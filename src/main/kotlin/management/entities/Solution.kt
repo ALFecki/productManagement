@@ -25,7 +25,14 @@ data class Solution (
 //    val related : List<Product> = listOf()
 
     @Column(name = "price")
-    val price : BigDecimal? = null
+    val price : BigDecimal? = null,
+
+    @Column(name = "legal_name")
+    val legalName : String,
+
+    @Column(name = "version")
+    val version : String = "2.4.0"
+
 
 //    Column(name = )
 
