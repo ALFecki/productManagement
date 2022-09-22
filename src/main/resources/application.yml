@@ -1,0 +1,22 @@
+micronaut:
+  application:
+    name: productManagement
+r2dbc:
+  datasources:
+    default:
+      schema-generate: NONE
+      driverClassName: org.postgresql.Driver
+      url: r2dbc:postgresql://localhost:5432/postgres
+      username: root
+      password: 'root'
+      dialect: POSTGRES
+jpa:
+  default:
+    properties.hibernate:
+      hbm2ddl.auto: none
+      show-sql: true
+
+netty:
+  default:
+    allocator:
+      max-order: 3
