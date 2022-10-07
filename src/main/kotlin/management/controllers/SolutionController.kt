@@ -1,32 +1,23 @@
 package management.controllers
 
-import io.micronaut.http.MediaType
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.PathVariable
-import io.micronaut.http.annotation.Produces
 import management.entities.Solution
 import management.repositories.SolutionRepository
+import management.services.SolutionService
 
 
 @Controller("/solutions")
-class SolutionController (private val solutionRepository : SolutionRepository){
+class SolutionController(private val solutionService: SolutionService) {
 
     @Get
-    @Produces(MediaType.APPLICATION_JSON)
-    fun getAllSolutions() : List<Solution> {
-        val listOfSolutions = solutionRepository.findAll()
-            .collectList().block()
-        return listOfSolutions
+    fun getAllSolutions() : MutableList<Solution> {
+        return solutionService.getAllSolutions()
     }
 
-    @Get("/{name}")
-    @Produces(MediaType.APPLICATION_JSON)
-    fun getSolutionByName(@PathVariable name : String) : Solution {
-        return solutionRepository.findByName(name)
+    @Get("/{alias}")
+    fun getSolutionByAlias(@PathVariable alias : String) : Solution {
+        return solutionService.getSolutionByAlias(alias)
     }
-
-
-
-
 }

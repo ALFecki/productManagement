@@ -1,28 +1,31 @@
 package management.entities
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.Id
-import jakarta.persistence.Table
 
-@Entity
-@Table(name = "AccompanyingDoc", schema = "ikassa")
-data class AccompanyingDoc (
+import io.micronaut.data.annotation.TypeDef
+import io.micronaut.data.model.DataType
+import javax.persistence.*
+import management.utils.ConstVariables.SCHEMA
 
-    @GeneratedValue
-    @Id val accDocId: Int,
 
-    @Column(name = "path")
-    val path: String,
+ @Entity
+    @Table(name = "accompanying_doc", schema = SCHEMA)
+    data class AccompanyingDoc (
 
-    @Column(name = "name")
-    val name: String = "",
+        @Column(name = "path")
+        val path: String,
 
-//    @Column(name = "field")
-//    val fields: Map<String, String>? = mapOf(),
+        @Column(name = "name")
+        val name: String,
+//
+//        @TypeDef(type = DataType.JSON)
+//        @Column(name = "field")
+//        val fields: Map<String, String>? = null,
 
-    /** Process document as raw file or as templated docx file */
-    @Column(name = "raw")
-    val raw: Boolean = false
-)
+        @Column(name = "raw")
+        val raw: Boolean = false
+    ) {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        @Column(name = "accompanying_doc_id")
+        var accompanyingDocId: Long = 0
+    }
