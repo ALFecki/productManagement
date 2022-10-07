@@ -2,5 +2,5 @@ applicationType: default
 defaultPackage: management
 testFramework: junit
 sourceLanguage: kotlin
-buildTool: gradle
-features: [annotation-api, app-name, data, data-r2dbc, gradle, http-client, jackson-databind, junit, kotlin, kotlin-application, kotlin-build, logback, micronaut-build, netty-server, postgres, r2dbc, readme, shade, test-resources, yaml]
+buildTool: gradle_kotlin
+features: [annotation-api, app-name, data, data-jpa, gradle, http-client, jackson-databind, jdbc-hikari, junit, kotlin, kotlin-application, kotlin-build, logback, micronaut-build, netty-server, postgres, readme, shade, test-resources, yaml]

@@ -1,29 +1,15 @@
-# Gradle
-# ------
-.gradle
-/build
-/buildSrc/build
-build
-out
-
-# IDEA
-# ----
-.idea
-.shelf
-/*.iml
-/*.ipr
-/*.iws
-/buildSrc/*.iml
-/buildSrc/*.ipr
-/buildSrc/*.iws
-/buildSrc/out
-/out
-/subprojects/*/*.iml
-/subprojects/*/out
-/.teamcity/*.iml
-/.teamcity/target
-*.log
-
+Thumbs.db
 .DS_Store
-
-file-uploads/*
+.gradle
+build/
+target/
+out/
+.micronaut/
+.idea
+*.iml
+*.ipr
+*.iws
+.project
+.settings
+.classpath
+.factorypath

@@ -1,75 +1,63 @@
 package management.entities
 
-import com.fasterxml.jackson.annotation.JsonProperty
-import io.micronaut.data.annotation.Query
-import jakarta.persistence.*
-import management.repositories.AccompanyingDocRepository
-import reactor.core.publisher.Flux
+import io.micronaut.data.annotation.TypeDef
+import io.micronaut.data.model.DataType
 import java.math.BigDecimal
+import javax.persistence.*
+import management.utils.ConstVariables.SCHEMA
+
 
 
 @Entity
-@Table(name = "Product", schema = "ikassa")
-public class Product(
+@Table(name = "product", schema = SCHEMA)
+data class Product(
 
-    @GeneratedValue
-    @Id val productId: Int? = null,
+        @Column(name = "alias")
+        var alias: String? = null,
 
-    @Column(name = "alias")
-    val alias: String? = null,
+        @Column(name = "name")
+        var name: String,
 
-    @Column(name = "name")
-    val name: String,
+        @Column(name = "comment")
+        val comment: String? = null,
 
-    @Column(name = "comment")
-    val comment: String = "",
+        @TypeDef(type = DataType.BIGDECIMAL)
+        @Column(name = "price")
+        val price: BigDecimal,
 
-    @Column(name = "price")
-    val price: BigDecimal,
+        @TypeDef(type = DataType.BIGDECIMAL)
+        @Column(name = "tax")
+        val tax: BigDecimal = BigDecimal.ZERO,
 
+        @Column(name = "currency")
+        val currency: String? = null,
 
-//    @Column(name = "accompanying_docs")
-//    @OneToMany(fetch = FetchType.LAZY,
-//    mappedBy = "product")
+        @Column(name = "units")
+        val units: Int = 1,
 
-//    @OneToMany(orphanRemoval = true)
-//    @JoinTable(name = "ProductAccDocLink",
-//        joinColumns = [JoinColumn(name = "product_link", referencedColumnName = "product_id")],
-//        inverseJoinColumns = [JoinColumn(name = "accompanying_link", referencedColumnName = "acc_doc_id")])
-//    val accompanyingDocs: Array<AccompanyingDoc>? = emptyArray(),
+        @Column(name = "round_total")
+        val roundTotal: Boolean = false,
 
+        @Column(name = "dual_docs")
+        val dualDocs: Boolean = false,
 
-    @Column(name = "soft_relations")
-    val softRelations: Array<Short>? = emptyArray(),
+        @ManyToMany(
+                targetEntity = AccompanyingDoc::class,
+                fetch = FetchType.EAGER,
+                cascade = [(CascadeType.ALL)])
+        @JoinTable(
+                name = "products_accompanying_docs",
+                schema = SCHEMA,
+                joinColumns = [JoinColumn(name = "product_id")],
+                inverseJoinColumns = [JoinColumn(name = "accompanying_doc_id")]
+        )
+        var accompanyingDocs: MutableList<AccompanyingDoc> = mutableListOf()
 
-    @Column(name = "hard_relations")
-    val hardRelations: Array<Short>? = emptyArray(),
-
-
-//    val additionalFields: Map<String, String>? = mapOf(),
-
-
-    @Column(name = "tax")
-    val tax: BigDecimal = BigDecimal.ZERO,
-
-    @Column(name = "currency")
-    val currency: String = "",
-
-    @Column(name = "units")
-    val units: Int = 1,
-
-    @Column(name = "round_total")
-    val roundTotal: Boolean = false,
-
-    @Column(name = "dual_docs")
-    val dualDocs: Boolean = false
 
 ) {
-//        val repository : AccompanyingDocRepository;
-}
-//    val additionalFields : Int =  0
-//    @Query("SELECT * FROM ")
-//    fun getAccompanyingDocs() {
-//
-//    }
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "product_id")
+    var productId: Long = 0
 
+}

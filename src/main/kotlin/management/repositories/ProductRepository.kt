@@ -1,25 +1,16 @@
 package management.repositories
 
-
-import io.micronaut.data.model.query.builder.sql.Dialect
-import io.micronaut.data.r2dbc.annotation.R2dbcRepository
+import io.micronaut.data.annotation.Repository
+import io.micronaut.data.jpa.repository.JpaRepository
 import management.entities.Product
-import io.micronaut.data.repository.reactive.ReactiveStreamsCrudRepository
-import reactor.core.publisher.Flux
+import java.math.BigDecimal
 
-@R2dbcRepository(dialect = Dialect.POSTGRES)
-interface ProductRepository : ReactiveStreamsCrudRepository<Product, Int> {
 
-        fun findByName(name: String) : Flux<Product>
-        fun findByAlias(alias : String) : Flux<Product>
-        override fun findAll() : Flux<Product>
-
-        fun save(entity: Product) : Product
-        fun saveAll(entities: List<Product>)
-
-        fun updateByProductId(productId : Int, entity: Product)
-        fun updateByName(name : String, entity: Product)
-
-        fun deleteByProductId(productId: Int)
-        fun deleteByName(name : String)
+@Repository
+interface ProductRepository : JpaRepository<Product, Long> {
+    fun findByAlias(alias : String) : MutableList<Product>
+    fun deleteByAlias(alias: String)
+    fun updateByAlias(alias: String, name : String)
+    fun updateByAlias(alias: String, price : BigDecimal)
+//    fun updateTaxByAlias(alias: String, tax : BigDecimal)
 }

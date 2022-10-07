@@ -1,39 +1,95 @@
 package management.entities
 
-import jakarta.persistence.*
 import java.math.BigDecimal
-import javax.management.monitor.StringMonitor
+import javax.persistence.*
+import management.utils.ConstVariables.SCHEMA
 
 
 @Entity
-@Table(name = "Solution", schema = "ikassa")
-data class Solution (
+@Table(name = "solution", schema = SCHEMA)
+data class Solution(
+        @Column(name = "alias")
+        val alias : String,
 
-    @GeneratedValue
-    @Id val solutionId : Int? = null,
+        @Column (name = "name")
+        val name : String,
 
-    @Column(name = "alias")
-    val alias : String,
+        @ManyToMany(
+                targetEntity = Product::class,
+                fetch = FetchType.LAZY,
+                cascade = [(CascadeType.ALL)]
+        )
+        @JoinTable(
+                name = "solutions_products",
+                schema = SCHEMA,
+                joinColumns = [JoinColumn(name = "solution_id")],
+                inverseJoinColumns = [JoinColumn(name = "product_id")]
+        )
+        var contents: MutableList<Product> = mutableListOf(),
 
-    @Column(name = "name")
-    val name : String,
+        @ManyToMany(
+                targetEntity = Product::class,
+                fetch = FetchType.LAZY,
+                cascade = [(CascadeType.ALL)]
+        )
+        @JoinTable(
+                name = "solutions_related_products",
+                schema = SCHEMA,
+                joinColumns = [JoinColumn(name = "solution_id")],
+                inverseJoinColumns = [JoinColumn(name = "product_id")]
+        )
+        var related: MutableList<Product> = mutableListOf(),
 
-//    @Column(name = "contents")
-//    val contents
+        @Column(name = "price")
+        val price : BigDecimal? = null, // WHY?
 
-//    @Column(name = "related")
-//    val related : List<Product> = listOf()
+        @ManyToMany(
+                targetEntity = AccompanyingDoc::class,
+                fetch = FetchType.LAZY,
+                cascade = [(CascadeType.ALL)]
+        )
+        @JoinTable(
+                name = "solutions_accompanying_docs",
+                schema = SCHEMA,
+                joinColumns = [JoinColumn(name = "solution_id")],
+                inverseJoinColumns = [JoinColumn(name = "accompanying_doc_id")]
+        )
+        var accompanyingDoc: MutableList<AccompanyingDoc> = mutableListOf(),
 
-    @Column(name = "price")
-    val price : BigDecimal? = null,
+        @ManyToMany(
+                targetEntity = Product::class,
+                fetch = FetchType.LAZY,
+                cascade = [(CascadeType.ALL)]
+        )
+        @JoinTable(
+                name = "solutions_equipment",
+                schema = SCHEMA,
+                joinColumns = [JoinColumn(name = "solution_id")],
+                inverseJoinColumns = [JoinColumn(name = "product_id")]
+        )
+        var equipment: MutableList<Product> = mutableListOf(),
 
-    @Column(name = "legal_name")
-    val legalName : String,
+//    @TypeDef(type = DataType.JSON)
+//    @Column(name = "extra_vars")
+//    val extraVars : Map<String, String>,
 
-    @Column(name = "version")
-    val version : String = "2.4.0"
+        @Column(name ="legal_name")
+        val legal_name : String,
 
+        @Column(name = "version")
+        val version : String = "2.4.0",
 
-//    Column(name = )
+        @OneToOne(
+                targetEntity = AccompanyingDoc::class,
+                fetch = FetchType.EAGER,
+                cascade = [(CascadeType.ALL)]
+        )
+        @JoinColumn(name = "forced_instruction_link")
+        val forcedInstructionPdf : AccompanyingDoc? = null
 
-)
+) {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "solution_id")
+    val solutionId : Long = 0
+}
