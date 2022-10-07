@@ -1,0 +1,16 @@
+micronaut:
+  application:
+    name: test
+datasources:
+  default:
+    driverClassName: org.postgresql.Driver
+    db-type: postgresql
+    dialect: POSTGRES
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: root
+    password: root
+jpa.default.properties.hibernate.hbm2ddl.auto: update
+netty:
+  default:
+    allocator:
+      max-order: 3
