@@ -1,8 +1,6 @@
 package management.entities
 
 
-import io.micronaut.data.annotation.TypeDef
-import io.micronaut.data.model.DataType
 import javax.persistence.*
 import management.utils.ConstVariables.SCHEMA
 

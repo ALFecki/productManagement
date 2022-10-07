@@ -20,4 +20,10 @@ class SolutionController(private val solutionService: SolutionService) {
     fun getSolutionByAlias(@PathVariable alias : String) : Solution {
         return solutionService.getSolutionByAlias(alias)
     }
+
+    @Get("/export/default")
+    fun exportDefaultSolutions() : List<Solution> {
+        // TODO("implement")
+        return solutionService.exportDefaultSolutions()
+    }
 }

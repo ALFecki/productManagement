@@ -140,7 +140,7 @@ VALUES  ('fm_paymob',
          315, 20, '', 1, false, false);
 
 
-INSERT INTO ikassa."product_accompanying_docs"("product_id", "accompanying_doc_id")
+INSERT INTO ikassa."products_accompanying_docs"("product_id", "accompanying_doc_id")
 VALUES ((SELECT product_id FROM ikassa.product WHERE alias = 'fm_paymob'),
         (SELECT accompanying_doc_id FROM ikassa."accompanying_doc" WHERE path = 'docs/products/paymob_m1.docx'));
 

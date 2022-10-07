@@ -25,6 +25,11 @@ class ProductController(private val productService: ProductService) {
         return productService.getProductByAlias(alias)
     }
 
+    @Get("/export/default")
+    fun exportDefaultProducts() : List<Product> {
+        return productService.exportDefault()
+    }
+
     @Get("/delete/{alias}")
     fun deleteProduct(@PathVariable alias: String) {
         return productService.deleteProduct(alias)
