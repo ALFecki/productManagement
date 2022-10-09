@@ -63,6 +63,17 @@ class ProductService (private val productRepository: ProductRepository) {
         return accompanyingDocList
     }
 
+    fun checkAccompanyingDocs(products : JsonArray) {
+        (0 until products.size()).forEach {
+            var product = products.get(it)!! as Map<String, String>
+            val accompanyingDocList = makeAccompanyingDocs(product["accompanying_docs"] as JsonArray)
+            for(doc in accompanyingDocList) {
+
+
+            }
+        }
+    }
+
     fun getAllProducts() : MutableList<Product> {
         return productRepository.findAll()
     }

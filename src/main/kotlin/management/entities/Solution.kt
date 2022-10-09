@@ -74,7 +74,7 @@ data class Solution(
 //    val extraVars : Map<String, String>,
 
         @Column(name ="legal_name")
-        val legal_name : String,
+        val legalName : String,
 
         @Column(name = "version")
         val version : String = "2.4.0",

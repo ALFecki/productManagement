@@ -6,8 +6,10 @@ import management.repositories.SolutionRepository
 
 
 @Singleton
-class SolutionService (private val solutionRepository: SolutionRepository) {
+class SolutionService (private val solutionRepository: SolutionRepository,
+                       private val productService: ProductService) {
 
+//    private val defaultProducts = listOf()
     fun getAllSolutions() : MutableList<Solution> {
         return solutionRepository.findAll()
     }
@@ -20,7 +22,7 @@ class SolutionService (private val solutionRepository: SolutionRepository) {
         return solutionRepository.saveAll(
                 listOf(
 //                        Solution(
-//                                id = "smart_and_card_nexgo_n86",
+//                                alias = "smart_and_card_nexgo_n86",
 //                                name = "iKassa Smart&Card NexGo N86",
 //                                legalName = "iKassa Smart&Card",
 //                                contents = productsRepository.filter {
