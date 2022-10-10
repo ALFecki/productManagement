@@ -88,17 +88,26 @@ class ProductService (private val productRepository: ProductRepository,
 
     fun checkAccompanyingDocs(products : JsonArray) : MutableList<Product> {
         val savedProducts : MutableList<Product> = mutableListOf()
+        println(products)
         (0 until products.size()).forEach {
-            val product = products.get(it)!! as MutableMap<*, *>
+            val product = products.get(it)!!
+            if (product["accompanying_docs"] == null) {
+                savedProducts.add(productRepository.save(makeProduct(product, mutableListOf<AccompanyingDoc>())))
+                return@forEach
+            }
             val accompanyingDocList = makeAccompanyingDocs(product["accompanying_docs"] as JsonArray)
+            val accompanyingDocListCopy = accompanyingDocList
             val savedAccompanyingDocList : MutableList<AccompanyingDoc> = mutableListOf()
-            for (doc in accompanyingDocList) {
-            if (accompanyingDocRepository.findByPath(doc.path) != null) {
-                    accompanyingDocList.remove(doc)
+            (0 until accompanyingDocList.size).forEach {
+                val doc = accompanyingDocList[it]
+                println(1)
+                if (accompanyingDocRepository.findByPath(doc.path) != null) {
+                    accompanyingDocListCopy.remove(doc)
                     savedAccompanyingDocList.add(accompanyingDocRepository.findByPath(doc.path)!!)
+                }
             }
-            }
-            val savedProduct = productRepository.save(makeProduct(product as JsonArray, accompanyingDocList))
+
+            val savedProduct = productRepository.save(makeProduct(product, accompanyingDocListCopy))
             for (doc in savedAccompanyingDocList) {
                 val link = productAccDocLinkRepository.save(
                     ProductAccDoc(
