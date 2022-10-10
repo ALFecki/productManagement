@@ -6,7 +6,6 @@ import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.PathVariable
 import io.micronaut.http.annotation.Post
 import io.micronaut.json.tree.JsonArray
-import io.micronaut.json.tree.JsonObject
 import management.entities.Product
 import management.services.ProductService
 
@@ -36,8 +35,9 @@ class ProductController(private val productService: ProductService) {
     }
 
     @Post("/create")
-    fun createProduct(@Body requestData : JsonArray) : MutableList<Product>? {
-        return productService.createProduct(requestData)
+    fun createProduct(@Body requestData : String) : MutableList<Product>? {
+        
+        return productService.createProduct(requestData as JsonArray)
     }
 
     @Post("/update/name/{alias}")

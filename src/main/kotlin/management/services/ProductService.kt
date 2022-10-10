@@ -5,6 +5,9 @@ import io.micronaut.json.tree.JsonNode
 import jakarta.inject.Singleton
 import management.entities.AccompanyingDoc
 import management.entities.Product
+import management.links.entities.ProductAccDoc
+import management.links.repositories.ProductAccDocRepository
+import management.repositories.AccompanyingDocRepository
 import management.repositories.ProductRepository
 import management.utils.FilePath.PATH_TO_ADAPTER_MICROUSB
 import management.utils.FilePath.PATH_TO_ADAPTER_MICROUSB_WHIPPY
@@ -24,9 +27,11 @@ import management.utils.FilePath.PATH_TO_PRINTER_RPP02N
 
 
 @Singleton
-class ProductService (private val productRepository: ProductRepository) {
+class ProductService (private val productRepository: ProductRepository,
+                      private val accompanyingDocRepository: AccompanyingDocRepository,
+                      private val productAccDocLinkRepository: ProductAccDocRepository) {
 
-    private fun makeProduct(productData: JsonArray) : MutableList<Product>? {
+    private fun makeProducts(productData: JsonArray) : MutableList<Product>? {
         val productList : MutableList<Product> = mutableListOf()
         (0 until productData.size()).forEach {
             val product : JsonNode = productData.get(it) ?: return null
@@ -50,6 +55,24 @@ class ProductService (private val productRepository: ProductRepository) {
         return productList
     }
 
+    private fun makeProduct(product : JsonNode, docs : MutableList<AccompanyingDoc>) : Product {
+
+        return Product(
+                alias = product.get("alias")!!.stringValue,
+                name = product.get("name")!!.stringValue,
+                comment = product.get("comment")?.stringValue,
+                price = product.get("price")!!.bigDecimalValue, // "price":123.4
+                tax = product.get("tax")?.bigDecimalValue ?: BigDecimal.ZERO,
+                currency = product.get("currency")?.stringValue,
+                units = product.get("units")?.intValue ?: 1,
+                roundTotal = product.get("round_total")?.booleanValue ?: false, // "round_total":true
+                dualDocs = product.get("dual_docs")?.booleanValue ?: false, // "dual_docs":true
+                accompanyingDocs = docs
+            )
+
+
+    }
+
     private fun makeAccompanyingDocs(docs : JsonArray) : MutableList<AccompanyingDoc> {
         val accompanyingDocList : MutableList<AccompanyingDoc> = mutableListOf()
         (0 until docs.size()).forEach {
@@ -63,15 +86,28 @@ class ProductService (private val productRepository: ProductRepository) {
         return accompanyingDocList
     }
 
-    fun checkAccompanyingDocs(products : JsonArray) {
+    fun checkAccompanyingDocs(products : JsonArray) : MutableList<Product> {
+        val savedProducts : MutableList<Product> = mutableListOf()
         (0 until products.size()).forEach {
-            var product = products.get(it)!! as Map<String, String>
+            val product = products.get(it)!! as MutableMap<*, *>
             val accompanyingDocList = makeAccompanyingDocs(product["accompanying_docs"] as JsonArray)
-            for(doc in accompanyingDocList) {
-
-
+            val savedAccompanyingDocList : MutableList<AccompanyingDoc> = mutableListOf()
+            for (doc in accompanyingDocList) {
+            if (accompanyingDocRepository.findByPath(doc.path) != null) {
+                    accompanyingDocList.remove(doc)
+                    savedAccompanyingDocList.add(accompanyingDocRepository.findByPath(doc.path)!!)
             }
+            }
+            val savedProduct = productRepository.save(makeProduct(product as JsonArray, accompanyingDocList))
+            for (doc in savedAccompanyingDocList) {
+                val link = productAccDocLinkRepository.save(
+                    ProductAccDoc(
+                        productId = savedProduct.productId,
+                        accDocId = doc.accompanyingDocId))
+            }
+            savedProducts.add(savedProduct)
         }
+        return savedProducts;
     }
 
     fun getAllProducts() : MutableList<Product> {
@@ -83,8 +119,7 @@ class ProductService (private val productRepository: ProductRepository) {
     }
 
     fun createProduct(productData : JsonArray) : MutableList<Product> {
-//        TODO("if acc_docs !empty find this docs in DB")
-        return productRepository.saveAll(makeProduct(productData)!!)
+        return this.checkAccompanyingDocs(productData)
     }
 
     fun updateProductName(alias: String, name : Map<String, String>) {
