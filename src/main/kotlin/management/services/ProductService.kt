@@ -113,6 +113,7 @@ class ProductService (private val productRepository: ProductRepository,
                     ProductAccDoc(
                         productId = savedProduct.productId,
                         accDocId = doc.accompanyingDocId))
+//                productAccDocLinkRepository.insertLink(savedProduct.alias!!, doc.path)
             }
             savedProducts.add(savedProduct)
         }

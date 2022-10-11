@@ -1,15 +1,18 @@
 package management.services
 
 import jakarta.inject.Singleton
+import management.entities.Product
 import management.entities.Solution
 import management.repositories.SolutionRepository
+import javax.transaction.Transactional
 
 
 @Singleton
 class SolutionService (private val solutionRepository: SolutionRepository,
                        private val productService: ProductService) {
 
-//    private val defaultProducts = listOf()
+    private val defaultProducts : MutableList<Product> = mutableListOf()
+
     fun getAllSolutions() : MutableList<Solution> {
         return solutionRepository.findAll()
     }
@@ -18,64 +21,69 @@ class SolutionService (private val solutionRepository: SolutionRepository,
         return solutionRepository.findByAlias(alias)
     }
 
+
     fun exportDefaultSolutions() : List<Solution> {
+        defaultProducts += productService.getProductByAlias(alias = "ikassa_register")
+        defaultProducts += productService.getProductByAlias(alias ="ikassa_license")
+        defaultProducts += productService.getProductByAlias(alias ="skko_register")
+        defaultProducts += productService.getProductByAlias(alias ="skko_license_6")
+        defaultProducts += productService.getProductByAlias(alias ="personal")
+        defaultProducts += productService.getProductByAlias(alias ="app")
         return solutionRepository.saveAll(
                 listOf(
-//                        Solution(
-//                                alias = "smart_and_card_nexgo_n86",
-//                                name = "iKassa Smart&Card NexGo N86",
-//                                legalName = "iKassa Smart&Card",
-//                                contents = productsRepository.filter {
-//                                    ikassaBaseList.contains(it.alias)
-//                                },
-//                                equipment = listOf("nexgo_n86")
-//                        ),
-//
-//                        Solution(id = "smart", name = "iKassa Smart", legalName = "iKassa Smart",
-//                                contents = productsRepository.filter {
-//                                    ikassaBaseList.contains(it.alias)
-//                                },
-//                                related = productsRepository.filter {
-//                                    listOf<Short>(8, 9, 10, 11, 12).contains(it.id)
-//                                },
-//                                equipment = listOf(/*"rpp02n"*/ /*, "gandlarok_mpos"*/),
-//                                version = "2.5.0"
-//                        ),
-//
-//                        Solution(id = "fm", name = "iKassa FM", legalName = "iKassa Smart",
-//                                contents = productsRepository.filter {
-//                                    ikassaBaseList.contains(it.alias)
-//                                },
-//                                equipment = listOf("fm_paymob" /*, "gandlarok_mpos"*/),
-//                                version = "2.5.0"
-//                        ),
-//                        /*
-//                         * FIXME: кирилл сейчас юзает smart_and_card_promo а не просто smart_and_card,
-//                         *   потому цену надо менять и там.
-//                         *   Кроме того, есть акционная цена на пакс при >=6 месяцев,
-//                         *   она берется из товара pax930_promo и подставляется в DocumentsController
-//                         *   для всех паксов.
-//                         */
-//                        Solution(id = "smart_and_card", name = "iKassa Smart&Card PAX A930", legalName = "iKassa Smart&Card",
-//                                contents = productsRepository.filter {
-//                                    ikassaBaseList.contains(it.alias)
-//                                },
-//                                related = productsRepository.filter {
-//                                    listOf<Short>(13).contains(it.id)
-//                                },
-//                                equipment = listOf("pax930"),
-//                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»")
-//                        ),
-//
-//                        Solution(id = "smart_and_card_azur", name = "iKassa Smart&Card Azur", legalName = "iKassa Smart&Card",
-//                                contents = productsRepository.filter {
-//                                    ikassaBaseList.contains(it.alias)
-//                                },
-//                                related = productsRepository.filter {
-//                                    listOf<Short>(13).contains(it.id)
-//                                },
-//                                equipment = listOf("azur8223")
-//                        ),
+                        Solution(
+                                alias = "smart_and_card_nexgo_n86",
+                                name = "iKassa Smart&Card NexGo N86",
+                                legalName = "iKassa Smart&Card",
+                                contents = defaultProducts,
+                                equipment = productService.getProductByAlias(alias = "nexgo_n86")
+                        ),
+                        Solution(
+                            alias = "smart",
+                            name = "iKassa Smart",
+                            legalName = "iKassa Smart",
+                                contents = defaultProducts,
+                                related = productService.getProductByAlias(alias = "personal") +
+                                        productService.getProductByAlias(alias = "app") +
+                                        productService.getProductByAlias(alias = "fm_paymob") +
+                                        productService.getProductByAlias(alias = "pax930") +
+                                        productService.getProductByAlias(alias = "pax910") +
+                                        productService.getProductByAlias(alias = "fm_azur"),
+                                equipment = mutableListOf(/*"rpp02n"*/ /*, "gandlarok_mpos"*/),
+                                version = "2.5.0"
+                        ),
+                        Solution(
+                            alias = "fm",
+                            name = "iKassa FM",
+                            legalName = "iKassa Smart",
+                            contents = defaultProducts,
+                                equipment = productService.getProductByAlias(alias = "fm_paymob") /*, "gandlarok_mpos"*/,
+                                version = "2.5.0"
+                        ),
+                        /*
+                         * FIXME: кирилл сейчас юзает smart_and_card_promo а не просто smart_and_card,
+                         *   потому цену надо менять и там.
+                         *   Кроме того, есть акционная цена на пакс при >=6 месяцев,
+                         *   она берется из товара pax930_promo и подставляется в DocumentsController
+                         *   для всех паксов.
+                         */
+                        Solution(
+                            alias = "smart_and_card",
+                            name = "iKassa Smart&Card PAX A930",
+                            legalName = "iKassa Smart&Card",
+                            contents = defaultProducts,
+                                related = productService.getProductByAlias(alias = "adapter_typec"),
+                                equipment = productService.getProductByAlias(alias = "pax930")
+//                                TODO("extraVars = mapOf(\"PROCESSINGPROVIDER\" to \"ОАО «Банк БелВЭБ»\"")
+                        ),
+                        Solution(
+                            alias = "smart_and_card_azur",
+                            name = "iKassa Smart&Card Azur",
+                            legalName = "iKassa Smart&Card",
+                            contents = defaultProducts,
+                            related = productService.getProductByAlias(alias = "adapter_typec"),
+                            equipment = productService.getProductByAlias(alias = "azur8223")
+                        ),
 //
 //                        Solution(id = "smart_and_card_nexgo", name = "iKassa Smart&Card NexGo", legalName = "iKassa Smart&Card",
 //                                contents = productsRepository.filter {

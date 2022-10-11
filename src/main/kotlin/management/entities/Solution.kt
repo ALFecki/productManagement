@@ -16,7 +16,7 @@ data class Solution(
 
         @ManyToMany(
                 targetEntity = Product::class,
-                fetch = FetchType.LAZY,
+                fetch = FetchType.EAGER,
                 cascade = [(CascadeType.ALL)]
         )
         @JoinTable(
@@ -29,7 +29,7 @@ data class Solution(
 
         @ManyToMany(
                 targetEntity = Product::class,
-                fetch = FetchType.LAZY,
+                fetch = FetchType.EAGER,
                 cascade = [(CascadeType.ALL)]
         )
         @JoinTable(
@@ -38,14 +38,14 @@ data class Solution(
                 joinColumns = [JoinColumn(name = "solution_id")],
                 inverseJoinColumns = [JoinColumn(name = "product_id")]
         )
-        var related: MutableList<Product> = mutableListOf(),
+        var related: List<Product> = mutableListOf(),
 
         @Column(name = "price")
         val price : BigDecimal? = null, // WHY?
 
         @ManyToMany(
                 targetEntity = AccompanyingDoc::class,
-                fetch = FetchType.LAZY,
+                fetch = FetchType.EAGER,
                 cascade = [(CascadeType.ALL)]
         )
         @JoinTable(
@@ -58,7 +58,7 @@ data class Solution(
 
         @ManyToMany(
                 targetEntity = Product::class,
-                fetch = FetchType.LAZY,
+                fetch = FetchType.EAGER,
                 cascade = [(CascadeType.ALL)]
         )
         @JoinTable(
@@ -79,13 +79,13 @@ data class Solution(
         @Column(name = "version")
         val version : String = "2.4.0",
 
-        @OneToOne(
-                targetEntity = AccompanyingDoc::class,
-                fetch = FetchType.EAGER,
-                cascade = [(CascadeType.ALL)]
-        )
-        @JoinColumn(name = "forced_instruction_link")
-        val forcedInstructionPdf : AccompanyingDoc? = null
+//        @OneToOne(
+//                targetEntity = AccompanyingDoc::class,
+//                fetch = FetchType.EAGER,
+//                cascade = [(CascadeType.ALL)]
+//        )
+//        @JoinColumn(name = "forced_instruction_link")
+//        val forcedInstructionPdf : AccompanyingDoc? = null
 
 ) {
     @Id

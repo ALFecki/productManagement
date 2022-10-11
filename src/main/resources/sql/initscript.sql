@@ -54,8 +54,8 @@ CREATE TABLE ikassa."solution" (
     "legal_name" character varying NOT NULL,
     "version" character varying NOT NULL,
     "forced_instruction_link" bigserial,
-    PRIMARY KEY (solution_id),
-    FOREIGN KEY ("forced_instruction_link") REFERENCES ikassa.accompanying_doc("accompanying_doc_id")
+    PRIMARY KEY (solution_id)--,
+--     FOREIGN KEY ("forced_instruction_link") REFERENCES ikassa.accompanying_doc("accompanying_doc_id")
 );
 
 ALTER TABLE IF EXISTS ikassa."solution"

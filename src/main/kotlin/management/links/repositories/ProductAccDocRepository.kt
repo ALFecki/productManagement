@@ -16,6 +16,8 @@ interface ProductAccDocRepository : JpaRepository<ProductAccDoc, Long> {
 //    val operations: JpaRepositoryOperations
 //
 //
+//    @Query(nativeQuery = true, value = "INSERT INTO ikassa.products_accompanying_docs (product_id, accompanying_doc_id) VALUES ((SELECT product_id FROM ikassa.product WHERE alias = :alias), (SELECT accompanying_doc_id FROM ikassa.accompanying_doc WHERE path = :path))")
+//    fun insertLink(alias : String, path : String)
 //    @Transactional
 //    fun insertLink(alias : String, path : String) {
 //        JpaRepositoryOperations::getCurrentEntityManager
