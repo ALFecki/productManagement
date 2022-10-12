@@ -27,7 +27,7 @@ data class Solution(
                 joinColumns = [JoinColumn(name = "solution_id")],
                 inverseJoinColumns = [JoinColumn(name = "product_id")]
         )
-        var contents: Set<Product> = setOf(),
+        var contents: List<Product> = listOf(),
 
         @LazyCollection(LazyCollectionOption.FALSE)
         @ManyToMany(
@@ -40,7 +40,7 @@ data class Solution(
                 joinColumns = [JoinColumn(name = "solution_id")],
                 inverseJoinColumns = [JoinColumn(name = "product_id")]
         )
-        var related: Set<Product> = setOf(),
+        var related: List<Product> = listOf(),
 
         @Column(name = "price")
         val price : BigDecimal? = null, // WHY?
@@ -56,7 +56,7 @@ data class Solution(
                 joinColumns = [JoinColumn(name = "solution_id")],
                 inverseJoinColumns = [JoinColumn(name = "accompanying_doc_id")]
         )
-        var accompanyingDoc: Set<AccompanyingDoc> = setOf(),
+        var accompanyingDoc: List<AccompanyingDoc> = listOf(),
 
         @LazyCollection(LazyCollectionOption.FALSE)
         @ManyToMany(
@@ -69,7 +69,7 @@ data class Solution(
                 joinColumns = [JoinColumn(name = "solution_id")],
                 inverseJoinColumns = [JoinColumn(name = "product_id")]
         )
-        var equipment: Set<Product> = setOf(),
+        var equipment: List<Product> = listOf(),
 
 //    @TypeDef(type = DataType.JSON)
 //    @Column(name = "extra_vars")

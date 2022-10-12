@@ -53,8 +53,6 @@ data class Product(
                 inverseJoinColumns = [JoinColumn(name = "accompanying_doc_id")]
         )
         var accompanyingDocs: List<AccompanyingDoc> = listOf()
-
-
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

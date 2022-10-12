@@ -5,8 +5,6 @@ import io.micronaut.json.tree.JsonNode
 import jakarta.inject.Singleton
 import management.entities.AccompanyingDoc
 import management.entities.Product
-import management.links.entities.ProductAccDoc
-import management.links.repositories.ProductAccDocRepository
 import management.repositories.AccompanyingDocRepository
 import management.repositories.ProductRepository
 import management.utils.FilePath.PATH_TO_ADAPTER_MICROUSB
@@ -28,8 +26,7 @@ import management.utils.FilePath.PATH_TO_PRINTER_RPP02N
 
 @Singleton
 class ProductService (private val productRepository: ProductRepository,
-                      private val accompanyingDocRepository: AccompanyingDocRepository,
-                      private val productAccDocLinkRepository: ProductAccDocRepository) {
+                      private val accompanyingDocRepository: AccompanyingDocRepository) {
 
     private fun makeProducts(productData: JsonArray) : MutableList<Product>? {
         val productList : MutableList<Product> = mutableListOf()
@@ -69,8 +66,6 @@ class ProductService (private val productRepository: ProductRepository,
                 dualDocs = product.get("dual_docs")?.booleanValue ?: false, // "dual_docs":true
 //                accompanyingDocs = docs
             )
-
-
     }
 
     private fun makeAccompanyingDocs(docs : JsonArray) : List<AccompanyingDoc> {
@@ -129,7 +124,7 @@ class ProductService (private val productRepository: ProductRepository,
         return productRepository.findAll()
     }
 
-    fun getProductByAlias(alias : String) : Set<Product> {
+    fun getProductByAlias(alias : String) : List<Product> {
         return productRepository.findByAlias(alias)
     }
 

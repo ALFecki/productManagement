@@ -13,7 +13,7 @@ import javax.transaction.Transactional
 class SolutionService (private val solutionRepository: SolutionRepository,
                        private val productService: ProductService) {
 
-    private var defaultProducts : Set<Product> = setOf()
+    private var defaultProducts : List<Product> = listOf()
 
     fun getAllSolutions() : MutableList<Solution> {
         return solutionRepository.findAll()
@@ -23,6 +23,9 @@ class SolutionService (private val solutionRepository: SolutionRepository,
         return solutionRepository.findByAlias(alias)
     }
 
+    fun deleteSolution(alias : String) {
+        return solutionRepository.deleteByAlias(alias)
+    }
 
     fun exportDefaultSolutions() : List<Solution> {
         defaultProducts += productService.getProductByAlias(alias = "ikassa_register")
@@ -52,7 +55,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                                         productService.getProductByAlias(alias = "pax930") +
                                         productService.getProductByAlias(alias = "pax910") +
                                         productService.getProductByAlias(alias = "fm_azur"),
-                                equipment = setOf(/*"rpp02n"*/ /*, "gandlarok_mpos"*/),
+                                equipment = listOf(/*"rpp02n"*/ /*, "gandlarok_mpos"*/),
                                 version = "2.5.0"
                         ),
                         Solution(
@@ -341,17 +344,17 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             alias = "stub",
                             name = "= Выберите решение =",
                             legalName = "",
-                            contents = emptySet(),
-                            related = emptySet(),
-                            equipment = emptySet()
+                            contents = emptyList(),
+                            related = emptyList(),
+                            equipment = emptyList()
                         ),
                         Solution(
                             alias = "stub_a1",
                             name = "",
                             legalName = "",
-                            contents = emptySet(),
-                            related = emptySet(),
-                            equipment = emptySet()
+                            contents = emptyList(),
+                            related = emptyList(),
+                            equipment = emptyList()
                         ),
 
                         /**

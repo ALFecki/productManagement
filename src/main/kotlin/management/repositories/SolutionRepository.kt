@@ -8,4 +8,5 @@ import management.entities.Solution
 @Repository
 interface SolutionRepository : JpaRepository<Solution, Long> {
     fun findByAlias(alias : String) : Solution
+    fun deleteByAlias(alias : String)
 }

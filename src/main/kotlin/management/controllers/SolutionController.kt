@@ -21,9 +21,13 @@ class SolutionController(private val solutionService: SolutionService) {
         return solutionService.getSolutionByAlias(alias)
     }
 
+    @Get("/delete/{alias}")
+    fun deleteSolutionByAlias(@PathVariable alias: String) {
+        return solutionService.deleteSolution(alias)
+    }
+
     @Get("/export/default")
     fun exportDefaultSolutions() : List<Solution> {
-        // TODO("implement")
         return solutionService.exportDefaultSolutions()
     }
 }
