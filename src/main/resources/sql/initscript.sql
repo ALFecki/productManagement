@@ -53,9 +53,7 @@ CREATE TABLE ikassa."solution" (
     "extra_vars" jsonb,
     "legal_name" character varying NOT NULL,
     "version" character varying NOT NULL,
-    "forced_instruction_link" bigserial,
-    PRIMARY KEY (solution_id)--,
---     FOREIGN KEY ("forced_instruction_link") REFERENCES ikassa.accompanying_doc("accompanying_doc_id")
+    PRIMARY KEY (solution_id)
 );
 
 ALTER TABLE IF EXISTS ikassa."solution"
@@ -103,4 +101,15 @@ CREATE TABLE ikassa."solutions_equipment" (
     FOREIGN KEY ("product_id") REFERENCES ikassa."product"("product_id")
 );
 ALTER TABLE IF EXISTS ikassa."solutions_equipment"
+    OWNER TO root;
+
+CREATE TABLE ikassa."solution_instruction" (
+    "instruction_id" bigserial,
+    "solution_id" bigint,
+    "accompanying_doc_id" bigint,
+    PRIMARY KEY ("instruction_id"),
+    FOREIGN KEY ("solution_id") REFERENCES ikassa."solution"("solution_id"),
+    FOREIGN KEY ("accompanying_doc_id") REFERENCES ikassa."accompanying_doc"("accompanying_doc_id")
+);
+ALTER TABLE IF EXISTS ikassa."solution_instruction"
     OWNER TO root;

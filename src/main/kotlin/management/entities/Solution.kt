@@ -19,7 +19,7 @@ data class Solution(
         @LazyCollection(LazyCollectionOption.FALSE)
         @ManyToMany(
                 targetEntity = Product::class,
-                cascade = [(CascadeType.MERGE)]
+                cascade = [CascadeType.MERGE]
         )
         @JoinTable(
                 name = "solutions_products",
@@ -32,7 +32,7 @@ data class Solution(
         @LazyCollection(LazyCollectionOption.FALSE)
         @ManyToMany(
                 targetEntity = Product::class,
-                cascade = [(CascadeType.MERGE)]
+                cascade = [CascadeType.MERGE]
         )
         @JoinTable(
                 name = "solutions_related_products",
@@ -81,13 +81,18 @@ data class Solution(
         @Column(name = "version")
         val version : String = "2.4.0",
 
-//        @OneToOne(
-//                targetEntity = AccompanyingDoc::class,
-//                fetch = FetchType.EAGER,
-//                cascade = [(CascadeType.ALL)]
-//        )
-//        @JoinColumn(name = "forced_instruction_link")
-//        val forcedInstructionPdf : AccompanyingDoc? = null
+
+        @LazyCollection(LazyCollectionOption.FALSE)
+        @OneToOne(
+            targetEntity = AccompanyingDoc::class,
+            cascade = [(CascadeType.ALL)],
+        )
+        @JoinTable(
+            name = "solution_instruction",
+            schema = SCHEMA,
+            joinColumns = [JoinColumn(name = "solution_id")],
+            inverseJoinColumns = [JoinColumn(name = "accompanying_doc_id")] )
+        val forcedInstructionPdf : AccompanyingDoc? = null
 
 ) {
     @Id

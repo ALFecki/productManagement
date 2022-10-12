@@ -45,14 +45,14 @@ data class Product(
         @LazyCollection(LazyCollectionOption.FALSE)
         @ManyToMany(
                 targetEntity = AccompanyingDoc::class,
-                cascade = [(CascadeType.MERGE),(CascadeType.PERSIST)])
+                cascade = [CascadeType.ALL])
         @JoinTable(
                 name = "products_accompanying_docs",
                 schema = SCHEMA,
                 joinColumns = [JoinColumn(name = "product_id")],
                 inverseJoinColumns = [JoinColumn(name = "accompanying_doc_id")]
         )
-        var accompanyingDocs: Set<AccompanyingDoc> = setOf()
+        var accompanyingDocs: List<AccompanyingDoc> = listOf()
 
 
 ) {
