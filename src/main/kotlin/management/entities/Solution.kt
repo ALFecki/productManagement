@@ -3,6 +3,8 @@ package management.entities
 import java.math.BigDecimal
 import javax.persistence.*
 import management.utils.ConstVariables.SCHEMA
+import org.hibernate.annotations.LazyCollection
+import org.hibernate.annotations.LazyCollectionOption
 
 
 @Entity
@@ -14,10 +16,10 @@ data class Solution(
         @Column (name = "name")
         val name : String,
 
+        @LazyCollection(LazyCollectionOption.FALSE)
         @ManyToMany(
                 targetEntity = Product::class,
-                fetch = FetchType.EAGER,
-                cascade = [(CascadeType.ALL)]
+                cascade = [(CascadeType.MERGE)]
         )
         @JoinTable(
                 name = "solutions_products",
@@ -25,12 +27,12 @@ data class Solution(
                 joinColumns = [JoinColumn(name = "solution_id")],
                 inverseJoinColumns = [JoinColumn(name = "product_id")]
         )
-        var contents: MutableList<Product> = mutableListOf(),
+        var contents: Set<Product> = setOf(),
 
+        @LazyCollection(LazyCollectionOption.FALSE)
         @ManyToMany(
                 targetEntity = Product::class,
-                fetch = FetchType.EAGER,
-                cascade = [(CascadeType.ALL)]
+                cascade = [(CascadeType.MERGE)]
         )
         @JoinTable(
                 name = "solutions_related_products",
@@ -38,15 +40,15 @@ data class Solution(
                 joinColumns = [JoinColumn(name = "solution_id")],
                 inverseJoinColumns = [JoinColumn(name = "product_id")]
         )
-        var related: List<Product> = mutableListOf(),
+        var related: Set<Product> = setOf(),
 
         @Column(name = "price")
         val price : BigDecimal? = null, // WHY?
 
+        @LazyCollection(LazyCollectionOption.FALSE)
         @ManyToMany(
                 targetEntity = AccompanyingDoc::class,
-                fetch = FetchType.EAGER,
-                cascade = [(CascadeType.ALL)]
+                cascade = [(CascadeType.MERGE)]
         )
         @JoinTable(
                 name = "solutions_accompanying_docs",
@@ -54,12 +56,12 @@ data class Solution(
                 joinColumns = [JoinColumn(name = "solution_id")],
                 inverseJoinColumns = [JoinColumn(name = "accompanying_doc_id")]
         )
-        var accompanyingDoc: MutableList<AccompanyingDoc> = mutableListOf(),
+        var accompanyingDoc: Set<AccompanyingDoc> = setOf(),
 
+        @LazyCollection(LazyCollectionOption.FALSE)
         @ManyToMany(
                 targetEntity = Product::class,
-                fetch = FetchType.EAGER,
-                cascade = [(CascadeType.ALL)]
+                cascade = [(CascadeType.MERGE)]
         )
         @JoinTable(
                 name = "solutions_equipment",
@@ -67,7 +69,7 @@ data class Solution(
                 joinColumns = [JoinColumn(name = "solution_id")],
                 inverseJoinColumns = [JoinColumn(name = "product_id")]
         )
-        var equipment: MutableList<Product> = mutableListOf(),
+        var equipment: Set<Product> = setOf(),
 
 //    @TypeDef(type = DataType.JSON)
 //    @Column(name = "extra_vars")

@@ -49,7 +49,7 @@ class ProductService (private val productRepository: ProductRepository,
                 units = product.get("units")?.intValue ?: 1,
                 roundTotal = product.get("round_total")?.booleanValue ?: false, // "round_total":true
                 dualDocs = product.get("dual_docs")?.booleanValue ?: false, // "dual_docs":true
-                accompanyingDocs = docs
+//                accompanyingDocs = docs
             )
         }
         return productList
@@ -67,7 +67,7 @@ class ProductService (private val productRepository: ProductRepository,
                 units = product.get("units")?.intValue ?: 1,
                 roundTotal = product.get("round_total")?.booleanValue ?: false, // "round_total":true
                 dualDocs = product.get("dual_docs")?.booleanValue ?: false, // "dual_docs":true
-                accompanyingDocs = docs
+//                accompanyingDocs = docs
             )
 
 
@@ -124,7 +124,7 @@ class ProductService (private val productRepository: ProductRepository,
         return productRepository.findAll()
     }
 
-    fun getProductByAlias(alias : String) : MutableList<Product> {
+    fun getProductByAlias(alias : String) : Set<Product> {
         return productRepository.findByAlias(alias)
     }
 
@@ -210,13 +210,13 @@ class ProductService (private val productRepository: ProductRepository,
                 Product(alias = "fm_paymob",
                         name = "Мобильный компьютер PayMob-M1", comment = "iKassa FM",
                         price = BigDecimal(315), tax = BigDecimal(20),
-                        accompanyingDocs = mutableListOf(AccompanyingDoc(PATH_TO_FM, "05 Реквизиты для оплаты устройства PayMob-M1"))),
+                        accompanyingDocs = setOf(AccompanyingDoc(PATH_TO_FM, "05 Реквизиты для оплаты устройства PayMob-M1"))),
 
                 Product(alias = "pax930",
                         name = "POS-терминал PAX A930", comment = "iKassa Smart&Card",
                         price = BigDecimal(715), tax = BigDecimal(20),
                         dualDocs=true,
-                        accompanyingDocs = mutableListOf(
+                        accompanyingDocs = setOf(
                                 AccompanyingDoc(PATH_TO_PAX930, "05 Счёт на оборудование РАХ А930"),
                                 AccompanyingDoc("docs/static/pax930_instalment_3.docx", "05_3 Рассрочка на оборудование РАХ А930 (3 мес)"),
                                 AccompanyingDoc("docs/static/pax930_instalment_6.docx", "05_6 Рассрочка на оборудование РАХ А930 (6 мес)")
@@ -226,50 +226,50 @@ class ProductService (private val productRepository: ProductRepository,
                         name = "POS-терминал PAX A910", comment = "iKassa Smart&Card",
                         price = BigDecimal(791.67)/*.toFixed(2)*/, tax = BigDecimal(20),
                         dualDocs=true,
-                        accompanyingDocs = mutableListOf(AccompanyingDoc(PATH_TO_PAX910, "05 Договор на оборудование РАХ А910"))),
+                        accompanyingDocs = setOf(AccompanyingDoc(PATH_TO_PAX910, "05 Договор на оборудование РАХ А910"))),
 
                 Product(alias = "fm_azur",
                         name = "Кассовый аппарат «AZUR POS», модель KS8223SK", comment = "iKassa FM Azur",
                         price = BigDecimal(424.16)/*.toFixed(2)*/, tax = BigDecimal(20), roundTotal = true,
                         dualDocs=true,
-                        accompanyingDocs = mutableListOf(AccompanyingDoc(PATH_TO_AZUR_FM, "05 Реквизиты для оплаты устройства FM Azur"))),
+                        accompanyingDocs = setOf(AccompanyingDoc(PATH_TO_AZUR_FM, "05 Реквизиты для оплаты устройства FM Azur"))),
 
                 Product(alias="adapter_typec", name = "Адаптер USB-USB Type-C",
                         price = BigDecimal(7.0),
-                        accompanyingDocs = mutableListOf(AccompanyingDoc(PATH_TO_ADAPTER_TYPEC, name = "Адаптер USB-USB Type-C"))),
+                        accompanyingDocs = setOf(AccompanyingDoc(PATH_TO_ADAPTER_TYPEC, name = "Адаптер USB-USB Type-C"))),
 
                 Product(alias="adapter_microusb", name = "Адаптер USB-MicroUSB",
                         price = BigDecimal(7.0),
-                        accompanyingDocs = mutableListOf(AccompanyingDoc(PATH_TO_ADAPTER_MICROUSB, name = "Адаптер USB-MicroUSB"))),
+                        accompanyingDocs = setOf(AccompanyingDoc(PATH_TO_ADAPTER_MICROUSB, name = "Адаптер USB-MicroUSB"))),
 
                 Product(alias="adapter_microusb_whippy", name = "Адаптер гибкий USB-MicroUSB",
                         price = BigDecimal(8.0),
-                        accompanyingDocs = mutableListOf(AccompanyingDoc(PATH_TO_ADAPTER_MICROUSB_WHIPPY, name = "Адаптер гибкий USB-MicroUSB"))),
+                        accompanyingDocs = setOf(AccompanyingDoc(PATH_TO_ADAPTER_MICROUSB_WHIPPY, name = "Адаптер гибкий USB-MicroUSB"))),
 
                 Product(alias = "rpp02n", name = "Мобильный принтер RPP02N", comment = "Чёрный принтер",
                         price = BigDecimal(100), tax = BigDecimal(20),
                         dualDocs=true,
-                        accompanyingDocs = mutableListOf(AccompanyingDoc(PATH_TO_PRINTER_RPP02N, "05 Реквизиты для оплаты мобильного принтера"))),
+                        accompanyingDocs = setOf(AccompanyingDoc(PATH_TO_PRINTER_RPP02N, "05 Реквизиты для оплаты мобильного принтера"))),
 
                 Product(name = "Мобильный принтер RPP02A", comment = "С рыжими кнопками",
                         price = BigDecimal(100), tax = BigDecimal(20),
                         dualDocs=true,
-                        accompanyingDocs = mutableListOf(AccompanyingDoc(PATH_TO_PRINTER_RPP02A, "05 Реквизиты для оплаты мобильного принтера"))),
+                        accompanyingDocs = setOf(AccompanyingDoc(PATH_TO_PRINTER_RPP02A, "05 Реквизиты для оплаты мобильного принтера"))),
 
                 Product(name = "Сумка-чехол с ремешком", comment = "Для PAX 930 (smart&card)",
                         price = BigDecimal(55),
-                        accompanyingDocs = mutableListOf(AccompanyingDoc(PATH_TO_PAX930_BAG, "Сумка-чехол"))),
+                        accompanyingDocs = setOf(AccompanyingDoc(PATH_TO_PAX930_BAG, "Сумка-чехол"))),
 
                 Product(alias = "azur8223",
                         name = "Бесконтактный POS-терминал AZUR POS, модель KS 8223, с ПО", comment = "iKassa Smart&Card Azur",
                         price = BigDecimal(958.33)/*.toFixed(2)*/, tax = BigDecimal(20), roundTotal = true,
                         dualDocs=true,
-                        accompanyingDocs = mutableListOf(AccompanyingDoc(PATH_TO_AZUR8223, "05 Договор на оборудование AZUR POS 8223"))),
+                        accompanyingDocs = setOf(AccompanyingDoc(PATH_TO_AZUR8223, "05 Договор на оборудование AZUR POS 8223"))),
 
                 Product(alias = "gandlarok_mpos",
                         name = "Считыватель Vi 218 с программным протоколом взаимодействия с программным обеспечением «ГандлярОК» (магнитная полоса, чип, бесконтакт)", comment = "Гандлярок MPOS",
                         price = BigDecimal(250), tax = BigDecimal(20),
-                        accompanyingDocs = mutableListOf(
+                        accompanyingDocs = setOf(
                                 AccompanyingDoc("docs/products/gandlarok_invoice.xlsm", "10 Счёт ГандлярОК", raw=true),
                                 AccompanyingDoc("docs/products/gandlarok_doc.docx", "11 Договор купли-продажи Гандлярок", raw=true)
                         )),
@@ -278,7 +278,7 @@ class ProductService (private val productRepository: ProductRepository,
                         name = "Smart POS Nexgo N5 с ПО GTPOS", comment = "iKassa Smart&Card NexGo",
                         price = BigDecimal(825), tax = BigDecimal(20),
                         dualDocs=true,
-                        accompanyingDocs = mutableListOf(
+                        accompanyingDocs = setOf(
                                 AccompanyingDoc(PATH_TO_NEXGO, "05 Информация для заключения договора на оборудование")
                         )
                 ),
@@ -288,7 +288,7 @@ class ProductService (private val productRepository: ProductRepository,
                         price = BigDecimal(715), tax = BigDecimal(20),
                         dualDocs=true,
                         //accompanyingDocs = listOf(AccompanyingDoc(PATH_TO_PAX930_LANCARD, "05 Договор на оборудование РАХ А930"))
-                        accompanyingDocs = mutableListOf(
+                        accompanyingDocs = setOf(
                                 AccompanyingDoc(PATH_TO_PAX930, "05 Счёт на оборудование РАХ А930"),
                                 AccompanyingDoc("docs/static/pax930_instalment_3.docx", "05_1 Рассрочка на оборудование РАХ А930 (3 мес)"),
                                 AccompanyingDoc("docs/static/pax930_instalment_6.docx", "05_1 Рассрочка на оборудование РАХ А930 (6 мес)")
@@ -298,32 +298,32 @@ class ProductService (private val productRepository: ProductRepository,
                 Product(alias = "dusik_r",
                         name = "iKassa multi Dusik_r", comment = "iKassa multi Dusik_r",
                         price = BigDecimal(855), tax = BigDecimal(20),
-                        accompanyingDocs = mutableListOf()
+                        accompanyingDocs = setOf()
                 ),
 
                 Product(alias = "azur8223_belvti",
                         name = "Бесконтактный POS-терминал AZUR POS, модель KS 8223, с ПО", comment = "iKassa Smart&Card Azur",
                         price = BigDecimal(735.50)/*.toFixed(2)*/, tax = BigDecimal(20), roundTotal = true,
                         dualDocs=true,
-                        accompanyingDocs = mutableListOf(AccompanyingDoc(PATH_TO_AZUR8223_BELVTI, "05 Договор на оборудование AZUR POS 8223"))),
+                        accompanyingDocs = setOf(AccompanyingDoc(PATH_TO_AZUR8223_BELVTI, "05 Договор на оборудование AZUR POS 8223"))),
 
                 Product(alias = "azur_fm_belvti",
                         name = "Бесконтактный POS-терминал AZUR POS, модель KS 8223, с ПО", comment = "iKassa Smart&Card Azur",
                         price = BigDecimal(332.50)/*.toFixed(2)*/, tax = BigDecimal(20),
                         dualDocs=true,
-                        accompanyingDocs = mutableListOf(AccompanyingDoc(PATH_TO_AZUR_FM_BELVTI, "05 Договор на оборудование AZUR POS 8223SK"))),
+                        accompanyingDocs = setOf(AccompanyingDoc(PATH_TO_AZUR_FM_BELVTI, "05 Договор на оборудование AZUR POS 8223SK"))),
 
                 Product(alias = "pax930_promo",
                         name = "POS-терминал PAX A930", comment = "iKassa Smart&Card",
                         price = BigDecimal(715), tax = BigDecimal(20),
                         dualDocs=true,
-                        accompanyingDocs = mutableListOf(AccompanyingDoc(PATH_TO_PAX930, "05 Счёт на оборудование РАХ А930"))),
+                        accompanyingDocs = setOf(AccompanyingDoc(PATH_TO_PAX930, "05 Счёт на оборудование РАХ А930"))),
 
                 Product(alias = "feitian_f20",
                         name = "POS-терминал Feitian F20", comment = "iKassa Smart&Card",
                         price = BigDecimal(650), tax = BigDecimal(20),
                         dualDocs=true,
-                        accompanyingDocs = mutableListOf()),
+                        accompanyingDocs = setOf()),
 
                 Product(alias = "ikassa_license_12_season",
                         name = "Абонентское обслуживание iKassa",
@@ -334,7 +334,7 @@ class ProductService (private val productRepository: ProductRepository,
                         name = "Smart POS Nexgo N86",
                         comment = "iKassa Smart&Card NexGo N86",
                         dualDocs = true,
-                        accompanyingDocs = mutableListOf(
+                        accompanyingDocs = setOf(
                                 AccompanyingDoc(PATH_TO_NEXGO, "05 Информация для заключения договора на оборудование")
                         ),
                         price = BigDecimal(747.5),

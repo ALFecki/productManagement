@@ -5,7 +5,8 @@ import io.micronaut.data.model.DataType
 import java.math.BigDecimal
 import javax.persistence.*
 import management.utils.ConstVariables.SCHEMA
-
+import org.hibernate.annotations.LazyCollection
+import org.hibernate.annotations.LazyCollectionOption
 
 
 @Entity
@@ -41,17 +42,17 @@ data class Product(
         @Column(name = "dual_docs")
         val dualDocs: Boolean = false,
 
+        @LazyCollection(LazyCollectionOption.FALSE)
         @ManyToMany(
                 targetEntity = AccompanyingDoc::class,
-                fetch = FetchType.EAGER,
-                cascade = [(CascadeType.ALL)])
+                cascade = [(CascadeType.MERGE),(CascadeType.PERSIST)])
         @JoinTable(
                 name = "products_accompanying_docs",
                 schema = SCHEMA,
                 joinColumns = [JoinColumn(name = "product_id")],
                 inverseJoinColumns = [JoinColumn(name = "accompanying_doc_id")]
         )
-        var accompanyingDocs: MutableList<AccompanyingDoc> = mutableListOf()
+        var accompanyingDocs: Set<AccompanyingDoc> = setOf()
 
 
 ) {

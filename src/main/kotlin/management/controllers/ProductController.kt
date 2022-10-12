@@ -21,7 +21,7 @@ class ProductController(private val productService: ProductService) {
     }
 
     @Get("/{alias}")
-    fun getProductByAlias(@PathVariable alias : String) : MutableList<Product> {
+    fun getProductByAlias(@PathVariable alias : String) : Set<Product> {
         return productService.getProductByAlias(alias)
     }
 
