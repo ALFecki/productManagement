@@ -1,10 +1,13 @@
 package management.entities
 
+import io.micronaut.data.annotation.TypeDef
+import io.micronaut.data.model.DataType
 import java.math.BigDecimal
 import javax.persistence.*
 import management.utils.ConstVariables.SCHEMA
 import org.hibernate.annotations.LazyCollection
 import org.hibernate.annotations.LazyCollectionOption
+import org.hibernate.annotations.TypeDefs
 
 
 @Entity
@@ -71,9 +74,12 @@ data class Solution(
         )
         var equipment: List<Product> = listOf(),
 
-//    @TypeDef(type = DataType.JSON)
-//    @Column(name = "extra_vars")
-//    val extraVars : Map<String, String>,
+//        @ElementCollection
+//        @Column(
+//                name = "extra_vars",
+//                columnDefinition = "json")
+//        @TypeDef(type = DataType.JSON)
+//        val extraVars : Map<String, String> = hashMapOf(),
 
         @Column(name ="legal_name")
         var legalName : String,
@@ -99,4 +105,6 @@ data class Solution(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "solution_id")
     val solutionId : Long = 0
+
+
 }

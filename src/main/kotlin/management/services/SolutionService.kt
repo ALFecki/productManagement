@@ -183,8 +183,8 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
                                 related = listOf(productService.getProductByAlias(alias = "adapter_typec")!!),
-                                equipment = listOf(productService.getProductByAlias(alias = "pax930")!!)
-//                                TODO("extraVars = mapOf(\"PROCESSINGPROVIDER\" to \"ОАО «Банк БелВЭБ»\"")
+                                equipment = listOf(productService.getProductByAlias(alias = "pax930")!!),
+                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»")
                         ),
                         Solution(
                             alias = "smart_and_card_azur",
@@ -473,7 +473,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                                     listOf(productService.getProductByAlias(alias = "skko_license_6")!!) +
                                     listOf(productService.getProductByAlias(alias = "personal")!!) +
                                     listOf(productService.getProductByAlias(alias = "app")!!),
-                            equipment =  listOf(productService.getProductByAlias(alias = "smart_docless")!!),
+//TODO                            equipment =  listOf(productService.getProductByAlias(alias = "smart_docless")!!),
                             version = "2.5.0"
                         ),
                         Solution(

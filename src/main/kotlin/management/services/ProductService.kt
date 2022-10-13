@@ -22,6 +22,7 @@ import management.utils.FilePath.PATH_TO_PAX930
 import management.utils.FilePath.PATH_TO_PAX930_BAG
 import management.utils.FilePath.PATH_TO_PRINTER_RPP02A
 import management.utils.FilePath.PATH_TO_PRINTER_RPP02N
+import management.utils.toFixed
 
 
 @Singleton
@@ -54,7 +55,6 @@ class ProductService (private val productRepository: ProductRepository,
     }
 
     private fun makeProduct(product : JsonNode, docs : MutableList<AccompanyingDoc>) : Product {
-
         return Product(
                 alias = product.get("alias")!!.stringValue,
                 name = product.get("name")!!.stringValue,
@@ -65,7 +65,7 @@ class ProductService (private val productRepository: ProductRepository,
                 units = product.get("units")?.intValue ?: 1,
                 roundTotal = product.get("round_total")?.booleanValue ?: false, // "round_total":true
                 dualDocs = product.get("dual_docs")?.booleanValue ?: false, // "dual_docs":true
-//                accompanyingDocs = docs
+                accompanyingDocs = docs
             )
     }
     fun makeAccompanyingDoc(doc : JsonNode) : AccompanyingDoc {
@@ -167,45 +167,58 @@ class ProductService (private val productRepository: ProductRepository,
         return productRepository.saveAll(listOf(
 
                 Product(alias = "ikassa_register",
-                        name = "Регистрация программной кассы (включая СКО)", comment = "Регистрация Программной кассы (ПК) в АИС ПКС iKassa",
+                        name = "Регистрация программной кассы (включая СКО)",
+                        comment = "Регистрация Программной кассы (ПК) в АИС ПКС iKassa",
                         price = BigDecimal(53)),
                 Product(alias = "ikassa_register_only",
-                        name = "Регистрация программной кассы (включая СКО)", comment = "Регистрация Программной кассы (ПК) в АИС ПКС iKassa",
+                        name = "Регистрация программной кассы (включая СКО)",
+                        comment = "Регистрация Программной кассы (ПК) в АИС ПКС iKassa",
                         price = BigDecimal(53)),
                 Product(alias = "ikassa_license",
-                        name = "Абонентское обслуживание iKassa", comment = "Абонентская плата (за 1 месяц)",
+                        name = "Абонентское обслуживание iKassa",
+                        comment = "Абонентская плата (за 1 месяц)",
                         price = BigDecimal(15)),
                 Product(alias = "ikassa_license_3", //ikassa license 3
-                        name = "Абонентское обслуживание iKassa", comment = "Абонентская плата (за 3 месяца)",
+                        name = "Абонентское обслуживание iKassa",
+                        comment = "Абонентская плата (за 3 месяца)",
                         price = BigDecimal(45)),
                 Product(alias = "ikassa_license_6",
-                        name = "Абонентское обслуживание iKassa", comment = "Абонентская плата (за 6 месяцев)",
+                        name = "Абонентское обслуживание iKassa",
+                        comment = "Абонентская плата (за 6 месяцев)",
                         price = BigDecimal(87)),//BigDecimal(14.5)),
                 Product(alias = "ikassa_license_12",
-                        name = "Абонентское обслуживание iKassa", comment = "Абонентская плата (за 12 месяцев)",
+                        name = "Абонентское обслуживание iKassa",
+                        comment = "Абонентская плата (за 12 месяцев)",
                         price = BigDecimal(174)),//BigDecimal(14.5)),
                 Product(alias = "ikassa_license_dusik",
-                        name = "Абонентское обслуживание iKassa", comment = "Абонентская плата (за 1 месяц)",
+                        name = "Абонентское обслуживание iKassa",
+                        comment = "Абонентская плата (за 1 месяц)",
                         price = BigDecimal(20)),
                 Product(alias = "ikassa_license_3_dusik", //ikassa license 3
-                        name = "Абонентское обслуживание iKassa", comment = "Абонентская плата (за 3 месяца)",
+                        name = "Абонентское обслуживание iKassa",
+                        comment = "Абонентская плата (за 3 месяца)",
                         price = BigDecimal(60)),
                 Product(alias = "ikassa_license_6_dusik",
-                        name = "Абонентское обслуживание iKassa", comment = "Абонентская плата (за 6 месяцев)",
+                        name = "Абонентское обслуживание iKassa",
+                        comment = "Абонентская плата (за 6 месяцев)",
                         price = BigDecimal(120)),//BigDecimal(14.5)),
                 Product(alias = "ikassa_license_12_dusik",
-                        name = "Абонентское обслуживание iKassa", comment = "Абонентская плата (за 12 месяцев)",
+                        name = "Абонентское обслуживание iKassa",
+                        comment = "Абонентская плата (за 12 месяцев)",
                         price = BigDecimal(240)),//BigDecimal(14.5)),
                 Product(alias = "skko_register",
-                        name = "Регистрация программной кассы в СККО", comment = "",
+                        name = "Регистрация программной кассы в СККО",
+                        comment = "",
                         price = BigDecimal(2.50),
                         tax = BigDecimal(20)),
                 Product(alias = "skko_license_6",
-                        name = "Оплата за обслуживание программной кассы в СККО", comment = "Информационное обслуживание пользователя программной кассы за 6 месяцев",
+                        name = "Оплата за обслуживание программной кассы в СККО",
+                        comment = "Информационное обслуживание пользователя программной кассы за 6 месяцев",
                         price = BigDecimal(25),
                         tax = BigDecimal(20)),
                 Product(alias = "skko_license_12",
-                        name = "Оплата за обслуживание программной кассы в СККО", comment = "Информационное обслуживание пользователя программной кассы за 12 месяцев",
+                        name = "Оплата за обслуживание программной кассы в СККО",
+                        comment = "Информационное обслуживание пользователя программной кассы за 12 месяцев",
                         price = BigDecimal(50),
                         tax = BigDecimal(20)),
 
@@ -214,18 +227,23 @@ class ProductService (private val productRepository: ProductRepository,
                         price = BigDecimal.ZERO),
 
                 Product(alias = "app",
-                        name = "Программная Касса", comment = "само приложение",
+                        name = "Программная Касса",
+                        comment = "само приложение",
                         price = BigDecimal.ZERO),
 
                 Product(alias = "fm_paymob",
-                        name = "Мобильный компьютер PayMob-M1", comment = "iKassa FM",
-                        price = BigDecimal(315), tax = BigDecimal(20),
+                        name = "Мобильный компьютер PayMob-M1",
+                        comment = "iKassa FM",
+                        price = BigDecimal(315),
+                        tax = BigDecimal(20),
                         accompanyingDocs = listOf(AccompanyingDoc(PATH_TO_FM, "05 Реквизиты для оплаты устройства PayMob-M1"))
                 ),
 
                 Product(alias = "pax930",
-                        name = "POS-терминал PAX A930", comment = "iKassa Smart&Card",
-                        price = BigDecimal(715), tax = BigDecimal(20),
+                        name = "POS-терминал PAX A930",
+                        comment = "iKassa Smart&Card",
+                        price = BigDecimal(715),
+                        tax = BigDecimal(20),
                         dualDocs=true,
                         accompanyingDocs = listOf(
                                 AccompanyingDoc(PATH_TO_PAX930, "05 Счёт на оборудование РАХ А930"),
@@ -234,14 +252,19 @@ class ProductService (private val productRepository: ProductRepository,
                         )
                 ),
                 Product(alias = "pax910",
-                        name = "POS-терминал PAX A910", comment = "iKassa Smart&Card",
-                        price = BigDecimal(791.67)/*.toFixed(2)*/, tax = BigDecimal(20),
+                        name = "POS-терминал PAX A910",
+                        comment = "iKassa Smart&Card",
+                        price = BigDecimal(791.67).toFixed(2),
+                        tax = BigDecimal(20),
                         dualDocs=true,
                         accompanyingDocs = listOf(AccompanyingDoc(PATH_TO_PAX910, "05 Договор на оборудование РАХ А910"))),
 
                 Product(alias = "fm_azur",
-                        name = "Кассовый аппарат «AZUR POS», модель KS8223SK", comment = "iKassa FM Azur",
-                        price = BigDecimal(424.16)/*.toFixed(2)*/, tax = BigDecimal(20), roundTotal = true,
+                        name = "Кассовый аппарат «AZUR POS», модель KS8223SK",
+                        comment = "iKassa FM Azur",
+                        price = BigDecimal(424.16).toFixed(2),
+                        tax = BigDecimal(20),
+                        roundTotal = true,
                         dualDocs=true,
                         accompanyingDocs = listOf(AccompanyingDoc(PATH_TO_AZUR_FM, "05 Реквизиты для оплаты устройства FM Azur"))),
 
@@ -273,12 +296,13 @@ class ProductService (private val productRepository: ProductRepository,
 
                 Product(alias = "azur8223",
                         name = "Бесконтактный POS-терминал AZUR POS, модель KS 8223, с ПО", comment = "iKassa Smart&Card Azur",
-                        price = BigDecimal(958.33)/*.toFixed(2)*/, tax = BigDecimal(20), roundTotal = true,
+                        price = BigDecimal(958.33).toFixed(2), tax = BigDecimal(20), roundTotal = true,
                         dualDocs=true,
                         accompanyingDocs = listOf(AccompanyingDoc(PATH_TO_AZUR8223, "05 Договор на оборудование AZUR POS 8223"))),
 
                 Product(alias = "gandlarok_mpos",
-                        name = "Считыватель Vi 218 с программным протоколом взаимодействия с программным обеспечением «ГандлярОК» (магнитная полоса, чип, бесконтакт)", comment = "Гандлярок MPOS",
+                        name = "Считыватель Vi 218 с программным протоколом взаимодействия с программным обеспечением «ГандлярОК» (магнитная полоса, чип, бесконтакт)",
+                        comment = "Гандлярок MPOS",
                         price = BigDecimal(250), tax = BigDecimal(20),
                         accompanyingDocs = listOf(
                                 AccompanyingDoc("docs/products/gandlarok_invoice.xlsm", "10 Счёт ГандлярОК", raw=true),
@@ -314,13 +338,13 @@ class ProductService (private val productRepository: ProductRepository,
 
                 Product(alias = "azur8223_belvti",
                         name = "Бесконтактный POS-терминал AZUR POS, модель KS 8223, с ПО", comment = "iKassa Smart&Card Azur",
-                        price = BigDecimal(735.50)/*.toFixed(2)*/, tax = BigDecimal(20), roundTotal = true,
+                        price = BigDecimal(735.50).toFixed(2), tax = BigDecimal(20), roundTotal = true,
                         dualDocs=true,
                         accompanyingDocs = listOf(AccompanyingDoc(PATH_TO_AZUR8223_BELVTI, "05 Договор на оборудование AZUR POS 8223"))),
 
                 Product(alias = "azur_fm_belvti",
                         name = "Бесконтактный POS-терминал AZUR POS, модель KS 8223, с ПО", comment = "iKassa Smart&Card Azur",
-                        price = BigDecimal(332.50)/*.toFixed(2)*/, tax = BigDecimal(20),
+                        price = BigDecimal(332.50).toFixed(2), tax = BigDecimal(20),
                         dualDocs=true,
                         accompanyingDocs = listOf(AccompanyingDoc(PATH_TO_AZUR_FM_BELVTI, "05 Договор на оборудование AZUR POS 8223SK"))),
 
@@ -339,7 +363,7 @@ class ProductService (private val productRepository: ProductRepository,
                 Product(alias = "ikassa_license_12_season",
                         name = "Абонентское обслуживание iKassa",
                         comment = "Регистрация Программной кассы (ПК) в АИС ПКС iKassa и Абонентская плата (за 12 месяцев) по тарифу “Сезон Smart”",
-                        price = BigDecimal(129.60)/*.toFixed(2)*/),//BigDecimal(14.5)),
+                        price = BigDecimal(129.60).toFixed(2)),//BigDecimal(14.5)),
                 Product(
                         alias = "nexgo_n86",
                         name = "Smart POS Nexgo N86",
