@@ -1,12 +1,12 @@
 package management.services
 
+import io.micronaut.json.tree.JsonArray
+import io.micronaut.json.tree.JsonNode
 import jakarta.inject.Singleton
 import management.entities.AccompanyingDoc
 import management.entities.Product
 import management.entities.Solution
 import management.repositories.SolutionRepository
-import java.math.BigDecimal
-import javax.transaction.Transactional
 
 
 @Singleton
@@ -23,18 +23,84 @@ class SolutionService (private val solutionRepository: SolutionRepository,
         return solutionRepository.findByAlias(alias)
     }
 
+    fun createSolution(solutions : JsonArray) : List<Solution> {
+
+    }
+
+    fun updateSolutionName(alias : String, name : Map<String, String>) {
+        return solutionRepository.updateByAlias(alias, name["name"]!!)
+    }
+
+    fun updateSolutionPrice(alias : String, price : Map<String, String>) {
+        return solutionRepository.updateByAlias(alias, price["price"]!!.toBigDecimal())
+    }
+
+    fun updateSolutionLegalName(alias : String, legalName : Map<String, String>) : Solution {
+        val solution = solutionRepository.findByAlias(alias)
+        solution.legalName = legalName["legal_name"]!!
+        return solutionRepository.update(solution)
+    }
+
+    fun updateSolutionVersion(alias: String, version : Map<String, String>) : Solution {
+        val solution = solutionRepository.findByAlias(alias)
+        solution.legalName = version["version"]!!
+        return solutionRepository.update(solution)
+    }
+
+    fun updateSolutionContent(alias : String, content : JsonNode) : Solution {
+        val solution = solutionRepository.findByAlias(alias)
+        solution.contents = productService.makeProducts(content["contents"] as JsonArray) as List<Product>
+        return solutionRepository.update(solution)
+    }
+
+    fun updateSolutionEquipment(alias: String, equipment : JsonNode) : Solution {
+        val solution = solutionRepository.findByAlias(alias)
+        solution.equipment = productService.makeProducts(equipment["equipment"] as JsonArray) as List<Product>
+        return solutionRepository.update(solution)
+    }
+
+    fun updateSolutionRelated(alias : String, related : JsonNode) : Solution {
+        val solution = solutionRepository.findByAlias(alias)
+        solution.related = productService.makeProducts(related["related"] as JsonArray) as List<Product>
+        return solutionRepository.update(solution)
+    }
+
+    fun updateSolutionInstruction(alias : String, instruction : JsonNode) : Solution {
+        val solution = solutionRepository.findByAlias(alias)
+        solution.forcedInstructionPdf = productService.makeAccompanyingDoc(instruction["solution_instruction"]!!)
+        return solutionRepository.update(solution)
+    }
+
+    fun addSolutionContent(alias : String, content : JsonNode) : Solution {
+        val solution = solutionRepository.findByAlias(alias)
+        solution.contents += productService.makeProducts(content["contents"] as JsonArray) as List<Product>
+        return solutionRepository.update(solution)
+    }
+
+    fun addSolutionEquipment(alias: String, equipment : JsonNode) : Solution {
+        val solution = solutionRepository.findByAlias(alias)
+        solution.equipment += productService.makeProducts(equipment["equipment"] as JsonArray) as List<Product>
+        return solutionRepository.update(solution)
+    }
+
+    fun addSolutionRelated(alias : String, related : JsonNode) : Solution {
+        val solution = solutionRepository.findByAlias(alias)
+        solution.related += productService.makeProducts(related["related"] as JsonArray) as List<Product>
+        return solutionRepository.update(solution)
+    }
+
     fun deleteSolution(alias : String) {
         return solutionRepository.deleteByAlias(alias)
     }
 
     fun exportDefaultSolutions() : List<Solution> {
+        productService.exportDefault()
         defaultProducts += productService.getProductByAlias(alias = "ikassa_register")
         defaultProducts += productService.getProductByAlias(alias ="ikassa_license")
         defaultProducts += productService.getProductByAlias(alias ="skko_register")
         defaultProducts += productService.getProductByAlias(alias ="skko_license_6")
         defaultProducts += productService.getProductByAlias(alias ="personal")
         defaultProducts += productService.getProductByAlias(alias ="app")
-        println(defaultProducts)
         return solutionRepository.saveAll(
                 listOf(
                         Solution(

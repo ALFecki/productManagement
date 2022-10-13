@@ -28,7 +28,7 @@ import management.utils.FilePath.PATH_TO_PRINTER_RPP02N
 class ProductService (private val productRepository: ProductRepository,
                       private val accompanyingDocRepository: AccompanyingDocRepository) {
 
-    private fun makeProducts(productData: JsonArray) : MutableList<Product>? {
+    fun makeProducts(productData: JsonArray) : MutableList<Product>? {
         val productList : MutableList<Product> = mutableListOf()
         (0 until productData.size()).forEach {
             val product : JsonNode = productData.get(it) ?: return null
@@ -67,21 +67,30 @@ class ProductService (private val productRepository: ProductRepository,
 //                accompanyingDocs = docs
             )
     }
+    fun makeAccompanyingDoc(doc : JsonNode) : AccompanyingDoc {
 
-    private fun makeAccompanyingDocs(docs : JsonArray) : List<AccompanyingDoc> {
+        return accompanyingDocRepository.findByPath(doc.get("path")?.stringValue ?: throw Exception())
+            ?: AccompanyingDoc(
+                path = doc.get("path")!!.stringValue,
+                name = doc.get("name")!!.stringValue,
+                raw = doc.get("raw")?.booleanValue ?: false
+            )
+    }
+
+    fun makeAccompanyingDocs(docs : JsonArray) : List<AccompanyingDoc> {
         var accompanyingDocList : List<AccompanyingDoc> = listOf()
         (0 until docs.size()).forEach {
             val doc : JsonNode = docs.get(it)!!
             val existedDoc = accompanyingDocRepository.findByPath(doc.get("path").stringValue)
-//            if(existedDoc != null) {
-//                accompanyingDocList += existedDoc
-//            } else {
+            if(existedDoc != null) {
+                accompanyingDocList += existedDoc
+            } else {
                 accompanyingDocList += AccompanyingDoc(
                     path = doc.get("path")!!.stringValue,
                     name = doc.get("name")!!.stringValue,
                     raw = doc.get("raw")?.booleanValue ?: false
                 )
-//            }
+            }
         }
         return accompanyingDocList
     }

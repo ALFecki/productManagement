@@ -76,7 +76,7 @@ data class Solution(
 //    val extraVars : Map<String, String>,
 
         @Column(name ="legal_name")
-        val legalName : String,
+        var legalName : String,
 
         @Column(name = "version")
         val version : String = "2.4.0",
@@ -92,7 +92,7 @@ data class Solution(
             schema = SCHEMA,
             joinColumns = [JoinColumn(name = "solution_id")],
             inverseJoinColumns = [JoinColumn(name = "accompanying_doc_id")] )
-        val forcedInstructionPdf : AccompanyingDoc? = null
+        var forcedInstructionPdf : AccompanyingDoc? = null
 
 ) {
     @Id
