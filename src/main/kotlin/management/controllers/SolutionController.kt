@@ -1,6 +1,7 @@
 package management.controllers
 
 import io.micronaut.http.annotation.*
+import io.micronaut.json.tree.JsonArray
 import io.micronaut.json.tree.JsonNode
 import management.entities.Solution
 import management.repositories.SolutionRepository
@@ -18,6 +19,11 @@ class SolutionController(private val solutionService: SolutionService) {
     @Get("/{alias}")
     fun getSolutionByAlias(@PathVariable alias : String) : Solution {
         return solutionService.getSolutionByAlias(alias)
+    }
+
+    @Post("/create")
+    fun createSolution(@Body solutions : JsonArray) : List<Solution>? {
+        return solutionService.createSolution(solutions)
     }
 
     @Post("/update/name/{alias}")

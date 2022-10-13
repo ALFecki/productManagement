@@ -36,7 +36,8 @@ class ProductService (private val productRepository: ProductRepository,
             if (product["accompanying_docs"] != null) {
                  docs = makeAccompanyingDocs(product.get("accompanying_docs") as JsonArray)
             }
-            productList += Product(
+            productList += productRepository.findByAlias(product.get("alias")!!.stringValue)
+                ?: Product(
                 alias = product.get("alias")!!.stringValue,
                 name = product.get("name")!!.stringValue,
                 comment = product.get("comment")?.stringValue,
@@ -133,7 +134,7 @@ class ProductService (private val productRepository: ProductRepository,
         return productRepository.findAll()
     }
 
-    fun getProductByAlias(alias : String) : List<Product> {
+    fun getProductByAlias(alias : String) : Product? {
         return productRepository.findByAlias(alias)
     }
 

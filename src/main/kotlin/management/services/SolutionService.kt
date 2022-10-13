@@ -13,7 +13,7 @@ import management.repositories.SolutionRepository
 class SolutionService (private val solutionRepository: SolutionRepository,
                        private val productService: ProductService) {
 
-    private var defaultProducts : List<Product> = listOf()
+    private var defaultProducts : MutableList<Product> = mutableListOf()
 
     fun getAllSolutions() : MutableList<Solution> {
         return solutionRepository.findAll()
@@ -23,8 +23,46 @@ class SolutionService (private val solutionRepository: SolutionRepository,
         return solutionRepository.findByAlias(alias)
     }
 
-    fun createSolution(solutions : JsonArray) : List<Solution> {
+    fun createSolution(solutions : JsonArray) : List<Solution>? {
+        val newSolutions : MutableList<Solution> = mutableListOf()
+        (0 until solutions.size()).forEach {
+            val solution : JsonNode = solutions.get(it) ?: return null
+            newSolutions.add(
+                Solution(
+                    alias = solution.get("alias")!!.stringValue,
+                    name = solution.get("name")!!.stringValue,
+                    contents =
+                    if (solution.get("contents") != null)
+                        productService.makeProducts(solution.get("contents") as JsonArray) as List<Product>
+                    else
+                        listOf<Product>(),
+                    related =
+                    if (solution.get("related") != null)
+                        productService.makeProducts(solution.get("related") as JsonArray) as List<Product>
+                    else
+                        listOf<Product>(),
+                    price = solution.get("price")?.bigDecimalValue,
+                    accompanyingDoc =
+                    if (solution.get("accompanying_doc") != null)
+                        productService.makeAccompanyingDocs(solution.get("accompanying_doc") as JsonArray)
+                    else listOf(),
+                    equipment =
+                    if (solution.get("equipment") != null)
+                        productService.makeProducts(solution.get("equipment") as JsonArray) as List<Product>
+                    else
+                        listOf<Product>(),
+                    legalName = solution.get("legal_name")!!.stringValue,
+                    version = solution.get("version")?.stringValue ?: "2.4.0",
+                    forcedInstructionPdf =
+                    if (solution.get("solution_instruction") != null)
+                        productService.makeAccompanyingDoc(solution.get("solution_instruction")!!)
+                    else
+                        null
 
+                )
+            )
+        }
+        return solutionRepository.saveAll(newSolutions)
     }
 
     fun updateSolutionName(alias : String, name : Map<String, String>) {
@@ -95,12 +133,12 @@ class SolutionService (private val solutionRepository: SolutionRepository,
 
     fun exportDefaultSolutions() : List<Solution> {
         productService.exportDefault()
-        defaultProducts += productService.getProductByAlias(alias = "ikassa_register")
-        defaultProducts += productService.getProductByAlias(alias ="ikassa_license")
-        defaultProducts += productService.getProductByAlias(alias ="skko_register")
-        defaultProducts += productService.getProductByAlias(alias ="skko_license_6")
-        defaultProducts += productService.getProductByAlias(alias ="personal")
-        defaultProducts += productService.getProductByAlias(alias ="app")
+        defaultProducts.add(productService.getProductByAlias(alias = "ikassa_register")!!)
+        defaultProducts.add(productService.getProductByAlias(alias ="ikassa_license")!!)
+        defaultProducts.add(productService.getProductByAlias(alias ="skko_register")!!)
+        defaultProducts.add(productService.getProductByAlias(alias ="skko_license_6")!!)
+        defaultProducts.add(productService.getProductByAlias(alias ="personal")!!)
+        defaultProducts.add(productService.getProductByAlias(alias ="app")!!)
         return solutionRepository.saveAll(
                 listOf(
                         Solution(
@@ -108,19 +146,19 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa Smart&Card NexGo N86",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = productService.getProductByAlias(alias = "nexgo_n86")
+                            equipment = listOf(productService.getProductByAlias(alias = "nexgo_n86")!!)
                         ),
                         Solution(
                             alias = "smart",
                             name = "iKassa Smart",
                             legalName = "iKassa Smart",
                                 contents = defaultProducts,
-                                related = productService.getProductByAlias(alias = "personal") +
-                                        productService.getProductByAlias(alias = "app") +
-                                        productService.getProductByAlias(alias = "fm_paymob") +
-                                        productService.getProductByAlias(alias = "pax930") +
-                                        productService.getProductByAlias(alias = "pax910") +
-                                        productService.getProductByAlias(alias = "fm_azur"),
+                                related = listOf(productService.getProductByAlias(alias = "personal")!!) +
+                                        listOf(productService.getProductByAlias(alias = "app")!!) +
+                                        listOf(productService.getProductByAlias(alias = "fm_paymob")!!) +
+                                        listOf(productService.getProductByAlias(alias = "pax930")!!) +
+                                        listOf(productService.getProductByAlias(alias = "pax910")!!) +
+                                        listOf(productService.getProductByAlias(alias = "fm_azur")!!),
                                 equipment = listOf(/*"rpp02n"*/ /*, "gandlarok_mpos"*/),
                                 version = "2.5.0"
                         ),
@@ -129,7 +167,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa FM",
                             legalName = "iKassa Smart",
                             contents = defaultProducts,
-                            equipment = productService.getProductByAlias(alias = "fm_paymob") /*, "gandlarok_mpos"*/,
+                            equipment = listOf(productService.getProductByAlias(alias = "fm_paymob")!!) /*, "gandlarok_mpos"*/,
                             version = "2.5.0"
                         ),
                         /*
@@ -144,8 +182,8 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa Smart&Card PAX A930",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                                related = productService.getProductByAlias(alias = "adapter_typec"),
-                                equipment = productService.getProductByAlias(alias = "pax930")
+                                related = listOf(productService.getProductByAlias(alias = "adapter_typec")!!),
+                                equipment = listOf(productService.getProductByAlias(alias = "pax930")!!)
 //                                TODO("extraVars = mapOf(\"PROCESSINGPROVIDER\" to \"ОАО «Банк БелВЭБ»\"")
                         ),
                         Solution(
@@ -153,36 +191,36 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa Smart&Card Azur",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            related = productService.getProductByAlias(alias = "adapter_typec"),
-                            equipment = productService.getProductByAlias(alias = "azur8223")
+                            related = listOf(productService.getProductByAlias(alias = "adapter_typec")!!),
+                            equipment = listOf(productService.getProductByAlias(alias = "azur8223")!!)
                         ),
                         Solution(
                             alias = "smart_and_card_nexgo",
                             name = "iKassa Smart&Card NexGo",
                             legalName = "iKassa Smart&Card",
                             contents =defaultProducts,
-                            equipment = productService.getProductByAlias(alias = "nexgo")
+                            equipment = listOf(productService.getProductByAlias(alias = "nexgo")!!)
                         ),
                         Solution(
                             alias = "smart_and_card_feitian",
                             name = "iKassa Smart&Card Feitian F20",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = productService.getProductByAlias(alias ="feitian_f20")
+                            equipment = listOf(productService.getProductByAlias(alias ="feitian_f20")!!)
                         ),
                         Solution(
                             alias = "fm_azur",
                             name = "iKassa FM Azur",
                             legalName = "iKassa Smart",
                             contents = defaultProducts,
-                            equipment = productService.getProductByAlias(alias = "fm_azur"),
+                            equipment = listOf(productService.getProductByAlias(alias = "fm_azur")!!),
                             version = "2.5.0"
                         ),
                         Solution(
                             alias = "dusik_r",
                             name = "iKassa multi Dusik_r",
                             legalName = "iKassa multi Dusik_r",
-                            contents = defaultProducts + productService.getProductByAlias(alias = "dusik_r"),
+                            contents = defaultProducts + listOf(productService.getProductByAlias(alias = "dusik_r")!!),
                             version = "1.7.1"
                         ),
                         /** в dusik_r_partner не входит инвойс на лицензию, только на подключение */
@@ -190,11 +228,11 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             alias = "dusik_r_partner",
                             name = "iKassa multi Dusik_r",
                             legalName = "iKassa multi Dusik_r",
-                            contents = productService.getProductByAlias(alias = "ikassa_register")+
-                                    productService.getProductByAlias(alias = "skko_register") +
-                                    productService.getProductByAlias(alias = "skko_license_6") +
-                                    productService.getProductByAlias(alias = "personal") +
-                                    productService.getProductByAlias(alias = "app") ,
+                            contents = listOf(productService.getProductByAlias(alias = "ikassa_register")!!) +
+                                    listOf(productService.getProductByAlias(alias = "skko_register")!!) +
+                                    listOf(productService.getProductByAlias(alias = "skko_license_6")!!) +
+                                    listOf(productService.getProductByAlias(alias = "personal")!!) +
+                                    listOf(productService.getProductByAlias(alias = "app")!!) ,
                             version = "1.7.1"
                         ),
                         /** в dusik_r_partner_partner это как партнёрский дусик, только однозначно совсем партнёрский дусик.
@@ -204,10 +242,10 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             alias = "dusik_r_partner_partner",
                             name = "iKassa multi Dusik_r",
                             legalName = "iKassa multi Dusik_r",
-                            contents = productService.getProductByAlias(alias = "skko_register") +
-                                    productService.getProductByAlias(alias = "skko_license_6") +
-                                    productService.getProductByAlias(alias = "personal") +
-                                    productService.getProductByAlias(alias = "app"),
+                            contents = listOf(productService.getProductByAlias(alias = "skko_register")!!) +
+                                    listOf(productService.getProductByAlias(alias = "skko_license_6")!!) +
+                                    listOf(productService.getProductByAlias(alias = "personal")!!) +
+                                    listOf(productService.getProductByAlias(alias = "app")!!),
                             version = "1.7.1"
                         ),
                         /** индивидуальные солюшены для насвязи и а1,
@@ -260,7 +298,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa Smart&Card ОАО «Банк БелВЭБ»",
                             legalName = "iKassa Smart&Card",
                                 contents = defaultProducts,
-                                equipment = productService.getProductByAlias(alias ="pax930_lancard"),
+                                equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!),
 //                            TODO(
 //                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»"))
                         ),
@@ -268,7 +306,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa Smart&Card ОАО «Белгазпромбанк»",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = productService.getProductByAlias(alias ="pax930_lancard")
+                            equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!)
 //                            TODO(
 //                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Белгазпромбанк»"))
                         ),
@@ -277,7 +315,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa Smart&Card ОАО «Белинвестбанк»",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = productService.getProductByAlias(alias ="pax930_lancard")
+                            equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!)
 //                            TODO
 //                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Белинвестбанк»")
                         ),
@@ -285,7 +323,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa Smart&Card ОАО «АСБ Беларусбанк»",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = productService.getProductByAlias(alias ="pax930_lancard")
+                            equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!)
 //                            TODO
 //                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «АСБ Беларусбанк»")
                         ),
@@ -293,7 +331,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa Smart&Card ЗАО «РРБ-Банк»",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = productService.getProductByAlias(alias ="pax930_lancard")
+                            equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!)
 //                            TODO
 //                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»")
                         ),
@@ -301,7 +339,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa Smart&Card ОАО «Паритетбанк»",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = productService.getProductByAlias(alias ="pax930_lancard"),
+                            equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!),
 //                            TODO
 //                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Паритетбанк»"),
                             forcedInstructionPdf = AccompanyingDoc(path = "static/forced_paritet.pdf", name = "00-Инструкция.pdf", raw = true)
@@ -311,7 +349,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa Smart&Card ОАО «Белагропромбанк»",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = productService.getProductByAlias(alias ="pax930_lancard")
+                            equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!)
 //                            TODO
 //                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Белагропромбанк»")
                         ),
@@ -320,7 +358,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa Smart&Card Azur ОАО «Банк БелВЭБ»",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = productService.getProductByAlias(alias = "azur8223_belvti")
+                            equipment = listOf(productService.getProductByAlias(alias = "azur8223_belvti")!!)
 //                            TODO
 //                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»")
                         ),
@@ -328,7 +366,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa Smart&Card Azur ОАО «Приорбанк»",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = productService.getProductByAlias(alias = "azur8223_belvti")
+                            equipment = listOf(productService.getProductByAlias(alias = "azur8223_belvti")!!)
 //                          TODO
 //                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Приорбанк»")
                         ),
@@ -336,7 +374,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa Smart&Card 2в1",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = productService.getProductByAlias(alias = "azur_fm_belvti")
+                            equipment = listOf(productService.getProductByAlias(alias = "azur_fm_belvti")!!)
 //                            TODO
                                 //extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»")
                         ),
@@ -358,7 +396,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa Smart&Card PAX A910",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment =  productService.getProductByAlias(alias = "pax910")
+                            equipment =  listOf(productService.getProductByAlias(alias = "pax910")!!)
 //                            TODO
 //                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Приорбанк»")
                         ),
@@ -366,8 +404,8 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa Smart&Card PAX A930",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            related = productService.getProductByAlias(alias = "adapter_typec"),
-                            equipment =  productService.getProductByAlias(alias = "pax930")
+                            related = listOf(productService.getProductByAlias(alias = "adapter_typec")!!),
+                            equipment =  listOf(productService.getProductByAlias(alias = "pax930")!!)
 //                             TODO
 //                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»")
                         ),
@@ -375,7 +413,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa Smart&Card PAX A930",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            related = productService.getProductByAlias(alias = "adapter_typec")
+                            related = listOf(productService.getProductByAlias(alias = "adapter_typec")!!)
                                 //equipment = listOf("pax930"),
 //                            TODO
 //                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Технобанк»")
@@ -430,36 +468,36 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             alias = "smart_season",
                             name = "iKassa Smart на смартфоне",
                             legalName = "iKassa Smart",
-                            contents = productService.getProductByAlias(alias = "ikassa_license_12_season") +
-                                    productService.getProductByAlias(alias = "skko_register") +
-                                    productService.getProductByAlias(alias = "skko_license_6") +
-                                    productService.getProductByAlias(alias = "personal") +
-                                    productService.getProductByAlias(alias = "app"),
-                            equipment =  productService.getProductByAlias(alias = "smart_docless"),
+                            contents = listOf(productService.getProductByAlias(alias = "ikassa_license_12_season")!!) +
+                                    listOf(productService.getProductByAlias(alias = "skko_register")!!) +
+                                    listOf(productService.getProductByAlias(alias = "skko_license_6")!!) +
+                                    listOf(productService.getProductByAlias(alias = "personal")!!) +
+                                    listOf(productService.getProductByAlias(alias = "app")!!),
+                            equipment =  listOf(productService.getProductByAlias(alias = "smart_docless")!!),
                             version = "2.5.0"
                         ),
                         Solution(
                             alias = "azur_fm_season",
                             name = "iKassa Smart 2в1 на Azur POS SK",
                             legalName = "iKassa Smart",
-                            contents = productService.getProductByAlias(alias = "ikassa_license_12_season") +
-                                    productService.getProductByAlias(alias = "skko_register") +
-                                    productService.getProductByAlias(alias = "skko_license_6") +
-                                    productService.getProductByAlias(alias = "personal") +
-                                    productService.getProductByAlias(alias = "app"),
-                            equipment =  productService.getProductByAlias(alias = "azur_fm_belvti"),
+                            contents = listOf(productService.getProductByAlias(alias = "ikassa_license_12_season")!!) +
+                                    listOf(productService.getProductByAlias(alias = "skko_register")!!) +
+                                    listOf(productService.getProductByAlias(alias = "skko_license_6")!!) +
+                                    listOf(productService.getProductByAlias(alias = "personal")!!) +
+                                    listOf(productService.getProductByAlias(alias = "app")!!),
+                            equipment =  listOf(productService.getProductByAlias(alias = "azur_fm_belvti")!!),
                             version = "2.5.0"
                         ),
                         Solution(
                             alias = "feitian_f20_season",
                             name = "iKassa Smart&Card на Feitian F20",
                             legalName = "iKassa Smart&Card",
-                            contents = productService.getProductByAlias(alias = "ikassa_license_12_season") +
-                                    productService.getProductByAlias(alias = "skko_register") +
-                                    productService.getProductByAlias(alias = "skko_license_6") +
-                                    productService.getProductByAlias(alias = "personal") +
-                                    productService.getProductByAlias(alias = "app"),
-                            equipment =  productService.getProductByAlias(alias = "feitian_f20")
+                            contents = listOf(productService.getProductByAlias(alias = "ikassa_license_12_season")!!) +
+                                    listOf(productService.getProductByAlias(alias = "skko_register")!!) +
+                                    listOf(productService.getProductByAlias(alias = "skko_license_6")!!) +
+                                    listOf(productService.getProductByAlias(alias = "personal")!!) +
+                                    listOf(productService.getProductByAlias(alias = "app")!!),
+                            equipment =  listOf(productService.getProductByAlias(alias = "feitian_f20")!!)
                         )
                 )
         )
