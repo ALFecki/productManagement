@@ -184,7 +184,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             contents = defaultProducts,
                                 related = listOf(productService.getProductByAlias(alias = "adapter_typec")!!),
                                 equipment = listOf(productService.getProductByAlias(alias = "pax930")!!),
-                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»")
+                                extraVars = (mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»"))
                         ),
                         Solution(
                             alias = "smart_and_card_azur",

@@ -1,5 +1,6 @@
 package management.entities
 
+
 import io.micronaut.data.annotation.TypeDef
 import io.micronaut.data.model.DataType
 import java.math.BigDecimal
@@ -7,7 +8,8 @@ import javax.persistence.*
 import management.utils.ConstVariables.SCHEMA
 import org.hibernate.annotations.LazyCollection
 import org.hibernate.annotations.LazyCollectionOption
-import org.hibernate.annotations.TypeDefs
+import io.micronaut.jackson.serialize.`$JsonNodeSerializer$Definition$Reference`
+
 
 
 @Entity
@@ -74,12 +76,10 @@ data class Solution(
         )
         var equipment: List<Product> = listOf(),
 
-//        @ElementCollection
-//        @Column(
-//                name = "extra_vars",
-//                columnDefinition = "json")
-//        @TypeDef(type = DataType.JSON)
-//        val extraVars : Map<String, String> = hashMapOf(),
+        @ElementCollection
+        @Column(name = "extra_vars")
+        @field:TypeDef(type = DataType.JSON)
+        val extraVars : Map<String, String> = hashMapOf(),
 
         @Column(name ="legal_name")
         var legalName : String,
