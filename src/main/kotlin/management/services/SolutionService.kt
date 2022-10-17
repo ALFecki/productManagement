@@ -3,10 +3,10 @@ package management.services
 import io.micronaut.json.tree.JsonArray
 import io.micronaut.json.tree.JsonNode
 import jakarta.inject.Singleton
-import management.entities.AccompanyingDoc
-import management.entities.Product
-import management.entities.Solution
-import management.repositories.SolutionRepository
+import management.data.entities.AccompanyingDoc
+import management.data.entities.Product
+import management.data.entities.Solution
+import management.data.repositories.SolutionRepository
 
 
 @Singleton

@@ -1,8 +1,8 @@
-package management.repositories
+package management.data.repositories
 
 import io.micronaut.data.annotation.Repository
 import io.micronaut.data.jpa.repository.JpaRepository
-import management.entities.Product
+import management.data.entities.Product
 import java.math.BigDecimal
 
 

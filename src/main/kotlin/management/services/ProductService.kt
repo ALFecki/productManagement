@@ -3,10 +3,10 @@ package management.services
 import io.micronaut.json.tree.JsonArray
 import io.micronaut.json.tree.JsonNode
 import jakarta.inject.Singleton
-import management.entities.AccompanyingDoc
-import management.entities.Product
-import management.repositories.AccompanyingDocRepository
-import management.repositories.ProductRepository
+import management.data.entities.AccompanyingDoc
+import management.data.entities.Product
+import management.data.repositories.AccompanyingDocRepository
+import management.data.repositories.ProductRepository
 import management.utils.FilePath.PATH_TO_ADAPTER_MICROUSB
 import management.utils.FilePath.PATH_TO_ADAPTER_MICROUSB_WHIPPY
 import management.utils.FilePath.PATH_TO_ADAPTER_TYPEC
@@ -27,7 +27,8 @@ import management.utils.toFixed
 
 @Singleton
 class ProductService (private val productRepository: ProductRepository,
-                      private val accompanyingDocRepository: AccompanyingDocRepository) {
+                      private val accompanyingDocRepository: AccompanyingDocRepository
+) {
 
     fun makeProducts(productData: JsonArray) : MutableList<Product>? {
         val productList : MutableList<Product> = mutableListOf()
@@ -69,7 +70,6 @@ class ProductService (private val productRepository: ProductRepository,
             )
     }
     fun makeAccompanyingDoc(doc : JsonNode) : AccompanyingDoc {
-
         return accompanyingDocRepository.findByPath(doc.get("path")?.stringValue ?: throw Exception())
             ?: AccompanyingDoc(
                 path = doc.get("path")!!.stringValue,
@@ -79,7 +79,7 @@ class ProductService (private val productRepository: ProductRepository,
     }
 
     fun makeAccompanyingDocs(docs : JsonArray) : List<AccompanyingDoc> {
-        var accompanyingDocList : List<AccompanyingDoc> = listOf()
+        val accompanyingDocList : MutableList<AccompanyingDoc> = mutableListOf()
         (0 until docs.size()).forEach {
             val doc : JsonNode = docs.get(it)!!
             val existedDoc = accompanyingDocRepository.findByPath(doc.get("path").stringValue)

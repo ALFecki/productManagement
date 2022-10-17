@@ -1,4 +1,4 @@
-package management.entities
+package management.data.entities
 
 
 import javax.persistence.*

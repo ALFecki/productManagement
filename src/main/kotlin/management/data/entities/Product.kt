@@ -1,10 +1,12 @@
-package management.entities
+package management.data.entities
 
 import io.micronaut.data.annotation.TypeDef
 import io.micronaut.data.model.DataType
 import java.math.BigDecimal
 import javax.persistence.*
 import management.utils.ConstVariables.SCHEMA
+import management.utils.asWords
+import management.utils.toFixed
 import org.hibernate.annotations.LazyCollection
 import org.hibernate.annotations.LazyCollectionOption
 
@@ -58,5 +60,41 @@ data class Product(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")
     var productId: Long = 0
+
+
+    fun toTotal(quantity : Short = 1) : ProductTotal {
+        val taxSum = (tax.divide(BigDecimal(100)) * price).toFixed(2)
+        val taxTotal = (taxSum * BigDecimal(quantity.toInt())).toFixed(2)
+        val cost = (price + taxSum).toFixed(2)
+        val subTotal = (price * BigDecimal(quantity.toInt())).toFixed(2)
+        val total = if (roundTotal) {
+               (cost * BigDecimal(quantity.toInt())).toFixed(0)
+        } else {
+               (cost * BigDecimal(quantity.toInt())).toFixed(2)
+        }
+        return ProductTotal(
+                price = this.price,
+                priceFormatted = "${price} ${currency}",
+                quantity = quantity,
+                quantityFormatted = "${quantity} ${this.currency}",
+                cost = cost,
+                costFormatted = "${cost} ${currency}",
+                tax = tax,
+                taxFormatted = if(tax == BigDecimal.ZERO) {
+                        "без НДС *"
+                } else {
+                        "${tax}"
+                },
+                taxSum = taxSum,
+                taxSumFormatted = "$taxSum $currency",
+                taxTotal = taxTotal,
+                taxTotalFormatted = "$taxTotal $currency",
+                subTotal = subTotal,
+                subTotalFormatted = "$subTotal $currency",
+                total = total,
+                totalFormatted = "$total $currency",
+                totalText = total.asWords()
+        )
+    }
 
 }
