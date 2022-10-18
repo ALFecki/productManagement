@@ -6,6 +6,7 @@ import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.PathVariable
 import io.micronaut.http.annotation.Post
 import io.micronaut.json.tree.JsonArray
+import io.micronaut.json.tree.JsonNode
 import management.data.entities.Product
 import management.services.ProductService
 
@@ -54,6 +55,14 @@ class ProductController(private val productService: ProductService) {
         return productService.updateProductTax(alias, tax)
     }
 
+    @Post("/update/docs/{alias}")
+    fun updateAccompanyingDocs(@PathVariable alias : String, @Body docs : JsonNode) : Product? {
+        return productService.updateProductDocs(alias, docs)
+    }
 
+    @Post("/add/docs/{alias}")
+    fun addAccompanyingDocs(@PathVariable alias : String, @Body docs : JsonNode) : Product? {
+        return productService.addProductDocs(alias, docs)
+    }
 
 }

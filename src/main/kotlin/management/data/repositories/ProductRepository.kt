@@ -12,5 +12,4 @@ interface ProductRepository : JpaRepository<Product, Long> {
     fun deleteByAlias(alias: String)
     fun updateByAlias(alias: String, name : String)
     fun updateByAlias(alias: String, price : BigDecimal)
-//    fun updateTaxByAlias(alias: String, tax : BigDecimal)
 }

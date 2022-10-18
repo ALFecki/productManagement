@@ -113,3 +113,33 @@ CREATE TABLE ikassa."solution_instruction" (
 );
 ALTER TABLE IF EXISTS ikassa."solution_instruction"
     OWNER TO root;
+
+
+CREATE TABLE ikassa."partner_form" (
+    "partner_form_id" bigserial NOT NULL,
+    "UNP" INT NOT NULL,
+    "name" character varying NOT NULL,
+    "logo" character varying NOT NULL,
+    "name_remap" jsonb,
+    "email_mode" character varying NOT NULL,
+    "emails" character varying[],
+    "allow_manual" boolean,
+    "description" character varying,
+    "available_periods" INT[],
+    "slug" character varying,
+    PRIMARY KEY (partner_form_id)
+);
+
+ALTER TABLE IF EXISTS ikassa."partner_form"
+    OWNER TO root;
+
+CREATE TABLE ikassa."form_solution" (
+    "form_solution_link_id" bigint,
+    "partner_form_id" bigserial,
+    "solution_id" bigint,
+    PRIMARY KEY ("form_solution_link_id"),
+    FOREIGN KEY ("partner_form_id") REFERENCES ikassa."partner_form"("partner_form_id"),
+    FOREIGN KEY ("solution_id") REFERENCES ikassa."solution"("solution_id")
+);
+ALTER TABLE IF EXISTS ikassa."form_solution"
+    OWNER TO root;

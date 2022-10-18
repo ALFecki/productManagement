@@ -7,4 +7,5 @@ import management.data.entities.AccompanyingDoc
 @Repository
 interface AccompanyingDocRepository : JpaRepository<AccompanyingDoc, Long> {
     fun findByPath(path : String) : AccompanyingDoc?
+
 }

@@ -5,6 +5,7 @@ import io.micronaut.json.tree.JsonNode
 import jakarta.inject.Singleton
 import management.data.entities.AccompanyingDoc
 import management.data.entities.Product
+import management.data.entities.Solution
 import management.data.repositories.AccompanyingDocRepository
 import management.data.repositories.ProductRepository
 import management.utils.FilePath.PATH_TO_ADAPTER_MICROUSB
@@ -156,6 +157,18 @@ class ProductService (private val productRepository: ProductRepository,
             tax.getOrDefault("tax", BigDecimal.ZERO)
             .toString()
             .toBigDecimal())
+    }
+
+    fun updateProductDocs(alias: String, docs : JsonNode) : Product? {
+        val product = productRepository.findByAlias(alias) ?: throw(Exception("No such product in database"))
+        product.accompanyingDocs = makeAccompanyingDocs(docs["accompanying_docs"] as JsonArray)
+        return productRepository.update(product)
+    }
+
+    fun addProductDocs(alias: String, docs : JsonNode) : Product? {
+        val product = productRepository.findByAlias(alias) ?: throw(Exception("No such product in database"))
+        product.accompanyingDocs += makeAccompanyingDocs(docs["accompanying_docs"] as JsonArray)
+        return productRepository.update(product)
     }
 
     fun deleteProduct(alias : String) {
