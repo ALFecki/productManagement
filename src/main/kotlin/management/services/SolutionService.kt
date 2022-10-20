@@ -290,8 +290,8 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
                                 //equipment = listOf("pax910"),
-                            // TODO(
-//                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Приорбанк»"))
+
+                            extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Приорбанк»")
                         ),
                         //ОАО «Банк БелВЭБ» ОАО «Белгазпромбанк»  ОАО «Белинвестбанк»
                         Solution(alias = "smart_and_card_belweb",
@@ -299,49 +299,43 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             legalName = "iKassa Smart&Card",
                                 contents = defaultProducts,
                                 equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!),
-//                            TODO(
-//                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»"))
+                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»")
                         ),
                         Solution(alias = "smart_and_card_belgazprom",
                             name = "iKassa Smart&Card ОАО «Белгазпромбанк»",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!)
-//                            TODO(
-//                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Белгазпромбанк»"))
+                            equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!),
+                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Белгазпромбанк»")
                         ),
                         Solution(
                             alias = "smart_and_card_belinvest",
                             name = "iKassa Smart&Card ОАО «Белинвестбанк»",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!)
-//                            TODO
-//                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Белинвестбанк»")
+                            equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!),
+                            extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Белинвестбанк»")
                         ),
                         Solution(alias = "smart_and_card_belarusbank",
                             name = "iKassa Smart&Card ОАО «АСБ Беларусбанк»",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!)
-//                            TODO
-//                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «АСБ Беларусбанк»")
+                            equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!),
+                            extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «АСБ Беларусбанк»")
                         ),
                         Solution(alias = "smart_and_card_rrbbank",
                             name = "iKassa Smart&Card ЗАО «РРБ-Банк»",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!)
-//                            TODO
-//                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»")
+                            equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!),
+                            extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»")
                         ),
                         Solution(alias = "smart_and_card_paritetbank",
                             name = "iKassa Smart&Card ОАО «Паритетбанк»",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
                             equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!),
-//                            TODO
-//                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Паритетбанк»"),
+                            extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Паритетбанк»"),
                             forcedInstructionPdf = AccompanyingDoc(path = "static/forced_paritet.pdf", name = "00-Инструкция.pdf", raw = true)
                         ),
                         Solution(
@@ -349,34 +343,30 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa Smart&Card ОАО «Белагропромбанк»",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!)
-//                            TODO
-//                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Белагропромбанк»")
+                            equipment = listOf(productService.getProductByAlias(alias ="pax930_lancard")!!),
+                            extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Белагропромбанк»")
                         ),
-//
+
                         Solution(alias = "smart_and_card_azur_belweb",
                             name = "iKassa Smart&Card Azur ОАО «Банк БелВЭБ»",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = listOf(productService.getProductByAlias(alias = "azur8223_belvti")!!)
-//                            TODO
-//                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»")
+                            equipment = listOf(productService.getProductByAlias(alias = "azur8223_belvti")!!),
+                            extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»")
                         ),
                         Solution(alias = "smart_and_card_azur_prior",
                             name = "iKassa Smart&Card Azur ОАО «Приорбанк»",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = listOf(productService.getProductByAlias(alias = "azur8223_belvti")!!)
-//                          TODO
-//                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Приорбанк»")
+                            equipment = listOf(productService.getProductByAlias(alias = "azur8223_belvti")!!),
+                            extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Приорбанк»")
                         ),
                         Solution(alias = "smart_and_card_azur_fm",
                             name = "iKassa Smart&Card 2в1",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment = listOf(productService.getProductByAlias(alias = "azur_fm_belvti")!!)
-//                            TODO
-                                //extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»")
+                            equipment = listOf(productService.getProductByAlias(alias = "azur_fm_belvti")!!),
+                            extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»")
                         ),
                         Solution(alias = "smart_a1",
                             name = "iKassa Smart",
@@ -396,27 +386,24 @@ class SolutionService (private val solutionRepository: SolutionRepository,
                             name = "iKassa Smart&Card PAX A910",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            equipment =  listOf(productService.getProductByAlias(alias = "pax910")!!)
-//                            TODO
-//                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Приорбанк»")
+                            equipment =  listOf(productService.getProductByAlias(alias = "pax910")!!),
+                            extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Приорбанк»")
                         ),
                         Solution(alias = "smart_and_card_promo",
                             name = "iKassa Smart&Card PAX A930",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
                             related = listOf(productService.getProductByAlias(alias = "adapter_typec")!!),
-                            equipment =  listOf(productService.getProductByAlias(alias = "pax930")!!)
-//                             TODO
-//                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»")
+                            equipment =  listOf(productService.getProductByAlias(alias = "pax930")!!),
+                            extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Банк БелВЭБ»")
                         ),
                         Solution(alias = "smart_and_card_tehnobank",
                             name = "iKassa Smart&Card PAX A930",
                             legalName = "iKassa Smart&Card",
                             contents = defaultProducts,
-                            related = listOf(productService.getProductByAlias(alias = "adapter_typec")!!)
+                            related = listOf(productService.getProductByAlias(alias = "adapter_typec")!!),
                                 //equipment = listOf("pax930"),
-//                            TODO
-//                                extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Технобанк»")
+                            extraVars = mapOf("PROCESSINGPROVIDER" to "ОАО «Технобанк»")
                         )
                         /**
                          * TODO: легаси-мусор чтоб у НаСвязи не поотваливались формы сразу после обновления.

@@ -9,6 +9,10 @@ import management.data.repositories.PartnerFormRepository
 @Singleton
 class PartnerService(private val partnerFormRepository: PartnerFormRepository,
                      private val solutionService : SolutionService) {
+
+    fun getAllPartnerForms() : List<PartnerForm> {
+        return partnerFormRepository.findAll()
+    }
     fun getFormByUNP(UNP : Int) : PartnerForm {
         return partnerFormRepository.findByUNP(UNP)
     }
@@ -21,7 +25,7 @@ class PartnerService(private val partnerFormRepository: PartnerFormRepository,
         return partnerFormRepository.saveAll(
             listOf(
                 PartnerForm(
-                    UNP =193141246,
+                    UNP = 193141246,
                     name = "iKassa",
                     logo ="https://ikassa.by/ikassa_logo.png",
                     solutions = listOf(
@@ -54,12 +58,11 @@ class PartnerService(private val partnerFormRepository: PartnerFormRepository,
                         solutionService.getSolutionByAlias("smart_and_card_docless_a1"),
                         solutionService.getSolutionByAlias("smart_a1")
                     ),
-//                   TODO
-//                    hashMapOf(
-//                        "smart_and_card_docless_a1" to "Smart-касса PAX A930",
-//                        "fm_docless" to "Smart-касса PayMob M-1",
-//                        "smart_a1" to "Smart-касса на смартфоне"
-//                    )
+                    nameRemap =  hashMapOf(
+                        "smart_and_card_docless_a1" to "Smart-касса PAX A930",
+                        "fm_docless" to "Smart-касса PayMob M-1",
+                        "smart_a1" to "Smart-касса на смартфоне"
+                    )
                 ),
                 PartnerForm(
                     UNP =100220190,
@@ -90,22 +93,21 @@ class PartnerService(private val partnerFormRepository: PartnerFormRepository,
                     name = "Дракарис",
                     logo ="https://ikassa.by/ikassa_logo.png",
                     listOf(solutionService.getSolutionByAlias("dusik_r_partner")),
-//                  TODO
-//                    emailMode = PartnerFormEmailMode.NONE
+                    emailModeName = PartnerFormEmailMode.NONE.name
                 ),
                 PartnerForm(
                     UNP = 191826858,
                     name = "RestFront",
                     logo = "https://ikassa.by/partners/ikassa_restfront_form_header.png",
-                    solutions =  listOf(solutionService.getSolutionByAlias("dusik_r")) //,
-                    //hashMapOf("smart" to "iKassa Prior SoftPos")
+                    solutions =  listOf(solutionService.getSolutionByAlias("dusik_r")),
+                    nameRemap = hashMapOf("smart" to "iKassa Prior SoftPos")
                 ),
                 PartnerForm(
                     UNP = 191263307,
                     name ="Bytech",
                     logo ="https://ikassa.by/ikassa_logo.png",
                     solutions =  listOf(solutionService.getSolutionByAlias("smart_and_card_azur")),
-                    partnerEmail = listOf("sales@bytechs.by"),
+                    partnerEmail = arrayOf("sales@bytechs.by"),
                     slug = "bytech_azur"
                 ),
                 PartnerForm(
@@ -113,7 +115,7 @@ class PartnerService(private val partnerFormRepository: PartnerFormRepository,
                     name = "Bytech",
                     logo = "https://ikassa.by/ikassa_logo.png",
                     solutions =  listOf(solutionService.getSolutionByAlias("smart_and_card_a910")),
-                    partnerEmail = listOf("sales@bytechs.by"),
+                    partnerEmail = arrayOf("sales@bytechs.by"),
                     slug = "bytech_pax910"
                 ),
                 PartnerForm(
@@ -129,7 +131,7 @@ class PartnerService(private val partnerFormRepository: PartnerFormRepository,
                         solutionService.getSolutionByAlias("smart_and_card_paritetbank"),
                         solutionService.getSolutionByAlias("smart_and_card_belagroprombank"),
                     ),
-                    partnerEmail = listOf("pos@lancard.by", "kudelko.e@farnell-service.by")
+                    partnerEmail = arrayOf("pos@lancard.by", "kudelko.e@farnell-service.by")
                 ),
                 PartnerForm(
                     UNP = 100361187,
@@ -139,7 +141,7 @@ class PartnerService(private val partnerFormRepository: PartnerFormRepository,
                         solutionService.getSolutionByAlias("smart_and_card_rrbbank"),
                         solutionService.getSolutionByAlias("smart")
                     ),
-                    partnerEmail = listOf("pos@lancard.by", "kudelko.e@farnell-service.by")
+                    partnerEmail = arrayOf("pos@lancard.by", "kudelko.e@farnell-service.by")
                 ),
                 PartnerForm(
                     UNP = 100233809,
@@ -148,7 +150,7 @@ class PartnerService(private val partnerFormRepository: PartnerFormRepository,
                     solutions =  listOf(
                         solutionService.getSolutionByAlias("smart_and_card_paritetbank")
                     ),
-                    partnerEmail = listOf("pos@lancard.by", "kudelko.e@farnell-service.by")
+                    partnerEmail = arrayOf("pos@lancard.by", "kudelko.e@farnell-service.by")
                 ),
                 PartnerForm(
                     UNP = 101468222,
@@ -160,7 +162,7 @@ class PartnerService(private val partnerFormRepository: PartnerFormRepository,
                         solutionService.getSolutionByAlias("smart_and_card_azur_fm")
                     ),
                     allowManual = false,
-                    partnerEmail = listOf("region@belvti.by")
+                    partnerEmail = arrayOf("region@belvti.by")
                 ),
                 PartnerForm(
                     UNP = 100706562,
@@ -170,7 +172,7 @@ class PartnerService(private val partnerFormRepository: PartnerFormRepository,
                         solutionService.getSolutionByAlias("smart_and_card_tehnobank")
                     ),
                     //allowManual = false,
-                    partnerEmail = listOf("a.ivanischev@tb.by")
+                    partnerEmail = arrayOf("a.ivanischev@tb.by")
                 ),
                 PartnerForm(
                     UNP =2022,
@@ -181,7 +183,7 @@ class PartnerService(private val partnerFormRepository: PartnerFormRepository,
                         solutionService.getSolutionByAlias("azur_fm_season"),
                         solutionService.getSolutionByAlias("feitian_f20_season")
                     ),
-                    availablePeriods = listOf(12),
+                    availablePeriods = arrayOf(12),
                     formDescription = "Эта форма позволяет заполнить данные и скачать готовый пакет документов для тарифа \"Сезон Smart\""
                 ),
                 PartnerForm(
@@ -189,27 +191,25 @@ class PartnerService(private val partnerFormRepository: PartnerFormRepository,
                     name ="Берлио",
                     logo = "https://ikassa.by/partners/ikassa_berlio_form_header.png",
                     solutions = listOf(solutionService.getSolutionByAlias("dusik_r_partner")),
-//                  TODO
-//                    emailMode = PartnerFormEmailMode.BOTH,
-                    availablePeriods = listOf(1)
+
+                    emailModeName = PartnerFormEmailMode.BOTH.name,
+                    availablePeriods = arrayOf(1)
                 ),
                 PartnerForm(
                     UNP = 190369806,
                     name = "ККС",
                     logo = "https://object.ikassa.by/ikassa-assets/ikassa_kks.png",
                     solutions =  listOf(solutionService.getSolutionByAlias("dusik_r_partner_partner")),
-//                  TODO
-//                    emailMode = PartnerFormEmailMode.BOTH,
-                    availablePeriods = listOf(1)
+                    emailModeName = PartnerFormEmailMode.BOTH.name,
+                    availablePeriods = arrayOf(1)
                 ),
                 PartnerForm(
                     UNP = 190497010,
                     name ="ООО \"СОФТ-СИСТЕМ\"",
                     logo ="https://object.ikassa.by/ikassa-assets/ikassa_softsystems.png",
                     solutions =  listOf(solutionService.getSolutionByAlias("dusik_r_partner")),
-//                  TODO
-//                    emailMode = PartnerFormEmailMode.BOTH,
-                    partnerEmail = listOf("info@softsys.by")
+                    emailModeName = PartnerFormEmailMode.BOTH.name,
+                    partnerEmail = arrayOf("info@softsys.by")
                 ),
             )
         )

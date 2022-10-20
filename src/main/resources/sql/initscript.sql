@@ -1,4 +1,8 @@
 DROP SCHEMA ikassa CASCADE;
+DROP SCHEMA public CASCADE;
+
+CREATE SCHEMA public
+    AUTHORIZATION root;
 
 CREATE SCHEMA ikassa
     AUTHORIZATION root; -- need to be refactored (testing example)
@@ -117,11 +121,11 @@ ALTER TABLE IF EXISTS ikassa."solution_instruction"
 
 CREATE TABLE ikassa."partner_form" (
     "partner_form_id" bigserial NOT NULL,
-    "UNP" INT NOT NULL,
+    "unp" INT NOT NULL,
     "name" character varying NOT NULL,
     "logo" character varying NOT NULL,
     "name_remap" jsonb,
-    "email_mode" character varying NOT NULL,
+    "email_mode" character varying, --NOT NULL,
     "emails" character varying[],
     "allow_manual" boolean,
     "description" character varying,
@@ -134,10 +138,8 @@ ALTER TABLE IF EXISTS ikassa."partner_form"
     OWNER TO root;
 
 CREATE TABLE ikassa."form_solution" (
-    "form_solution_link_id" bigint,
-    "partner_form_id" bigserial,
+    "partner_form_id" bigint,
     "solution_id" bigint,
-    PRIMARY KEY ("form_solution_link_id"),
     FOREIGN KEY ("partner_form_id") REFERENCES ikassa."partner_form"("partner_form_id"),
     FOREIGN KEY ("solution_id") REFERENCES ikassa."solution"("solution_id")
 );

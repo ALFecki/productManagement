@@ -31,6 +31,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     implementation("io.micronaut:micronaut-validation")
     implementation("pl.allegro.finance:tradukisto:1.12.0")
+    implementation("com.vladmihalcea:hibernate-types-52:2.20.0")
 
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
 

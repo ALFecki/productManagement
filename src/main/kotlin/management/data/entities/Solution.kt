@@ -1,13 +1,16 @@
 package management.data.entities
 
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import java.math.BigDecimal
 import javax.persistence.*
 import management.utils.ConstVariables.SCHEMA
 import org.hibernate.annotations.LazyCollection
 import org.hibernate.annotations.LazyCollectionOption
+import org.hibernate.annotations.Type
+import org.hibernate.annotations.TypeDef
 
-
+@TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)
 @Entity
 @Table(name = "solution", schema = SCHEMA)
 data class Solution(
@@ -74,7 +77,7 @@ data class Solution(
 
 
         @Column(name = "extra_vars")
-//        @TypeDef(type = DataType.JSON)
+        @Type(type = "jsonb")
         val extraVars : Map<String, String> = mapOf(),
 
         @Column(name ="legal_name")
