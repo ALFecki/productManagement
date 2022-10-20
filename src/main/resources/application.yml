@@ -1,6 +1,6 @@
 micronaut:
   application:
-    name: test
+    name: productManagement
 datasources:
   default:
     driverClassName: org.postgresql.Driver
@@ -9,7 +9,9 @@ datasources:
     url: jdbc:postgresql://localhost:5432/postgres
     username: root
     password: root
-jpa.default.properties.hibernate.hbm2ddl.auto: update
+jpa.default.properties.hibernate.hbm2ddl.auto: none
+
+
 netty:
   default:
     allocator:

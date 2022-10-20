@@ -1,13 +1,13 @@
-package management.entities
+package management.data.entities
 
 
 import javax.persistence.*
 import management.utils.ConstVariables.SCHEMA
 
 
- @Entity
-    @Table(name = "accompanying_doc", schema = SCHEMA)
-    data class AccompanyingDoc (
+@Entity
+@Table(name = "accompanying_doc", schema = SCHEMA)
+data class AccompanyingDoc (
 
         @Column(name = "path")
         val path: String,
@@ -21,9 +21,9 @@ import management.utils.ConstVariables.SCHEMA
 
         @Column(name = "raw")
         val raw: Boolean = false
-    ) {
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        @Column(name = "accompanying_doc_id")
-        var accompanyingDocId: Long = 0
-    }
+) {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "accompanying_doc_id")
+    var accompanyingDocId: Long = 0
+}

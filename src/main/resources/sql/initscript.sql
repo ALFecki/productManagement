@@ -1,4 +1,8 @@
 DROP SCHEMA ikassa CASCADE;
+DROP SCHEMA public CASCADE;
+
+CREATE SCHEMA public
+    AUTHORIZATION root;
 
 CREATE SCHEMA ikassa
     AUTHORIZATION root; -- need to be refactored (testing example)
@@ -53,9 +57,7 @@ CREATE TABLE ikassa."solution" (
     "extra_vars" jsonb,
     "legal_name" character varying NOT NULL,
     "version" character varying NOT NULL,
-    "forced_instruction_link" bigserial,
-    PRIMARY KEY (solution_id),
-    FOREIGN KEY ("forced_instruction_link") REFERENCES ikassa.accompanying_doc("accompanying_doc_id")
+    PRIMARY KEY (solution_id)
 );
 
 ALTER TABLE IF EXISTS ikassa."solution"
@@ -103,4 +105,43 @@ CREATE TABLE ikassa."solutions_equipment" (
     FOREIGN KEY ("product_id") REFERENCES ikassa."product"("product_id")
 );
 ALTER TABLE IF EXISTS ikassa."solutions_equipment"
+    OWNER TO root;
+
+CREATE TABLE ikassa."solution_instruction" (
+    "instruction_id" bigserial,
+    "solution_id" bigint,
+    "accompanying_doc_id" bigint,
+    PRIMARY KEY ("instruction_id"),
+    FOREIGN KEY ("solution_id") REFERENCES ikassa."solution"("solution_id"),
+    FOREIGN KEY ("accompanying_doc_id") REFERENCES ikassa."accompanying_doc"("accompanying_doc_id")
+);
+ALTER TABLE IF EXISTS ikassa."solution_instruction"
+    OWNER TO root;
+
+
+CREATE TABLE ikassa."partner_form" (
+    "partner_form_id" bigserial NOT NULL,
+    "unp" INT NOT NULL,
+    "name" character varying NOT NULL,
+    "logo" character varying NOT NULL,
+    "name_remap" jsonb,
+    "email_mode" character varying, --NOT NULL,
+    "emails" character varying[],
+    "allow_manual" boolean,
+    "description" character varying,
+    "available_periods" INT[],
+    "slug" character varying,
+    PRIMARY KEY (partner_form_id)
+);
+
+ALTER TABLE IF EXISTS ikassa."partner_form"
+    OWNER TO root;
+
+CREATE TABLE ikassa."form_solution" (
+    "partner_form_id" bigint,
+    "solution_id" bigint,
+    FOREIGN KEY ("partner_form_id") REFERENCES ikassa."partner_form"("partner_form_id"),
+    FOREIGN KEY ("solution_id") REFERENCES ikassa."solution"("solution_id")
+);
+ALTER TABLE IF EXISTS ikassa."form_solution"
     OWNER TO root;
