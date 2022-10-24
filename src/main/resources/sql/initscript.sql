@@ -145,3 +145,13 @@ CREATE TABLE ikassa."form_solution" (
 );
 ALTER TABLE IF EXISTS ikassa."form_solution"
     OWNER TO root;
+
+
+CREATE TABLE ikassa."document" (
+    "document_id" bigint,
+    "alias" character varying,
+    "name" character varying,
+    "path" character varying
+);
+ALTER TABLE IF EXISTS ikassa."document"
+    OWNER TO root;

@@ -7,7 +7,7 @@ import io.micronaut.http.annotation.PathVariable
 import io.micronaut.http.annotation.Post
 import io.micronaut.json.tree.JsonArray
 import io.micronaut.json.tree.JsonNode
-import management.data.entities.Product
+import management.data.products.Product
 import management.services.ProductService
 
 

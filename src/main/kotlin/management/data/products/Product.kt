@@ -1,4 +1,4 @@
-package management.data.entities
+package management.data.products
 
 import io.micronaut.data.annotation.TypeDef
 import io.micronaut.data.model.DataType

@@ -3,7 +3,7 @@ package management.controllers
 import io.micronaut.http.annotation.*
 import io.micronaut.json.tree.JsonArray
 import io.micronaut.json.tree.JsonNode
-import management.data.entities.Solution
+import management.data.products.Solution
 import management.services.SolutionService
 
 

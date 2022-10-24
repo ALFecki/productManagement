@@ -3,9 +3,9 @@ package management.services
 import io.micronaut.json.tree.JsonArray
 import io.micronaut.json.tree.JsonNode
 import jakarta.inject.Singleton
-import management.data.entities.AccompanyingDoc
-import management.data.entities.Product
-import management.data.entities.Solution
+import management.data.products.AccompanyingDoc
+import management.data.products.Product
+import management.data.products.Solution
 import management.data.repositories.AccompanyingDocRepository
 import management.data.repositories.ProductRepository
 import management.utils.FilePath.PATH_TO_ADAPTER_MICROUSB
@@ -96,7 +96,7 @@ class ProductService (private val productRepository: ProductRepository,
         }
         return accompanyingDocList
     }
-    
+
     fun getAllProducts() : MutableList<Product> {
         return productRepository.findAll()
     }

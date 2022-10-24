@@ -1,8 +1,8 @@
 package management.services
 
 import jakarta.inject.Singleton
-import management.data.entities.PartnerForm
-import management.data.entities.PartnerFormEmailMode
+import management.data.products.PartnerForm
+import management.data.products.PartnerFormEmailMode
 import management.data.repositories.PartnerFormRepository
 
 
