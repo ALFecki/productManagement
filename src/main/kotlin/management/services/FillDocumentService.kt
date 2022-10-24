@@ -2,7 +2,7 @@ package management.services
 
 import jakarta.inject.Singleton
 import management.data.docs.Document
-import management.data.docs.RenderedDocuments
+import management.data.docs.RenderedDocument
 import management.data.products.Product
 import management.data.products.Solution
 import management.data.repositories.DocumentRepository
@@ -27,9 +27,19 @@ class FillDocumentService (private val documentRepository: DocumentRepository) {
     )
 
 
-    fun fillProductsDocuments(products : List<Product>, eqTotal : Short, fullData : DocumentDto? = null, solution: Solution? = null) : List<RenderedDocuments> {
+    fun fillProductsDocuments(products : List<Product>, eqTotal : Short, fullData : DocumentDto? = null, solution: Solution? = null) : List<RenderedDocument> {
+        val documents : MutableList<RenderedDocument> = mutableListOf()
+        products.forEach { product ->
+            val totalProduct = product.toTotal(eqTotal)
+            product.accompanyingDocs.forEach { accompanyingDoc ->
+                val fileName = accompanyingDoc.name.ifEmpty { accompanyingDoc.path }
+                val content : ByteArray = byteArrayOf() // TODO: implement
+                documents.add(RenderedDocument(fileName, content, accompanyingDoc.path.substringAfterLast('.', "docx")))
+            }
+        }
 
         throw NotImplementedError()
+        return documents
     }
 
 
