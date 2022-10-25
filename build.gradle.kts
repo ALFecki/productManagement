@@ -32,6 +32,10 @@ dependencies {
     implementation("io.micronaut:micronaut-validation")
     implementation("pl.allegro.finance:tradukisto:1.12.0")
     implementation("com.vladmihalcea:hibernate-types-52:2.20.0")
+    implementation("org.apache.poi:poi:5.2.2")
+    implementation("org.apache.poi:poi-ooxml:5.2.2")
+    implementation("fr.opensagres.xdocreport:fr.opensagres.poi.xwpf.converter.core:2.0.4")
+    implementation("fr.opensagres.xdocreport:fr.opensagres.poi.xwpf.converter.pdf:2.0.4")
 
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
 

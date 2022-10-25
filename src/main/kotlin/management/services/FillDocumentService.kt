@@ -4,6 +4,7 @@ import jakarta.inject.Singleton
 import management.data.docs.Document
 import management.data.docs.RenderedDocument
 import management.data.products.Product
+import management.data.products.ProductTotal
 import management.data.products.Solution
 import management.data.repositories.DocumentRepository
 import management.forms.DocumentDto
@@ -13,6 +14,12 @@ import management.utils.FilePath.PATH_TO_PAYMENT_REGISTRATION
 import management.utils.FilePath.PATH_TO_PAYMENT_SERVICE
 import management.utils.FilePath.PATH_TO_PAYMENT_SKKO
 import management.utils.FilePath.PATH_TO_SMART
+import management.utils.toByteArray
+import org.apache.poi.xwpf.usermodel.XWPFDocument
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.util.zip.ZipOutputStream
+
 
 @Singleton
 class FillDocumentService (private val documentRepository: DocumentRepository) {
@@ -26,6 +33,11 @@ class FillDocumentService (private val documentRepository: DocumentRepository) {
         PATH_TO_FM to listOf("290", "0.2")
     )
 
+    fun fillProductDocument(path : String, product: Product, productTotal: ProductTotal, full : DocumentDto? = null, solution: Solution? = null) : ByteArray {
+
+
+        throw NotImplementedError()
+    }
 
     fun fillProductsDocuments(products : List<Product>, eqTotal : Short, fullData : DocumentDto? = null, solution: Solution? = null) : List<RenderedDocument> {
         val documents : MutableList<RenderedDocument> = mutableListOf()
@@ -33,7 +45,11 @@ class FillDocumentService (private val documentRepository: DocumentRepository) {
             val totalProduct = product.toTotal(eqTotal)
             product.accompanyingDocs.forEach { accompanyingDoc ->
                 val fileName = accompanyingDoc.name.ifEmpty { accompanyingDoc.path }
-                val content : ByteArray = byteArrayOf() // TODO: implement
+                val content = if(accompanyingDoc.raw) {
+                    this.getFileAsByteArray(fileName)!!
+                } else {
+                    byteArrayOf()
+                }
                 documents.add(RenderedDocument(fileName, content, accompanyingDoc.path.substringAfterLast('.', "docx")))
             }
         }
@@ -42,6 +58,38 @@ class FillDocumentService (private val documentRepository: DocumentRepository) {
         return documents
     }
 
+
+    fun getFile(filename: String): InputStream? {
+        return this::class.java.classLoader.getResourceAsStream(filename)
+    }
+
+    fun getFileAsByteArray(filename : String) : ByteArray? {
+        val stream = this::class.java.getResourceAsStream(filename) ?: return null
+        val byteArray = stream.readBytes()
+        stream.close()
+        return byteArray
+    }
+
+
+    fun renderDocument(path: String, pew: (document: XWPFDocument) -> Unit): ByteArray {
+        println(path)
+        getFile(path).use { docInputStream ->
+            XWPFDocument(docInputStream).use { document ->
+                pew(document)
+                return document.toByteArray()
+            }
+        }
+    }
+
+    fun createZipArchive(renderedDocuments: List<RenderedDocument>): ByteArray {
+        val out = ByteArrayOutputStream()
+        ZipOutputStream(out).use { zipOut ->
+            renderedDocuments.forEach { rd ->
+                rd.toZip(zipOut)
+            }
+        }
+        return out.toByteArray()
+    }
 
     public fun exportDefaultDocs() : List<Document> {
         return documentRepository.saveAll(

@@ -6,5 +6,5 @@ import management.data.docs.Document
 
 @Repository
 interface DocumentRepository : JpaRepository<Document, Long>  {
-    fun findByAlias(alias : String)
+    fun findByAlias(alias : String) : Document?
 }
