@@ -14,6 +14,8 @@ import management.utils.FilePath.PATH_TO_PAYMENT_REGISTRATION
 import management.utils.FilePath.PATH_TO_PAYMENT_SERVICE
 import management.utils.FilePath.PATH_TO_PAYMENT_SKKO
 import management.utils.FilePath.PATH_TO_SMART
+import management.utils.asWords
+import management.utils.replaceMultiple
 import management.utils.toByteArray
 import org.apache.poi.xwpf.usermodel.XWPFDocument
 import java.io.ByteArrayOutputStream
@@ -34,9 +36,34 @@ class FillDocumentService (private val documentRepository: DocumentRepository) {
     )
 
     fun fillProductDocument(path : String, product: Product, productTotal: ProductTotal, full : DocumentDto? = null, solution: Solution? = null) : ByteArray {
+        val defaultInfo = mutableMapOf<String, String?>(
+            "{caption}" to product.comment,
+            "{price}" to productTotal.priceFormatted,
+            "{tax}" to productTotal.taxFormatted,
+            "{tax_sum}" to productTotal.taxSumFormatted,
+            "{tax_sum_text}" to productTotal.taxSum.asWords(),
+            "{tax_total_text}" to productTotal.taxTotal.asWords(),
+            "{tax_total}" to productTotal.taxTotalFormatted,
+            "{cost}" to productTotal.costFormatted,
+            "{total}" to productTotal.totalFormatted,
+            "{subtotal}" to productTotal.subTotalFormatted,
+            "{total_text}" to productTotal.totalText,
+            "{total_value}" to productTotal.total.toString(),
+            "{quantity}" to productTotal.quantityFormatted,
 
+            "TAXTOTALTEXT" to productTotal.taxTotal.asWords(),
+            "TAXTOTALVALUE" to productTotal.taxTotal.toString(),
+            "TAXSUMTEXT" to productTotal.taxSum.asWords(),
+            "TAX_TOTAL" to productTotal.taxTotalFormatted,
+            "TOTAL_TEXT" to productTotal.totalText,
+            "TOTAL_VALUE" to productTotal.total.toString(),
+            "TOTAL" to productTotal.totalFormatted
+        )
+        solution?.extraVars?.let { defaultInfo.putAll(it) }
+        return renderDocument(path) {
+            it.replaceMultiple(defaultInfo)
+        }
 
-        throw NotImplementedError()
     }
 
     fun fillProductsDocuments(products : List<Product>, eqTotal : Short, fullData : DocumentDto? = null, solution: Solution? = null) : List<RenderedDocument> {
@@ -46,15 +73,13 @@ class FillDocumentService (private val documentRepository: DocumentRepository) {
             product.accompanyingDocs.forEach { accompanyingDoc ->
                 val fileName = accompanyingDoc.name.ifEmpty { accompanyingDoc.path }
                 val content = if(accompanyingDoc.raw) {
-                    this.getFileAsByteArray(fileName)!!
+                    this.getFileAsByteArray(accompanyingDoc.path)!!
                 } else {
-                    byteArrayOf()
+                    fillProductDocument(accompanyingDoc.path, product, totalProduct, fullData, solution)
                 }
                 documents.add(RenderedDocument(fileName, content, accompanyingDoc.path.substringAfterLast('.', "docx")))
             }
         }
-
-        throw NotImplementedError()
         return documents
     }
 
@@ -64,7 +89,8 @@ class FillDocumentService (private val documentRepository: DocumentRepository) {
     }
 
     fun getFileAsByteArray(filename : String) : ByteArray? {
-        val stream = this::class.java.getResourceAsStream(filename) ?: return null
+        val stream = this::class.java.classLoader.getResourceAsStream(filename)
+        stream ?: return null
         val byteArray = stream.readBytes()
         stream.close()
         return byteArray

@@ -1,10 +1,11 @@
 package management.data.docs
 
+import management.utils.ConstVariables.SCHEMA
 import javax.persistence.*
 
 
 @Entity
-@Table(name = "document", schema = "ikassa")
+@Table(name = "document", schema = SCHEMA)
 data class Document(
     @Column(name = "alias")
     val alias : String,
@@ -17,5 +18,6 @@ data class Document(
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val documentId : Long = 0
+    @Column(name = "document_id")
+    var documentId : Long = 0
 }

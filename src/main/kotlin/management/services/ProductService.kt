@@ -43,11 +43,11 @@ class ProductService (private val productRepository: ProductRepository,
                 ?: Product(
                 alias = product.get("alias")!!.stringValue,
                 name = product.get("name")!!.stringValue,
-                comment = product.get("comment")?.stringValue,
+                comment = product.get("comment")?.stringValue ?: "",
                 price = product.get("price")!!.bigDecimalValue, // "price":123.4
                 tax = product.get("tax")?.bigDecimalValue ?: BigDecimal.ZERO,
-                currency = product.get("currency")?.stringValue,
-                units = product.get("units")?.intValue ?: 1,
+                currency = product.get("currency")?.stringValue ?: "",
+                units = product.get("units")?.stringValue ?: "",
                 roundTotal = product.get("round_total")?.booleanValue ?: false, // "round_total":true
                 dualDocs = product.get("dual_docs")?.booleanValue ?: false, // "dual_docs":true
                 accompanyingDocs = docs
@@ -60,11 +60,11 @@ class ProductService (private val productRepository: ProductRepository,
         return Product(
                 alias = product.get("alias")!!.stringValue,
                 name = product.get("name")!!.stringValue,
-                comment = product.get("comment")?.stringValue,
+                comment = product.get("comment")?.stringValue ?: "",
                 price = product.get("price")!!.bigDecimalValue, // "price":123.4
                 tax = product.get("tax")?.bigDecimalValue ?: BigDecimal.ZERO,
-                currency = product.get("currency")?.stringValue,
-                units = product.get("units")?.intValue ?: 1,
+                currency = product.get("currency")?.stringValue ?: "",
+                units = product.get("units")?.stringValue ?: "",
                 roundTotal = product.get("round_total")?.booleanValue ?: false, // "round_total":true
                 dualDocs = product.get("dual_docs")?.booleanValue ?: false, // "dual_docs":true
                 accompanyingDocs = docs
@@ -82,17 +82,13 @@ class ProductService (private val productRepository: ProductRepository,
     fun makeAccompanyingDocs(docs : JsonArray) : List<AccompanyingDoc> {
         val accompanyingDocList : MutableList<AccompanyingDoc> = mutableListOf()
         (0 until docs.size()).forEach {
-            val doc : JsonNode = docs.get(it)!!
-            val existedDoc = accompanyingDocRepository.findByPath(doc.get("path").stringValue)
-            if(existedDoc != null) {
-                accompanyingDocList += existedDoc
-            } else {
-                accompanyingDocList += AccompanyingDoc(
+            val doc: JsonNode = docs.get(it)!!
+            accompanyingDocList += accompanyingDocRepository.findByPath(doc.get("path").stringValue)
+                ?: AccompanyingDoc(
                     path = doc.get("path")!!.stringValue,
                     name = doc.get("name")!!.stringValue,
                     raw = doc.get("raw")?.booleanValue ?: false
                 )
-            }
         }
         return accompanyingDocList
     }

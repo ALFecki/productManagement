@@ -22,7 +22,7 @@ data class Product(
         var name: String,
 
         @Column(name = "comment")
-        val comment: String? = null,
+        val comment: String = "",
 
         @TypeDef(type = DataType.BIGDECIMAL)
         @Column(name = "price")
@@ -33,10 +33,10 @@ data class Product(
         val tax: BigDecimal = BigDecimal.ZERO,
 
         @Column(name = "currency")
-        val currency: String? = null,
+        val currency: String = "",
 
         @Column(name = "units")
-        val units: Int = 1,
+        val units: String = "",
 
         @Column(name = "round_total")
         val roundTotal: Boolean = false,
@@ -64,6 +64,7 @@ data class Product(
 
     fun toTotal(quantity : Short = 1) : ProductTotal {
         val taxSum = (tax.divide(BigDecimal(100)) * price).toFixed(2)
+        println(taxSum)
         val taxTotal = (taxSum * BigDecimal(quantity.toInt())).toFixed(2)
         val cost = (price + taxSum).toFixed(2)
         val subTotal = (price * BigDecimal(quantity.toInt())).toFixed(2)

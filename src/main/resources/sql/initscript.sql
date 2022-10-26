@@ -28,7 +28,7 @@ CREATE TABLE ikassa."product" (
     "price" double precision,
     "tax" double precision,
     "currency" character varying,
-    "units" int,
+    "units" character varying,
     "round_total" boolean,
     "dual_docs" boolean,
     PRIMARY KEY("product_id")
@@ -148,10 +148,11 @@ ALTER TABLE IF EXISTS ikassa."form_solution"
 
 
 CREATE TABLE ikassa."document" (
-    "document_id" bigint,
+    "document_id" bigserial NOT NULL,
     "alias" character varying,
     "name" character varying,
-    "path" character varying
+    "path" character varying,
+    PRIMARY KEY ("document_id")
 );
 ALTER TABLE IF EXISTS ikassa."document"
     OWNER TO root;
