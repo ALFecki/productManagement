@@ -19,7 +19,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
         return solutionRepository.findAll()
     }
 
-    fun getSolutionByAlias(alias : String) : Solution {
+    fun getSolutionByAlias(alias : String) : Solution? {
         return solutionRepository.findByAlias(alias)
     }
 

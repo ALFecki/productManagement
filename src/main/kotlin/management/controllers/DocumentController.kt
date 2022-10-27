@@ -2,14 +2,14 @@ package management.controllers
 
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.MediaType
-import io.micronaut.http.annotation.Controller
-import io.micronaut.http.annotation.Get
-import io.micronaut.http.annotation.PathVariable
-import io.micronaut.http.annotation.Produces
-import io.micronaut.http.annotation.QueryValue
+import io.micronaut.http.annotation.*
 import management.data.docs.Document
+import management.data.products.PartnerForm
+import management.forms.DocumentDto
 import management.services.FillDocumentService
+import management.services.PartnerService
 import management.services.ProductService
+import management.services.SolutionService
 import management.utils.ellipsis
 import management.utils.notFound
 import management.utils.serveFile
@@ -20,7 +20,9 @@ import java.time.format.DateTimeFormatter
 @Controller("/docs")
 class DocumentController (
     private val fillDocumentService: FillDocumentService,
-    private val productService: ProductService
+    private val productService: ProductService,
+    private val solutionService: SolutionService,
+    private val partnerService: PartnerService
 
     ) {
 
@@ -45,6 +47,21 @@ class DocumentController (
                 }.${productDocument.extension}"
             )
         }
+    }
+
+    @Post("/step3")
+    @Produces("application/zip")
+    fun step3Post(@Body documentInfo : DocumentDto) : HttpResponse<*> {
+//        val form  = partnerService.getFormByUNP(documentInfo.equipment["partner_unp"]!!.toInt())
+//            ?: partnerService.
+
+        val solution = solutionService.getSolutionByAlias(documentInfo.equipment["solution"].toString())
+            ?: solutionService.getSolutionByAlias("smart")
+
+
+
+
+        throw NotImplementedError("HOW ARE YOU?")
     }
 
 

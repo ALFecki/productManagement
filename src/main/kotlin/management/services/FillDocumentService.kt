@@ -8,6 +8,7 @@ import management.data.products.ProductTotal
 import management.data.products.Solution
 import management.data.repositories.DocumentRepository
 import management.forms.DocumentDto
+import management.forms.OrganizationInfoDto
 import management.utils.FilePath.PATH_TO_FM
 import management.utils.FilePath.PATH_TO_PAYMENT_LICENSE
 import management.utils.FilePath.PATH_TO_PAYMENT_REGISTRATION
@@ -25,6 +26,8 @@ import java.util.zip.ZipOutputStream
 
 @Singleton
 class FillDocumentService (private val documentRepository: DocumentRepository) {
+
+    private val EMPTY_FIELD = "______________________________________"
 
     val payments = mapOf(
         PATH_TO_SMART to listOf("100", "0.2"),
@@ -59,8 +62,50 @@ class FillDocumentService (private val documentRepository: DocumentRepository) {
             "TOTAL_VALUE" to productTotal.total.toString(),
             "TOTAL" to productTotal.totalFormatted
         )
-        solution?.extraVars?.let { defaultInfo.putAll(it) }
-        return renderDocument(path) {
+
+        solution?.extraVars?.let {
+            defaultInfo.putAll(it)
+        }
+
+        val pew = full?.equipment?.getOrDefault("bank", null) ?: solution?.extraVars?.getOrDefault("PROCESSINGPROVIDER", null)
+        pew?.let {
+            if(it.trim() != "") {
+                defaultInfo["PROCESSINGPROVIDER"] = it.trim()
+            }
+        }
+
+        val realPath =if(full != null) {
+            val organization = full.contractData.organizationInfo
+            mapOf(
+                "CONTRACT_HEADER" to hardwareContractHeader(organization),
+                "{company[unp]}" to organization.unpN,
+                "UNP" to organization.unpN,
+                "{company[organization]}" to getOrganizationName(organization),
+                "ORG_NAME" to getOrganizationName(organization),
+                "{company[post_address]}" to "${organization.postAddress["index"]} ${organization.postAddress["address"]}",
+                "{company[legal_address]}" to "${organization.urAddress["index"]} ${organization.urAddress["address"]}",
+                "{company[email]}" to organization.mail,
+                "{company[phone]}" to organization.phone,
+                "BANK_ACCOUNT" to full.contractData.bankInfo["payment"],
+                "BANK_BIC" to full.contractData.bankInfo["BICBank"],
+                "BANK_NAME" to full.contractData.bankInfo["nameBank"],
+                "BANK_ADDRESS" to full.contractData.bankInfo.getOrDefault("bankAddress", EMPTY_FIELD),
+            ).let {
+                defaultInfo.putAll(it)
+            }
+            if(product.dualDocs) {
+                path.replace("docs/products", "docs/fill_auto/products")
+            } else {
+                path
+            }
+        } else {
+            if(product.dualDocs) {
+                path.replace("docs/products", "docs/fill_manual/products")
+            } else {
+                path
+            }
+        }
+        return renderDocument(realPath) {
             it.replaceMultiple(defaultInfo)
         }
 
@@ -96,6 +141,27 @@ class FillDocumentService (private val documentRepository: DocumentRepository) {
         return byteArray
     }
 
+    private fun stripIp(organization: OrganizationInfoDto): String {
+        return when {
+            organization.organization.startsWith("ип ", true) -> {
+                organization.organization.replace("ип ", "", true)
+            }
+            organization.organization.startsWith("индивидуальный предприниматель ", true) -> {
+                organization.organization.replace("индивидуальный предприниматель ", "", true)
+            }
+            else -> {
+                organization.organization
+            }
+        }
+    }
+    private fun getOrganizationName(organization: OrganizationInfoDto): String {
+        return if (organization.orgF == "IP") {
+            "Индивидуальный предприниматель ${stripIp(organization)}"
+        } else {
+            organization.organization //org.name
+        }
+    }
+
 
     fun renderDocument(path: String, pew: (document: XWPFDocument) -> Unit): ByteArray {
         println(path)
@@ -116,6 +182,47 @@ class FillDocumentService (private val documentRepository: DocumentRepository) {
         }
         return out.toByteArray()
     }
+
+    fun powerPaperText2(organization : OrganizationInfoDto): String {
+        val DOC_NUMBER_FIELD = organization.docValue?.get("DOC_NUMBER_FIELD")
+        val DATE_FIELD = organization.docValue?.get("DATE_FIELD")
+        val numField = if(DOC_NUMBER_FIELD != null && DOC_NUMBER_FIELD != "") {
+            "№$DOC_NUMBER_FIELD"
+        } else {
+            ""
+        }
+        val dateField = if(DATE_FIELD != null && DATE_FIELD != "") {
+            "от $DATE_FIELD"
+        } else {
+            ""
+        }
+        return "${DocWithEnding.getById(organization.docType).value} $numField $dateField"
+    }
+
+    fun contractHeader(org: OrganizationInfoDto): String {
+        val oe = if (org.orgF == "IP") {
+            "ый"
+        } else {
+            "ое"
+        }
+        return "${getOrganizationName(org)}, именуем${oe} в дальнейшем «Пользователь»," +
+                " в лице ${org.positionClient2.toLowerCase()} ${org.fioClient2}, действующего на основании ${powerPaperText2(org)}"
+    }
+
+    fun hardwareContractHeader(organiztion: OrganizationInfoDto): String {
+        return contractHeader(organiztion).replace("Пользователь", "Покупатель")
+    }
+
+
+
+
+
+
+
+
+
+
+
 
     public fun exportDefaultDocs() : List<Document> {
         return documentRepository.saveAll(
@@ -168,7 +275,7 @@ class FillDocumentService (private val documentRepository: DocumentRepository) {
                 Document(
                     name = "08 Акт приема-передачи СКО",
                     path = "skko/sko_act.docx",
-                    alias = "skko_sko_act"
+                    alias = "sko_act" // skko_sko_act
                 ),
                 Document(
                     name = "09 Заявление о доступе в Личный Кабинет по паролю",
@@ -179,5 +286,27 @@ class FillDocumentService (private val documentRepository: DocumentRepository) {
         )
     }
 
+    enum class DocWithEnding(val id: Int, val value: String) {
+        EMPTY(0, ""),
+        CHARTER(1, "Устава"),
+        CERTIFICATE(2, "Свидетельства о гос. регистрации"),
+        DOC(3, "Устава и договора"),
+        ATTORNEY(4, "Доверенности"),
+        CONTRACT(5, "Договора"),
+        ORDER(6, "Приказа");
+
+        companion object {
+            fun getById(id: Int): DocWithEnding {
+                return values()
+                    .find { it.id == id } ?: throw IllegalStateException("Unknown status with id $id")
+            }
+
+            fun from(id: Int): DocWithEnding {
+                return values()
+                    .find { it.id == id } ?: throw IllegalStateException("Unknown doc with id $id")
+            }
+        }
+    }
 
 }
+

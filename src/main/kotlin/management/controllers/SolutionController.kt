@@ -16,7 +16,7 @@ class SolutionController(private val solutionService: SolutionService) {
     }
 
     @Get("/{alias}")
-    fun getSolutionByAlias(@PathVariable alias : String) : Solution {
+    fun getSolutionByAlias(@PathVariable alias : String) : Solution? {
         return solutionService.getSolutionByAlias(alias)
     }
 
