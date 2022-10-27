@@ -1,5 +1,6 @@
 package management.services
 
+import com.microsoft.schemas.office.office.STHow
 import jakarta.inject.Singleton
 import management.data.docs.Document
 import management.data.docs.RenderedDocument
@@ -25,7 +26,9 @@ import java.util.zip.ZipOutputStream
 
 
 @Singleton
-class FillDocumentService (private val documentRepository: DocumentRepository) {
+class FillDocumentService (
+    private val documentRepository: DocumentRepository,
+    private val productService: ProductService) {
 
     private val EMPTY_FIELD = "______________________________________"
 
@@ -128,6 +131,129 @@ class FillDocumentService (private val documentRepository: DocumentRepository) {
         return documents
     }
 
+    fun fillIkassaInvoice(quantity : Short, period : Short, extraPrefix : String = "" ) : RenderedDocument {
+        val oneMonthLicense = "ikassa_license"
+
+        val productKey = (if (period == 1.toShort()) {
+            oneMonthLicense
+        } else {
+            "ikassa_license_$period"
+        }) + extraPrefix
+
+        val license = productService.getProductByAlias(productKey) ?: productService.getProductByAlias(oneMonthLicense)
+            ?: throw IllegalStateException("Cannot find license product")
+        val licenseTotal = license.toTotal()
+
+        val connection = productService.getProductByAlias("ikassa_register")
+            ?: throw IllegalStateException("Cannot find registration product")
+        val connectionTotal = connection.toTotal(quantity)
+
+        val total = connectionTotal.total + licenseTotal.total
+        val totalFormatted = "$total ${connection.currency}"
+
+        val cost = connectionTotal.cost + licenseTotal.cost
+        val costFormatted = "$cost ${connection.currency}"
+
+        val subTotal = connectionTotal.subTotal + licenseTotal.subTotal
+        val subTotalFormatted = "$subTotal ${connection.currency}"
+
+        return renderDocumentFromMap("docs", documentRepository.findByAlias("invoice")!!, mapOf(
+            "{connection[caption]}" to connection.comment,
+            "{connection[price]}" to connectionTotal.priceFormatted,
+            "{connection[tax]}" to connectionTotal.taxFormatted,
+            "{connection[cost]}" to connectionTotal.costFormatted,
+            "{connection[subtotal]}" to connectionTotal.subTotalFormatted,
+            "{connection[total]}" to connectionTotal.totalFormatted,
+
+            "{tariff[caption]}" to license.comment,
+            "{tariff[price]}" to licenseTotal.priceFormatted,
+            "{tariff[tax]}" to licenseTotal.taxFormatted,
+            "{tariff[cost]}" to licenseTotal.costFormatted,
+            "{tariff[subtotal]}" to licenseTotal.subTotalFormatted,
+            "{tariff[total]}" to licenseTotal.totalFormatted,
+
+            "{quantity}" to connectionTotal.quantityFormatted,
+            "{cost}" to costFormatted,
+            "{subtotal}" to subTotalFormatted,
+            "{total}" to totalFormatted,
+            "{total_text}" to total.asWords()
+        ))
+    }
+
+    fun fillIkassaRegistration(quantity: Short = 1): RenderedDocument {
+        val connection = productService.getProductByAlias("ikassa_register_only")
+            ?: throw IllegalStateException("Cannot find registration product")
+        val connectionTotal = connection.toTotal(quantity)
+
+        val total = connectionTotal.total
+        val totalFormatted = "$total ${connection.currency}"
+
+        val cost = connectionTotal.cost
+        val costFormatted = "$cost ${connection.currency}"
+
+        val subTotal = connectionTotal.subTotal
+        val subTotalFormatted = "$subTotal ${connection.currency}"
+
+        return renderDocumentFromMap("docs", documentRepository.findByAlias("invoice_register")!!, mapOf(
+            "{connection[caption]}" to connection.comment,
+            "{connection[price]}" to connectionTotal.priceFormatted,
+            "{connection[tax]}" to connectionTotal.taxFormatted,
+            "{connection[cost]}" to connectionTotal.costFormatted,
+            "{connection[subtotal]}" to connectionTotal.subTotalFormatted,
+            "{connection[total]}" to connectionTotal.totalFormatted,
+
+            "{quantity}" to connectionTotal.quantityFormatted,
+            "{cost}" to costFormatted,
+            "{subtotal}" to subTotalFormatted,
+            "{total}" to totalFormatted,
+            "{total_text}" to total.asWords()
+        ))
+
+    }
+
+    fun fillIkassaTariff(quantity: Short = 1, period: Short): RenderedDocument {
+        val oneMonthLicense = "ikassa_license"
+
+        val productKey = if (period == 1.toShort()) {
+            oneMonthLicense
+        } else {
+            "ikassa_license_$period"
+        }
+
+        val license = productService.getProductByAlias(productKey) ?: productService.getProductByAlias(oneMonthLicense)
+        ?: throw IllegalStateException("Cannot find license product")
+
+        return fillIkassaTariff(license, quantity)
+    }
+
+    fun fillIkassaTariff(license: Product, quantity: Short): RenderedDocument {
+        val licenseTotal = license.toTotal(quantity)
+
+        val total = licenseTotal.total
+        val totalFormatted = "$total ${license.currency}"
+
+        val cost = licenseTotal.cost
+        val costFormatted = "$cost ${license.currency}"
+
+        val subTotal = licenseTotal.subTotal
+        val subTotalFormatted = "$subTotal ${license.currency}"
+
+        return renderDocumentFromMap("docs", documentRepository.findByAlias("invoice_license")!!, mapOf(
+            "{tariff[caption]}" to license.comment,
+            "{tariff[price]}" to licenseTotal.priceFormatted,
+            "{tariff[tax]}" to licenseTotal.taxFormatted,
+            "{tariff[cost]}" to licenseTotal.costFormatted,
+            "{tariff[subtotal]}" to licenseTotal.subTotalFormatted,
+            "{tariff[total]}" to licenseTotal.totalFormatted,
+
+            "{quantity}" to licenseTotal.quantityFormatted,
+            "{cost}" to costFormatted,
+            "{subtotal}" to subTotalFormatted,
+            "{total}" to totalFormatted,
+            "{total_text}" to total.asWords()
+        ))
+    }
+
 
     fun getFile(filename: String): InputStream? {
         return this::class.java.classLoader.getResourceAsStream(filename)
@@ -171,6 +297,22 @@ class FillDocumentService (private val documentRepository: DocumentRepository) {
                 return document.toByteArray()
             }
         }
+    }
+
+    fun renderDocumentFromMap(_basePath: String, document: Document, map: Map<String, String?>): RenderedDocument {
+        val basePath = if (_basePath.endsWith("/")) {
+            _basePath
+        } else {
+            "$_basePath/"
+        }
+        return RenderedDocument(
+            document.name,
+            renderDocument(
+                "$basePath${document.path}"
+            ) {
+                it.replaceMultiple(map)
+            }
+        )
     }
 
     fun createZipArchive(renderedDocuments: List<RenderedDocument>): ByteArray {
