@@ -4,10 +4,12 @@ import com.microsoft.schemas.office.office.STHow
 import jakarta.inject.Singleton
 import management.data.docs.Document
 import management.data.docs.RenderedDocument
+import management.data.products.AccompanyingDoc
 import management.data.products.Product
 import management.data.products.ProductTotal
 import management.data.products.Solution
 import management.data.repositories.DocumentRepository
+import management.data.repositories.SolutionRepository
 import management.forms.DocumentDto
 import management.forms.OrganizationInfoDto
 import management.utils.FilePath.PATH_TO_FM
@@ -17,10 +19,10 @@ import management.utils.FilePath.PATH_TO_PAYMENT_SERVICE
 import management.utils.FilePath.PATH_TO_PAYMENT_SKKO
 import management.utils.FilePath.PATH_TO_SMART
 import management.utils.asWords
+import management.utils.makeBorder
 import management.utils.replaceMultiple
 import management.utils.toByteArray
-import org.apache.poi.xwpf.usermodel.XWPFDocument
-import org.apache.poi.xwpf.usermodel.XWPFTableRow
+import org.apache.poi.xwpf.usermodel.*
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.util.zip.ZipOutputStream
@@ -29,7 +31,9 @@ import java.util.zip.ZipOutputStream
 @Singleton
 class FillDocumentService (
     private val documentRepository: DocumentRepository,
-    private val productService: ProductService) {
+    private val productService: ProductService,
+    private val solutionService: SolutionService
+    ) {
 
     private val EMPTY_FIELD = "______________________________________"
 
@@ -429,6 +433,149 @@ class FillDocumentService (
         })
     }
 
+    fun fillApplication(full: DocumentDto) : RenderedDocument {
+        val organization = full.contractData.organizationInfo
+        val trade = full.contractData.tradeInfo
+        val document = documentRepository.findByAlias("skko_connection_application")!!
+
+        return RenderedDocument(document.name, renderDocument("docs/skko/dummy_no_margins.docx") { newDocument->
+            newDocument.removeBodyElement(0)
+
+            trade.forEachIndexed { tradePointIndex,tradePoint ->
+                val tradePointWorkTime =tradePoint.strTimeWork.joinToString (separator = "; ")
+                val tradePointWorkTimeFontSize = countFontSizeByStringLength(tradePointWorkTime)
+                val legalAddress = "${organization.urAddress["index"]} ${organization.urAddress["address"]}"
+                val postAddress = "${organization.postAddress["index"]} ${organization.postAddress["address"]}"
+                val postAddressFontSize = countFontSizeByStringLength(postAddress)
+
+                val tradePointAddress = tradePoint.torgAddress
+                val tradePointAddressFontSize = countFontSizeByStringLength(tradePointAddress)
+                for (i in 0 until tradePoint.unitsCashbox) {
+                    getFile("docs/fill_auto/${document.path}").use { docInputStream ->
+                        XWPFDocument(docInputStream).use { doc ->
+                            val paragraph: XWPFParagraph = doc.createParagraph()
+                            val run = paragraph.createRun()
+                            run.fontSize = 1
+                            run.setText("-")
+                            paragraph.isPageBreak = true
+
+                            if (tradePointIndex + 1 == trade.count() && i + 1 == tradePoint.unitsCashbox) {
+                                doc.removeBodyElement(doc.bodyElements.lastIndex)
+                            }
+                            val glnToggle = if(!tradePoint.glnToggle.isNullOrBlank() && tradePoint.glnToggle != "false") { "Да" } else {
+                                if(tradePoint.glnNumber.isNullOrBlank()) "Нет" else "Да"
+                            }
+                            val glnNumber = if(!tradePoint.glnNumber.isNullOrBlank()) {
+                                tradePoint.glnNumber
+                            } else {
+                                ""
+                            }
+                            val solution = solutionService.getSolutionByAlias(full.equipment.getOrDefault("solution", "smart"))!!
+                            doc.replaceMultiple(mapOf(
+                                "{company[unp]}" to organization.unpN,
+                                "{company[organization]}" to getOrganizationName(organization),
+                                "{company[post_address]}" to postAddress,
+                                "{company[email]}" to organization.mail,
+                                "{company[phone]}" to organization.phone,
+                                "{tradepoint[type]}" to tradePoint.torgType,
+                                "{tradepoint[name]}" to tradePoint.torgName,
+                                "{tradepoint[address]}" to tradePointAddress,
+                                "{tradepoint[worktime]}" to tradePointWorkTime,
+                                "TRADEPOINT_GLN_TOGGLE" to glnToggle,
+                                "TRADEPOINT_GLN" to glnNumber,
+                                "{solution}" to solution.legalName,
+                                "SOLUTION" to solution.legalName,
+                                "VERSION" to solution.version
+                            ))
+                            doc.tables.forEach {tbl ->
+                                tbl.rows.forEach { row ->
+                                    if (row.tableCells.count() >= 3) {
+                                        row.tableCells[2].paragraphs.forEach { parag ->
+                                            if (parag.text == tradePointWorkTime) {
+                                                parag.runs.forEach { it.fontSize = tradePointWorkTimeFontSize }
+                                            }
+
+                                            if (parag.text == postAddress) {
+                                                parag.runs.forEach { it.fontSize = postAddressFontSize }
+                                            }
+
+                                            if (parag.text == tradePointAddress) {
+                                                parag.runs.forEach { it.fontSize = tradePointAddressFontSize }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            fillOneDocumentFromAnother(doc, newDocument)
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    private fun fillOneDocumentFromAnother(source: XWPFDocument, target: XWPFDocument) {
+        source.bodyElements.forEachIndexed { index, element ->
+            if (element.elementType == BodyElementType.PARAGRAPH) {
+                val p = target.createParagraph()
+                val _index = target.paragraphs.indexOf(p)
+                target.setParagraph(element as XWPFParagraph, _index)
+            }
+            if (element.elementType == BodyElementType.TABLE) {
+                val t = target.createTable()
+                val _index = target.tables.indexOf(t)
+                target.setTable(_index, (element as XWPFTable))
+            }
+        }
+    }
+
+    fun fillNotification(organization: OrganizationInfoDto) : RenderedDocument {
+        return renderDocumentFromMap(
+            "docs/fill_auto",
+            documentRepository.findByAlias("connection_notification")!!,
+            mapOf("NOTIFICATION_HEADER" to notificationHeader(organization)))
+    }
+
+    fun fillLkUnsafe(organization: OrganizationInfoDto) : RenderedDocument {
+        return renderDocumentFromMap(
+            "docs/fill_auto",
+            documentRepository.findByAlias("declaration_lk_unsafe")!!,
+            mapOf("NOTIFICATION_HEADER" to notificationHeader(organization),
+                "UNP" to organization.unpN)
+        )
+    }
+
+    fun fillInstruction(contract : Boolean? = null, solution : Solution) : String {
+        val contractText = if (contract == null) {
+            """
+Два экземпляра заполненного и подписанного со своей стороны Заявления о присоединении к Публичному договору СККО либо дополнительного соглашения с РУП "Информационно-издательский центр по налогам и сборам"
+<ul>
+    <li>Если у Вас договор на СКНО НЕ заключен, то «01-1 Заявление о присоединении к Публичному договору СККО»;</li>
+    <li>Если у Вас договор на СКНО заключен, то «01-2 Дополнительное соглашение»;</li>
+</ul>
+"""
+        } else if(contract) {
+            """
+Два экземпляра заполненного и подписанного со своей стороны дополнительного соглашения
+с РУП “Информационно-издательский центр по налогам и сборам“:
+«01-2 Дополнительное соглашение»;
+"""
+        } else {
+            """
+Два экземпляра заполненного и подписанного со своей стороны Заявления о присоединении к Публичному договору СККО:
+«01-1 Заявление о присоединении к Публичному договору СККО»
+"""
+        }
+        val equipment = solution.equipment.map { it.name }
+        val contentsName = solution.contents.map { it.name }
+
+
+
+
+        throw NotImplementedError()
+    }
+
     fun powerPaperText(org: OrganizationInfoDto): String {
         val DOC_NUMBER_FIELD = org.docValue?.get("DOC_NUMBER_FIELD")
         val DATE_FIELD = org.docValue?.get("DATE_FIELD")
@@ -482,6 +629,18 @@ class FillDocumentService (
         }
     }
 
+    private fun countFontSizeByStringLength(string: String): Int {
+        return if (string.length > 70) {
+            6
+        } else if (string.length > 45) {
+            8
+        } else if (string.length > 35) {
+            9
+        } else {
+            11
+        }
+    }
+
 
     fun renderDocument(path: String, pew: (document: XWPFDocument) -> Unit): ByteArray {
         println(path)
@@ -506,6 +665,20 @@ class FillDocumentService (
             ) ?: throw IllegalArgumentException("$basePath${document.path} does not exists.")
         )
     }
+
+    fun renderDocument(_basePath: String, accompanyingDoc: AccompanyingDoc) : RenderedDocument {
+        val basePath = if (_basePath.endsWith("/")) {
+            _basePath
+        } else {
+            "$_basePath/"
+        }
+        return RenderedDocument(
+            accompanyingDoc.name,
+            getFileAsByteArray("$basePath${accompanyingDoc.path}"
+            ) ?: throw IllegalArgumentException("$basePath${accompanyingDoc.path} does not exists.")
+        )
+    }
+
 
     fun renderDocumentFromMap(_basePath: String, document: Document, map: Map<String, String?>): RenderedDocument {
         val basePath = if (_basePath.endsWith("/")) {
@@ -549,7 +722,7 @@ class FillDocumentService (
         return "${DocWithEnding.getById(organization.docType).value} $numField $dateField"
     }
 
-    fun contractHeader(org: OrganizationInfoDto): String {
+    private fun contractHeader(org: OrganizationInfoDto): String {
         val oe = if (org.orgF == "IP") {
             "ый"
         } else {
@@ -559,8 +732,13 @@ class FillDocumentService (
                 " в лице ${org.positionClient2.toLowerCase()} ${org.fioClient2}, действующего на основании ${powerPaperText2(org)}"
     }
 
-    fun hardwareContractHeader(organiztion: OrganizationInfoDto): String {
+    private fun hardwareContractHeader(organiztion: OrganizationInfoDto): String {
         return contractHeader(organiztion).replace("Пользователь", "Покупатель")
+    }
+
+    private fun notificationHeader(org: OrganizationInfoDto): String {
+        return "${getOrganizationName(org)} в лице ${org.positionClient2.toLowerCase()} ${org.fioClient2}," +
+                " действующего на основании ${powerPaperText2(org)}"
     }
 
 

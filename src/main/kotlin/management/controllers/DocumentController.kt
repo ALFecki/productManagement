@@ -175,6 +175,23 @@ class DocumentController (
             renderedDocument.add(fillDocumentService.fillExistingContract(documentInfo))
         }
 
+        renderedDocument.add(fillDocumentService.fillSkoAct(documentInfo.contractData.organizationInfo, count))
+        renderedDocument.add(fillDocumentService.fillApplication(documentInfo))
+
+        renderedDocument.add(fillDocumentService.fillNotification(documentInfo.contractData.organizationInfo))
+
+        renderedDocument.add(fillDocumentService.fillLkUnsafe(documentInfo.contractData.organizationInfo))
+
+        val instruction = if (solution.forcedInstructionPdf != null) {
+            renderedDocument.add(
+            fillDocumentService
+                .renderDocument("docs/", solution.forcedInstructionPdf!!)
+                .copy(extension = "pdf")
+            )
+        } else {
+
+
+        }
 
 
 

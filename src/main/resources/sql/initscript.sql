@@ -156,3 +156,13 @@ CREATE TABLE ikassa."document" (
 );
 ALTER TABLE IF EXISTS ikassa."document"
     OWNER TO root;
+
+
+CREATE TABLE ikassa."util" (
+    "util_id" bigserial NOT NULL,
+    "name" character varying,
+    "data" text,
+    PRIMARY KEY (util_id)
+);
+ALTER TABLE IF EXISTS ikassa."util"
+    OWNER TO root;

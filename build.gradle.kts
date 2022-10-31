@@ -37,8 +37,6 @@ dependencies {
     implementation("fr.opensagres.xdocreport:fr.opensagres.poi.xwpf.converter.core:2.0.4")
     implementation("fr.opensagres.xdocreport:fr.opensagres.poi.xwpf.converter.pdf:2.0.4")
 
-    implementation("by.ikassa.mail.service:api:0.2.7")
-
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
 
 }

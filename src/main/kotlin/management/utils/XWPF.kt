@@ -1,9 +1,7 @@
 package management.utils
 
-import org.apache.poi.xwpf.usermodel.UnderlinePatterns
-import org.apache.poi.xwpf.usermodel.XWPFDocument
-import org.apache.poi.xwpf.usermodel.XWPFParagraph
-import org.apache.poi.xwpf.usermodel.XWPFTable
+import org.apache.poi.xwpf.usermodel.*
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STBorder
 import java.io.ByteArrayOutputStream
 
 fun XWPFParagraph.replaceMultiple(replacingData : Map<String, String?>, isUnderline : Boolean = false) {
@@ -73,4 +71,13 @@ fun XWPFDocument.toByteArray(closeAfterExport: Boolean = false): ByteArray {
         this.close()
     }
     return out.toByteArray()
+}
+
+fun XWPFTableCell.makeBorder(borderType: STBorder.Enum= STBorder.BASIC_THIN_LINES) {
+    val cell = this.ctTc.tcPr?:this.ctTc.addNewTcPr()
+    val borders = cell.tcBorders?:cell.addNewTcBorders()
+    (borders.left?:borders.addNewLeft()).`val` = borderType
+    (borders.right?:borders.addNewRight()).`val` = borderType
+    (borders.top?:borders.addNewTop()).`val` = borderType
+    (borders.bottom?:borders.addNewBottom()).`val` = borderType
 }
