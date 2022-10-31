@@ -12,10 +12,7 @@ import management.services.FillDocumentService
 import management.services.PartnerService
 import management.services.ProductService
 import management.services.SolutionService
-import management.utils.ellipsis
-import management.utils.morph
-import management.utils.notFound
-import management.utils.serveFile
+import management.utils.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -35,32 +32,33 @@ class DocumentController (
     fun step3Common(
         period : Short,
         count: Short,
+        fullData : DocumentDto? = null,
         solution : Solution = solutionService.getSolutionByAlias("smart")!!,
         partnerForm: PartnerForm = partnerService.getFormByUNP(193141246)!!
 //        partnerUNP: Int? = null
     ) : MutableList<RenderedDocument> {
 
 // FIXME: из маркетинга, но я ниче не понял, что здесь происходит
-//        val equipment = productService.getAllProducts().mapNotNull {
-//            val p = solution.equipment.contains(it.alias)
-//            if(
-//                p &&
-//                period >= 6.toShort() &&
-//                //partner?.partnerUnp != null &&
-//                //listOf(190374449,193141246).contains(partner.partnerUnp) &&
-//                listOf("pax930", "pax930_lancard", "pax930_promo").contains(it.alias)
-//            ) {
-//                // Преопределяем цену если решение -- пакс
-//                // и если партнёр в списке партнёров
-//                // OPKI-4223
-////                 TODO: выпилить это
-//                it.copy(price=productsService.getProduct("pax930_promo")!!.price)
-//            } else if(p) {
-//                it
-//            } else {
-//                null
-//            }
-//        }
+        val equipment = productService.getAllProducts().mapNotNull {
+            val p = solution.equipment.contains(productService.getProductByAlias(it.alias!!))
+            if(
+                p &&
+                period >= 6.toShort() &&
+                //partner?.partnerUnp != null &&
+                //listOf(190374449,193141246).contains(partner.partnerUnp) &&
+                listOf("pax930", "pax930_lancard", "pax930_promo").contains(it.alias)
+            ) {
+                // Преопределяем цену если решение -- пакс
+                // и если партнёр в списке партнёров
+                // OPKI-4223
+//                 TODO: выпилить это
+                it.copy(price=productService.getProductByAlias("pax930_promo")!!.price)
+            } else if(p) {
+                it
+            } else {
+                null
+            }
+        }
 
         val solutionContent = solution.contents.map { it.alias }
         val renderedDocuments = mutableListOf<RenderedDocument>()
@@ -102,18 +100,34 @@ class DocumentController (
                     }
 
                 }
+
+
             }
+                "ikassa_license_12_season" -> {
+                val licenseProduct = productService.getProductByAlias(it.alias!!)!!
+                val ikassaInvoice = fillDocumentService.fillIkassaTariff(licenseProduct, count)
+                ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
+                renderedDocuments.add(ikassaInvoice)
+            }
+                "dusik_r" -> {
+
+                }
+
+                "skko_register" -> {
+                    renderedDocuments.add(fillDocumentService.fillSkkoInvoice(count))
+                }
 
             }
         }
 
 
-
-
-
-
-
-        throw NotImplementedError()
+        renderedDocuments.add(fillDocumentService.renderDocument("docs",
+            fillDocumentService.getDocumentByAlias("attorney")!!
+        ))
+        renderedDocuments.addAll(
+            fillDocumentService.fillProductsDocuments(equipment, count, fullData, solution)
+        )
+        return renderedDocuments
     }
 
     @Get("product/{alias}")
@@ -144,7 +158,24 @@ class DocumentController (
 //            ?: partnerService.
 
         val solution = solutionService.getSolutionByAlias(documentInfo.equipment["solution"].toString())
-            ?: solutionService.getSolutionByAlias("smart")
+            ?: solutionService.getSolutionByAlias("smart")!!
+        val count = documentInfo.equipment.getOrDefault("units", "1").toShort()
+        val period = documentInfo.equipment.getOrDefault("period", "1").toShort()
+        for ((key, value) in documentInfo.contractData.bankInfo) {
+            if (value.isBlank()) {
+                documentInfo.contractData.bankInfo[key] = EMPTY_FIELD
+            }
+        }
+
+        val renderedDocument = this.step3Common(period, count, documentInfo, solution)
+
+        if(documentInfo.contractData.organizationInfo.skkoNumber.isEmpty()) {
+            renderedDocument.add(fillDocumentService.fillNewContract(documentInfo))
+        } else {
+            renderedDocument.add(fillDocumentService.fillExistingContract(documentInfo))
+        }
+
+
 
 
 

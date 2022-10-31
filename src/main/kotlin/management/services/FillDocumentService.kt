@@ -20,6 +20,7 @@ import management.utils.asWords
 import management.utils.replaceMultiple
 import management.utils.toByteArray
 import org.apache.poi.xwpf.usermodel.XWPFDocument
+import org.apache.poi.xwpf.usermodel.XWPFTableRow
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.util.zip.ZipOutputStream
@@ -254,6 +255,199 @@ class FillDocumentService (
         ))
     }
 
+    fun fillSkkoInvoice(quantity: Short = 1) : RenderedDocument {
+        val oneMonthLicense = "skko_license"
+
+        val license6 = productService.getProductByAlias("skko_license_6")
+            ?: throw IllegalStateException("Cannot find skko license product")
+        val license12 = productService.getProductByAlias("skko_license_12")
+            ?: throw IllegalStateException("Cannot find skko license product")
+        val license6Total = license6.toTotal(quantity)
+        val license12Total = license12.toTotal(quantity)
+        val connection = productService.getProductByAlias("skko_register")
+            ?: throw IllegalStateException("Cannot find skko registration product")
+
+        val connectionTotal = connection.toTotal(quantity)
+        return renderDocumentFromMap("docs", documentRepository.findByAlias("skko_invoice")!!, mapOf(
+            "{skko_connection[caption]}" to connection.comment,
+            "{skko_connection[price]}" to connectionTotal.priceFormatted,
+            "{skko_connection[tax]}" to connectionTotal.taxFormatted,
+            "{skko_connection[tax_sum]}" to connectionTotal.taxSumFormatted,
+            "{skko_connection[tax_total]}" to connectionTotal.taxTotalFormatted,
+            "{skko_connection[cost]}" to connectionTotal.costFormatted,
+            "{skko_connection[total]}" to connectionTotal.totalFormatted,
+
+            "{skko_tariff_6[caption]}" to license6.comment,
+            "{skko_tariff_6[price]}" to license6Total.priceFormatted,
+            "{skko_tariff_6[tax]}" to license6Total.taxFormatted,
+            "{skko_tariff_6[tax_sum]}" to license6Total.taxSumFormatted,
+            "{skko_tariff_6[tax_total]}" to license6Total.taxTotalFormatted,
+            "{skko_tariff_6[cost]}" to license6Total.costFormatted,
+            "{skko_tariff_6[total]}" to license6Total.totalFormatted,
+
+            "{skko_tariff_12[caption]}" to license12.comment,
+            "{skko_tariff_12[price]}" to license12Total.priceFormatted,
+            "{skko_tariff_12[tax]}" to license12Total.taxFormatted,
+            "{skko_tariff_12[tax_sum]}" to license12Total.taxSumFormatted,
+            "{skko_tariff_12[tax_total]}" to license12Total.taxTotalFormatted,
+            "{skko_tariff_12[cost]}" to license12Total.costFormatted,
+            "{skko_tariff_12[total]}" to license12Total.totalFormatted,
+            "{T12TOTAL}" to license12Total.totalFormatted,
+
+            "{quantity}" to connectionTotal.quantityFormatted
+        ))
+    }
+
+    fun fillNewContract(full: DocumentDto): RenderedDocument {
+        val document = documentRepository.findByAlias("skko_contract")!!
+        return RenderedDocument(document.name, fillNewContract(full, "docs/fill_auto/${document.path}"))
+    }
+    fun fillNewContract(full : DocumentDto, path : String) : ByteArray {
+        val org = full.contractData.organizationInfo
+
+        return renderDocument(path) { contractDocument ->
+                val remap = mutableMapOf(
+                    "CONTRACT_HEADER" to contractHeader(org),
+                    "{company[unp]}" to org.unpN,
+                    "UNP" to org.unpN,
+                    "{company[organization]}" to getOrganizationName(org),
+                    "ORG_NAME" to getOrganizationName(org),
+                    "{company[post_address]}" to "${org.postAddress["index"]} ${org.postAddress["address"]}",
+                    "POST_ADDRESS" to "${org.postAddress["index"]} ${org.postAddress["address"]}",
+                    "{company[legal_address]}" to "${org.urAddress["index"]} ${org.urAddress["address"]}",
+                    "LEGAL_ADDRESS" to "${org.urAddress["index"]} ${org.urAddress["address"]}",
+                    "{company[email]}" to org.mail,
+                    "EMAIL" to org.mail,
+                    "{company[phone]}" to org.phone,
+                    "PHONE" to org.phone,
+                    "BANK_ACCOUNT" to full.contractData.bankInfo["payment"],
+                    "BANK_BIC" to full.contractData.bankInfo["BICBank"],
+                    "BANK_NAME" to full.contractData.bankInfo["nameBank"],
+                    "BANK_ADDRESS" to full.contractData.bankInfo.getOrDefault("bankAddress", EMPTY_FIELD),
+                )
+
+                remap.putAll(if(org.orgF == "IP") {
+                    /** если фио клиента и имя орги совпадают и клиент ип, применяем спецправила по заполнению полей */
+                    val (orgNameIp, fioClientIp, powerPaperIp) = if(org.fioClient == stripIp(org)) {
+                        listOf("${getOrganizationName(org)} / ${powerPaperText(org)}", "", "")
+                    } else {
+                        listOf(getOrganizationName(org), org.fioClient, powerPaperText(org))
+                    }
+                    mapOf(
+                        "FIOCLIENTIP" to fioClientIp,
+                        "ORGNAMEIP" to orgNameIp,
+                        "POWERPAPERIP" to powerPaperIp,
+                        "FIOCLIENTUR" to "",
+                        "ORGNAMEUR" to "",
+                        "POWERPAPERUR" to ""
+                    )
+                } else {
+                    mapOf(
+                        "FIOCLIENTIP" to "",
+                        "ORGNAMEIP" to "",
+                        "POWERPAPERIP" to "",
+                        "FIOCLIENTUR" to "${org.fioClient}, ${org.positionClient}",
+                        "ORGNAMEUR" to getOrganizationName(org),
+                        "POWERPAPERUR" to powerPaperText(org)
+                    )
+                })
+                contractDocument.replaceMultiple(remap)
+        }
+    }
+
+    fun fillExistingContract(full: DocumentDto): RenderedDocument {
+        val document = documentRepository.findByAlias("skko_contract_application")!!
+        return RenderedDocument(document.name, fillExistingContract(full, "docs/fill_auto/${document.path}"))
+    }
+
+    fun fillExistingContract(full: DocumentDto, path: String): ByteArray {
+        val org = full.contractData.organizationInfo
+
+        return renderDocument(path) { contractDocument ->
+            contractDocument.replaceMultiple(mapOf(
+                "CONTRACT_HEADER" to contractHeader(org),
+                "{company[unp]}" to org.unpN,
+                "UNP" to org.unpN,
+                "{company[organization]}" to getOrganizationName(org),
+                "ORG_NAME" to getOrganizationName(org),
+                "{company[post_address]}" to "${org.postAddress["index"]} ${org.postAddress["address"]}",
+                "{company[legal_address]}" to "${org.urAddress["index"]} ${org.urAddress["address"]}",
+                "{company[email]}" to org.mail,
+                "{company[phone]}" to org.phone,
+                "COMPANY_EMAIL" to org.mail,
+                "POST_ADDRESS" to "${org.postAddress["index"]} ${org.postAddress["address"]}",
+                "LEGAL_ADDRESS" to "${org.urAddress["index"]} ${org.urAddress["address"]}",
+                "BANK_ACCOUNT" to full.contractData.bankInfo["payment"],
+                "BANK_BIC" to full.contractData.bankInfo["BICBank"],
+                "BANK_NAME" to full.contractData.bankInfo["nameBank"],
+                "BANK_ADDRESS" to full.contractData.bankInfo.getOrDefault("bankAddress", EMPTY_FIELD),
+            ))
+            /*full.contractData.tradeInfo.forEachIndexed { index, tradepoint ->
+                val tabRow = XWPFTableRow(
+                    contractDocument.tables[contractDocument.tables.lastIndex].ctTbl.addNewTr(),
+                    contractDocument.tables[contractDocument.tables.lastIndex]
+                )
+                val numCell = tabRow.createCell()
+                numCell.text = (index + 1).toString()
+                val addressCell = tabRow.createCell()
+                addressCell.text = tradepoint.torgAddress
+                val koCountCell = tabRow.createCell()
+                koCountCell.text = "-"//tradepoint.unitsCashbox.toString()
+                val ikassaCountCell = tabRow.createCell()
+                ikassaCountCell.text = tradepoint.unitsCashbox.toString()
+                val modelTextCell = tabRow.createCell()
+                modelTextCell.text = "ПК ${getSolutionName(full.equipment.getValue("solution"))}"
+                val usCell = tabRow.createCell()
+                usCell.text = "ООО «АЙЭМЛЭБ»"
+            }*/
+        }
+    }
+
+    fun fillSkoAct(org: OrganizationInfoDto, quantity: Short = 1): RenderedDocument {
+        val connection = productService.getProductByAlias("ikassa_register")
+            ?: throw IllegalStateException("Cannot find ikassa registration product")
+        val connectionTotal = connection.toTotal(1)
+        val document = documentRepository.findByAlias("sko_act")!!
+        return RenderedDocument(document.name, renderDocument("docs/fill_auto/${document.path}") { skoActDocument ->
+            skoActDocument.replaceMultiple(mapOf(
+                "{company[organization]}" to getOrganizationName(org),
+                "{company[unp]}" to org.unpN
+            ))
+
+            for (i in 0 until quantity) {
+                val tabRow = XWPFTableRow(skoActDocument.tables[skoActDocument.tables.lastIndex - 1].ctTbl.addNewTr(), skoActDocument.tables[skoActDocument.tables.lastIndex - 1])
+                val numCell = tabRow.createCell()
+                numCell.text = (i + 1).toString()
+                numCell.makeBorder()
+                val serialCell = tabRow.createCell()
+                serialCell.text = ""
+                serialCell.makeBorder()
+                val modelCell = tabRow.createCell()
+                modelCell.text = "AvTPCR 128-F-01"
+                modelCell.makeBorder()
+            }
+        })
+    }
+
+    fun powerPaperText(org: OrganizationInfoDto): String {
+        val DOC_NUMBER_FIELD = org.docValue?.get("DOC_NUMBER_FIELD")
+        val DATE_FIELD = org.docValue?.get("DATE_FIELD")
+        val numField = if(DOC_NUMBER_FIELD != null && DOC_NUMBER_FIELD != "") {
+            "№$DOC_NUMBER_FIELD"
+        } else {
+            ""
+        }
+        val dateField = if(DATE_FIELD != null && DATE_FIELD != "") {
+            "от $DATE_FIELD"
+        } else {
+            ""
+        }
+        return "${Doc.getById(org.docType).value} $numField $dateField"
+    }
+
+    fun getDocumentByAlias(alias : String) : Document? {
+        return documentRepository.findByAlias(alias)
+    }
 
     fun getFile(filename: String): InputStream? {
         return this::class.java.classLoader.getResourceAsStream(filename)
@@ -297,6 +491,20 @@ class FillDocumentService (
                 return document.toByteArray()
             }
         }
+    }
+
+    fun renderDocument(_basePath: String, document: Document): RenderedDocument {
+        val basePath = if (_basePath.endsWith("/")) {
+            _basePath
+        } else {
+            "$_basePath/"
+        }
+        return RenderedDocument(
+            document.name,
+            getFileAsByteArray(
+                "$basePath${document.path}"
+            ) ?: throw IllegalArgumentException("$basePath${document.path} does not exists.")
+        )
     }
 
     fun renderDocumentFromMap(_basePath: String, document: Document, map: Map<String, String?>): RenderedDocument {
@@ -427,6 +635,29 @@ class FillDocumentService (
             )
         )
     }
+
+    enum class Doc(val id: Int, val value: String) {
+        EMPTY(0, ""),
+        CHARTER(1, "Устав"),
+        CERTIFICATE(2, "Свидетельство о гос. регистрации"),
+        DOC(3, "Устав и договор"),
+        ATTORNEY(4, "Доверенность"),
+        CONTRACT(5, "Договор"),
+        ORDER(6, "Приказ");
+
+        companion object {
+            fun getById(id: Int): Doc {
+                return values()
+                    .find { it.id == id } ?: throw IllegalStateException("Unknown status with id $id")
+            }
+
+            fun from(id: Int): Doc {
+                return values()
+                    .find { it.id == id } ?: throw IllegalStateException("Unknown doc with id $id")
+            }
+        }
+    }
+
 
     enum class DocWithEnding(val id: Int, val value: String) {
         EMPTY(0, ""),
