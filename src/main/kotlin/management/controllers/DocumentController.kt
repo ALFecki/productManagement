@@ -188,21 +188,29 @@ class DocumentController (
                 .renderDocument("docs/", solution.forcedInstructionPdf!!)
                 .copy(extension = "pdf")
             )
+            "Перечень документов, которые необходимо предоставить для регистрации, находится в прикрепленном файле."
         } else {
-
-
+            val instruction = fillDocumentService.fillInstruction(null, solution)
+            renderedDocument.add(
+                RenderedDocument(
+                    "00-Инструкция",
+                    instruction
+                        .replace("width=\"600\"", "width=\"800\"").toPDF(),
+                    "pdf"
+                )
+            )
+            instruction
         }
-
-
-
-
-
-        throw NotImplementedError("HOW ARE YOU?")
+        val archive = fillDocumentService.createZipArchive(renderedDocument)
+        val archiveName = "Заполненные документы для ${solution.name} от ${LocalDate.now().format(documentsDateFormat)}.zip"
+        return serveFile(archive, archiveName)
+        
     }
 
 
     @Get("/export/default")
     fun exportDefaultDocs() : List<Document> {
+        val utils = fillDocumentService.exportDefaultUtils()
         return fillDocumentService.exportDefaultDocs()
     }
 

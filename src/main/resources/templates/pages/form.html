@@ -1,0 +1,603 @@
+<link rel="stylesheet" href="https://ikassa.by/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.full.min.js" integrity="sha512-RtZU3AyMVArmHLiW0suEZ9McadTdegwbgtiQl5Qqo9kunkVg1ofwueXD8/8wv3Af8jkME3DDe3yLfR8HSJfT2g==" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.css" integrity="sha512-CbQfNVBSMAYmnzP3IC+mZZmYMP2HUnVkV4+PwuhpiMUmITtSpS7Prr3fNncV1RBOnWxzz4pYQ5EAGG4ck46Oig==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" integrity="sha512-nMNlpuaDPrqlEls3IX/Q56H36qvBASwb3ipuo3MxeWbsQB1881ox0cRv7UPTgBlriqoynt35KjEwgGUeUXIPnw==" crossorigin="anonymous" />
+<script src="https://ikassa.by/formToObject.min.js"></script>
+<script>
+	let partner_solutions = {partner_solutions_json};
+	var array_column = function(array, column) { return array.map(function(item) { return item[column]; }) }
+	var torgTypes = [];
+	fetch("/docs/torg_types").then(res => { return res.json(); }).then(response => { torgTypes = response; add_tradepoint();}).catch(it => add_tradepoint());
+</script>
+<style>
+	.control-label {
+		margin-bottom: 0rem;
+		margin-top: .5rem;
+	}
+
+	#period_container {
+		padding-left: 30px;
+	}
+
+	#power_paper {
+		margin-top: 10px;
+	}
+
+	.select2-container .select2-selection--single {
+		height: auto;
+	}
+</style>
+<form method="post" id="fast_form">
+	<div class="form-row">
+		<div class="form-group">
+			<label class="control-label">Решение</label>
+			{solution}
+			<input type="hidden" name="equipment[utm_source]" value="{source}">
+			<input type="hidden" name="equipment[partner_unp]" value="{partner_unp}">
+		</div>
+		<div class="form-group col">
+			<label class="control-label">Количество</label>
+			<input value="1" type="number" class="form-control" id="units" name="equipment[units]">
+			<small id="unitsHint" class="form-text text-muted"></small>
+		</div>
+		<!--div class="form-group col">
+			<label class="control-label">Количество принтеров</label>
+			<input type="number" class="form-control" id="printerCount" name="equipment[printerCount]">
+			<small id="printerCount" class="form-text text-muted">Только для SMART</small>
+		</div-->
+	</div>
+
+	{period_block}
+
+
+	{manual_download}
+
+
+
+  <div class="form-group">
+	  <label class="control-label">УНП</label>
+    <input value="" placeholder="000000000" type="text" class="form-control" id="unpN" name="contractData[organizationInfo][unpN]">
+    <small id="unpNHint" class="form-text text-muted"></small>
+  </div>
+  <!--div class="form-group">
+    <label for="exampleInputPassword1">Password</label>
+    <input type="password" class="form-control" id="exampleInputPassword1">
+  </div-->
+  <div id="org_type_container">
+  	<h5 class="control-label">Организационно-правовая форма</h5>
+	<div class="form-check">
+	  <input class="form-check-input" type="radio" name="contractData[organizationInfo][orgF]" id="org_type_ip" value="IP" checked>
+	  <label class="form-check-label" for="org_type_ip">
+	  	Индивидуальный предприниматель
+	  </label>
+	</div>
+	<div class="form-check">
+	  <input class="form-check-input" type="radio" name="contractData[organizationInfo][orgF]" name="exampleRadios" id="org_type_org" value="org">
+	  <label class="form-check-label" for="org_type_org">
+	    Юридическое лицо
+	  </label>
+	</div>
+  </div>
+
+	<div class="form-group">
+	    <label for="fioClient" class="control-label">Полное наименование организации</label>
+	    <input type="text" class="form-control" id="orgName" name="contractData[organizationInfo][organization]">
+	    <small id="orgNameHint" class="form-text text-muted">Фамилия, Имя, Отчество полностью для ИП</small>
+  	</div>
+
+
+	<div id="power_paper" class="card" style="/* display:none */">
+		<div class="card-body">
+			<div class="form-group">
+				<label for="fioClient" class="control-label">ФИО лица, заключающего договор</label>
+				<input type="text" class="form-control" id="fioClient" name="contractData[organizationInfo][fioClient]">
+				<!--small id="fioClient" class="form-text text-muted">На email будут отправлены заполненные документы</small-->
+			</div>
+			<div class="form-group">
+				<label for="fioClient2" class="control-label">ФИО в родительном падеже</label>
+				<input type="text" class="form-control" id="fioClient2" name="contractData[organizationInfo][fioClient2]">
+				<small id="fioClient2Hint" class="form-text text-muted"></small>
+			</div>
+			<div class="form-group">
+				<label for="positionClient" class="control-label">Должность лица, заключающего договор</label>
+				<input type="text" class="form-control" id="positionClient" name="contractData[organizationInfo][positionClient]">
+				<small id="positionClientHint" class="form-text text-muted"></small>
+			</div>
+			<div class="form-group">
+				<label for="positionClient2" class="control-label">Должность лица, заключающего договор, в родительном падеже</label>
+				<input type="text" class="form-control" id="positionClient2" name="contractData[organizationInfo][positionClient2]">
+				<small id="positionClient2Hint" class="form-text text-muted"></small>
+			</div>
+
+			<div class="form-group">
+				<label class="control-label">Документ, на основании которого действует лицо, заключающее договор</label>
+				<select class="form-control" name="contractData[organizationInfo][docType]">
+					<option hidden="" value="0">Выберите документ</option>
+					<option value="1">Устав</option>
+					<option value="2">Свидетельство о гос. регистрации</option>
+					<option value="3">Устав и договор</option>
+					<option value="4">Доверенность</option>
+					<option value="5">Договор</option>
+					<option value="6">Приказ</option>
+				</select>
+			</div>
+			<div class="form-row">
+				<div class="form-group col-md-6">
+					<label class="control-label">№ документа (если есть)</label>
+					<input type="text" class="form-control" name="contractData[organizationInfo][docValue][DOC_NUMBER_FIELD]">
+				</div>
+				<div class="form-group col-md-6">
+					<label class="control-label">Дата документа (если есть)</label>
+					<input type="text" class="form-control" name="contractData[organizationInfo][docValue][DATE_FIELD]">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<label class="control-label">Юридический адрес</label>
+	<div class="row">
+		<div class="col-sm-3">
+			<input type="text" name="contractData[organizationInfo][urAddress][index]" class="form-control" placeholder="Индекс">
+		</div>
+		<div class="col">
+			<input type="text" id="orgAddress" name="contractData[organizationInfo][urAddress][address]" class="form-control" placeholder="Адрес">
+		</div>
+	</div>
+
+	<label class="control-label">Почтовый адрес</label>
+	<div class="row">
+		<div class="col-sm-3">
+			<input type="text" name="contractData[organizationInfo][postAddress][index]" class="form-control" placeholder="Индекс">
+		</div>
+		<div class="col">
+			<input type="text" name="contractData[organizationInfo][postAddress][address]" class="form-control" placeholder="Адрес">
+		</div>
+	</div>
+
+	<div class="form-group">
+		<label for="email" class="control-label">Электронный адрес</label>
+		<input type="email" class="form-control" id="email" name="contractData[organizationInfo][mail]">
+		<!--small id="email" class="form-text text-muted">На email будут отправлены заполненные документы</small-->
+	</div>
+	<div class="form-group">
+		<label class="control-label">Телефон</label>
+		<input type="text" class="form-control" id="phone" name="contractData[organizationInfo][phone]">
+		<small id="phoneHint" class="form-text text-muted"></small>
+	</div>
+	<div class="form-check">
+		<input class="form-check-input" type="checkbox" value="Да" id="skkoNumber" name="contractData[organizationInfo][skkoNumber]">
+		<label class="form-check-label" for="skkoNumber">
+			Есть ли договор с СККО?
+		</label>
+		<small id="skkoHiny">Есть ли договор с Республиканским унитарным предприятием "Информационно-издательский центр по налогам и сборам"</small>
+	</div>
+
+	<br/>
+	<h4>Банковские реквизиты</h4>
+	<div class="form-group">
+	    <label for="payment">Расчётный счёт</label>
+	    <input type="text" class="form-control" id="payment" name="contractData[bankInfo][payment]">
+	    <small id="paymentHint" class="form-text text-muted"></small>
+  	</div>
+  	
+  	<div class="form-group">
+	    <label for="BICBank">BIC</label>
+	    <input type="text" class="form-control" id="BICBank" name="contractData[bankInfo][BICBank]">
+	    <small id="BICBankHint" class="form-text text-muted">Банковский идентификационный номер</small>
+  	</div>
+  	<div class="form-group">
+	    <label for="nameBank">Наименование банка</label>
+	    <input type="text" class="form-control" id="nameBank" name="contractData[bankInfo][nameBank]">
+	    <small id="nameBankHint" class="form-text text-muted"></small>
+  	</div>
+
+	<div class="form-group">
+		<label for="nameBank">Адрес банка</label>
+		<input type="text" class="form-control" id="bankAddress" name="contractData[bankInfo][bankAddress]">
+		<small id="bankAddressHint" class="form-text text-muted"></small>
+	</div>
+
+	<h4>Торговые объекты <span class="btn btn-success" title="Добавить" onclick="add_tradepoint()">+</span></h4>
+	<span class="small">При наличии нескольких торговых объектов нажмите «плюс»</span>
+  	<div id="tradepoints_container" class="card">
+	  	
+  	</div>
+
+
+
+<script>
+	const egrFieldNames = {
+		VKODS: "Статус",
+		VMNS: "МНС",
+		VNAIMP: "Организация",
+		VPADRES: "Адрес"
+	}
+
+	function remove_tradepoint(index) {
+		document.getElementById(`tradepoint-${index}`).remove()
+	}
+	function add_tradepoint() {
+		let index = [].slice.call(document.getElementsByClassName("one_tradepoint")).length;
+		let container = document.getElementById("tradepoints_container");
+		container.insertAdjacentHTML('beforeend', `
+		<div class="one_tradepoint card-body" id="tradepoint-${index}">
+			<h6 class="card-subtitle text-muted">Торговый объект <span class="btn btn-danger" onclick="remove_tradepoint(${index})" title="Удалить">-</span></h6>
+			<div class="form-group">
+			    <label for="torgName">Наименование торгового объекта</label>
+			    <input type="text" class="form-control" id="torgName" name="contractData[tradeInfo][${index}][torgName]">
+			    <small id="torgName" class="form-text text-muted">
+			    Доменное имя, товарный знак, название на вывеске объекта торговли и сервиса
+				</small>
+		  	</div>
+		  	<div class="form-group">
+			    <label for="torgName">Адрес торгового объекта</label>
+			    <input type="text" class="form-control" id="torgName" name="contractData[tradeInfo][${index}][torgAddress]">
+			    <small id="torgName" class="form-text text-muted"></small>
+		  	</div>
+		  	<div class="form-group">
+			    <label for="torgName">Кол-во касс по указанному адресу </label>
+			    <input value="1" type="number" class="form-control" id="torgName" name="contractData[tradeInfo][${index}][unitsCashbox]">
+			    <small id="torgName" class="form-text text-muted"></small>
+		  	</div>
+		  	<div class="form-group">
+			    <label for="torgName">Время работы торгового объекта</label>
+			    <input type="text" class="form-control" id="torgName" name="contractData[tradeInfo][${index}][strTimeWork][0]">
+			    <small id="torgName" class="form-text text-muted"></small>
+		  	</div>
+		  	<div class="form-group">
+			    <label for="torgName">Тип торгового объекта</label>
+			    <select id="torgName_${index}" class="form-control" placeholder="Тип торгового объекта" name="contractData[tradeInfo][${index}][torgType]">
+			    	${return_dooseek_if_exists()}
+			    	${torgTypes.map(it => `<option value='${it}'>${it}</option>`)}
+				</select>
+			    <!--input type="text" class="form-control" id="torgName" name="contractData[tradeInfo][${index}][torgType]"-->
+			    <small id="torgName" class="form-text text-muted">в соответствии со сферой деятельности или типом услуг</small>
+		  	</div>
+
+		  	<div class="form-check">
+				<input type="checkbox" class="form-check-input" id="glnToggle" name="contractData[tradeInfo][${index}][glnToggle]">
+				<label class="form-check-label" for="glnToggle">
+				Дифференцированный учёт
+				</label>
+				<small id="s_glnToggle" class="form-text text-muted">
+				Ставится отметка при ведении дифференцированного учета с иcпользованием системы автоматической идентификации ГС1 Беларуси при его наличии
+				</small>
+			</div>
+		  	<div class="form-group">
+			    <label for="glnNumber">GLN торгового объекта</label>
+			    <input type="text" class="form-control" id="glnNumber" name="contractData[tradeInfo][${index}][glnNumber]">
+			    <small id="s_glnNumber" class="form-text text-muted">GLN представляет собой 13-разрядный цифровой код (номер), который предназначен для точной и краткой идентификации юридических лиц, функциональных подразделений и физических объектов. Указывается при его наличии.</small>
+		  	</div>
+	  	</div>
+		`);
+
+		let pew = $(`#torgName_${index}`).select2({
+			placeholder: 'Тип торгового объекта',
+			theme: "bootstrap",
+			tags: true,
+			formatNoMatches: function () {
+				return '';
+			},
+			language: {
+				noResults: () => "Введите тип торгового объекта"
+			},
+			data: {
+				results: torgTypes.map(it => { return { "id": it, "text": it} })
+			}
+		});
+		console.log(pew);
+	}
+
+	return_dooseek_if_exists = function() {
+		if(partner_solutions.indexOf("dusik_r")+1 || partner_solutions.indexOf("dusik_r_partner")+1) {
+			return "<option value='АЗС'>АЗС (Доступно только для решения iKassa multi Dusik_r)</option>"
+		} else {
+			return ""
+		}
+	}
+	//add_tradepoint();
+
+	/*document.getElementById('org_type_org').addEventListener('change', function() {
+		console.log(this.checked);
+		if(this.checked) {
+			document.getElementById("power_paper").style["display"] = "block";
+
+		}
+	})
+	document.getElementById('org_type_ip').addEventListener('change', function() {
+		console.log(this.checked);
+		if(this.checked) {
+			document.getElementById("power_paper").style["display"] = "none";
+		}
+	})*/
+	document.getElementById('fast_form').addEventListener('submit', function(e) {
+		e.preventDefault();
+		fast_form()
+	});
+
+	const orgName = document.getElementById('orgName');
+	const orgAddress = document.getElementById('orgAddress');
+	const unpNHint = document.getElementById('unpNHint');
+	document.getElementById('unpN').addEventListener('input', function(e) {
+		unpNHint.innerText = "";
+		const unp = this.value;
+		if(unp.length === 9) {
+			console.log("unp length is valid");
+			fetch(`https://lk.ikassa.by/grp/getData?unp=${unp}&charset=UTF-8&type=json`).then(response => {
+				if(response.status == 404) {
+					throw new Error("УНП с таким номером не найден.");
+				} else if(response.status != 200) {
+					throw new Error(`Ошибка чтения из ЕГР: ${response.status} ${response.statusText}`);
+				}
+				return response.json()
+			}).then(result => {
+				return result.ROW;
+			}).then(info => {
+				unpNHint.innerText = `Статус: ${info.VKODS}`
+				if(info.VNAIMP) {
+					orgName.value = info.VNAIMP;
+				}
+				if(info.VPADRES) {
+					orgAddress.value = info.VPADRES;
+				}
+			}).catch(e => {
+				console.log(e);
+				unpNHint.innerText = e.message
+			})
+		}
+	});
+
+	var solution_empty = function() {
+		return document.querySelector('[name="equipment[solution]"]').value === "";
+	}
+
+	var fast_form = function() {
+		if(solution_empty()) {
+			alert("Для продолжения необходимо выбрать решение.");
+			return;
+		}
+		let documentsDto = formToObject(document.getElementById('fast_form'), {"includeEmptyValuedElements":1})
+		if(documentsDto.contractData.organizationInfo.unpN.length != 9) {
+			alert("УНП некорректной длины");
+			return;
+		}
+		if(!documentsDto.contractData.tradeInfo) {
+			alert("Нет точек продаж")
+			return;
+		}
+		documentsDto.contractData.tradeInfo = Object.values(documentsDto.contractData.tradeInfo)
+		documentsDto.contractData.tradeInfo.map(function(ti) {
+			ti.strTimeWork = Object.values(ti.strTimeWork);
+			ti.unitsCashbox = Number(ti.unitsCashbox)
+			return ti;
+		})
+		//console.log(documentsDto.tradeInfo);
+		var total_cashboxes = array_column(documentsDto.contractData.tradeInfo, 'unitsCashbox').reduce(function(accumulator, currentValue) { return accumulator + currentValue });
+		documentsDto.equipment.units = Number(documentsDto.equipment.units);
+		documentsDto.equipment.printerCount = Number(documentsDto.equipment.printerCount);
+
+		if(!documentsDto.equipment.units) {
+			alert("Не указано количество касс.");
+			return;
+		}
+
+		if(total_cashboxes != documentsDto.equipment.units) {
+			alert(`Указано количество касс ${documentsDto.equipment.units}, но по точкам продажи распределено ${total_cashboxes} касс.`);
+			return;
+		}
+
+		(function (){
+			var filename;
+			fetch("/docs/step3", {
+				method: "POST",
+				headers: {
+					"Content-type": "application/json"
+				},
+				body: JSON.stringify(documentsDto),
+			}).then(response => {
+				console.log(response);
+				filename = decodeURIComponent(
+						response.headers.get("Content-disposition").match(/"(.+?)"/)[1]
+				);
+				if (response.ok) {
+					return response.blob();
+				} else {
+					throw new Error(response)
+				}
+			}).then(blob => downloadBlob(filename, blob)).catch(e => { console.log(e); alert("Не удалось сохранить пакет документов."); })
+		})()
+	}
+
+
+	function downloadBlob(reportName, byte) {
+		var blob = new Blob([byte], {type: "application/zip"});
+		var link = document.createElement('a');
+		link.href = window.URL.createObjectURL(blob);
+		link.download = reportName;
+		link.click();
+	}
+
+	document.getElementById('download_manual').addEventListener('click', function() {
+		if(solution_empty()) {
+			alert("Для продолжения необходимо выбрать решение.");
+			return;
+		}
+		var count = document.querySelector('[name="equipment[units]"]').value;
+		var period = document.querySelector('[name="equipment[period]"]:checked').value;
+		var solutionName = document.querySelector('[name="equipment[solution]"]').value;
+		var partnerUnp = document.querySelector('[name="equipment[partner_unp]"]').value;
+		window.location.href = `/docs/step3?count=${count}&period=${period}&solutionName=${solutionName}&partner_unp=${partnerUnp}`
+	});
+
+	if($(`[name="equipment[utm_source]"]`).val() === "На Связи") {
+		let addresses = [
+			"Климовичи, ул. Строителей, 1Б, ТЦ Евроопт",
+			"Минск, ул. Лобанка, 94, ТЦ Maximus",
+			"Смолевичи , ул. А. Лявданского, 1-12",
+			"Минск, пр. Рокоссовского, 2, ТЦ Гиппо",
+			"Воложин, пл. Свободы, 5, Доброном",
+			"Борисов, ул. III-го Интернационала, 5 , ТЦ Корона",
+			"Минск, ул. Горецкого, 2, ТЦ Гиппо",
+			"Минск, ул. Жилуновича/пр. Партизанский, подземные переходы",
+			"Вилейка, ул, Чапаева, 60, ТЦ Евроопт",
+			"Брест, ул. Московская, 210, ТЦ Корона",
+			"Осиповичи, ул. Королева, 37 , Соседи",
+			"Солигорск, ул. Константина Заслонова, 29, ТЦ Корона",
+			"Дятлово, ул. Слонимская, 6а, ТЦ Евроопт",
+			"Мстиславль, ул. Петра  Мстиславца, 1, ТЦ Евроопт",
+			"Слуцк, ул.Ленина, 177, Дом Быта ",
+			"Слуцк, ул.Ленина, 177, Дом Быта ",
+			"Пружаны, ул. Советская, 5-1",
+			"Минск, Минский р-н, пересечение Логойского тракта  и МКАД, , ТРЦ Экспобел",
+			"Речица, ул. Пролетарская, 118, ТЦ Евроопт",
+			"Гомель, ул. Хатаевича, 9, ТЦ Линия ",
+			"Брест, Варшавское шоссе,11/1, ТЦ Евроопт",
+			"Слоним, ул. Ершова,58, ТЦ Евроопт",
+			"Лельчицы, ул. Ленина, д. 44Б, ТЦ Евроопт",
+			"Узда, ул. Новицкого, 11, ТЦ Евроопт",
+			"Минск, ул. Городецкая,30, ТЦ Гиппо",
+			"Хойники, ул. 70 лет Октября, 1, ТЦ Евроопт",
+			"Минск, пр-т Партизанский, ТЦ Партизанский ",
+			"Бобруйск, ул. Минская, 111, ТЦ Евроопт",
+			"Гродно, ул. Тимирязева, 8, ТЦ Евроопт",
+			"Солигорск, ул. Железнодорожная, 21, ТЦ Галерея ",
+			"Чечерск, пер. Первомайский, 4, ТЦ Евроопт",
+			"Минск, ул. Уманская, 54, ТЦ Глобо ",
+			"Браслав, ул. Октября, 15Б, ТЦ Евроопт",
+			"Светлогорск, ул Калинина, 6 , ТЦ Березки",
+			"Гродно, пр-т. Я.Купалы, 16А-1, ТЦ Корона",
+			"Пинск, ул. Партизанская, 42, ТЦ Евроопт",
+			"Поставы, ул. Юбилейная, 30, пом 46 , Соседи",
+			"Бобруйск, ул. 50 лет ВЛКСМ, 33-3 , ТЦ Корона",
+			"Орша, ул. Советская, 2В , ТЦ Орша Сити",
+			"Гомель, ул. Косарева, 18, ТЦ Гиппо",
+			"Полоцк, ул. Петруся Бровки, 45-1, ТЦ Дионис ",
+			"Могилев,  ул. Мовчанского, 6 , ТЦ Гиппо",
+			"Могилев,  ул. Лазаренко, 73Б , Евроопт",
+			"Ельск, ул. 50 лет СССР, 24А, ТЦ Евроопт",
+			"Витебск, Бешенковичское шоссе, 3-1 , ТЦ Корона",
+			"Витебск , ул. Ленина, 26А, ТЦ Марко-Сити ",
+			"Солигорск, ул. Железнодорожная, 21А, ТРЦ Green",
+			"Рогачев, ул. Богатырева, 118, ТЦ Евроопт",
+			"Борисов, ул. Гагарина, 107-2, ТЦ Евроопт",
+			"Жлобин, м-н 20, д.30, ТЦ Евроопт",
+			"Кобрин, ул. Ленина, 27",
+			"Крупки, ул. Московская, 61-1, ТЦ Е-сити ",
+			"Витебск, пр-т Строителей, 15 , ТЦ Евроопт",
+			"Старые Дороги, ул. Московская, 84, ТЦ Евроопт",
+			"Несвиж, ул. Советская, 21, ТЦ Евроопт",
+			"Минск, пр. Победителей, 65-1, ТЦ Корона-Замок ",
+			"Минск, пр.Партизанский, 150а, МоМо",
+			"Лида, ул. Красноармейская, 63, ТЦ Евроопт",
+			"Сморгонь, ул. Я.Коласа, 120 А, ТЦ Евроопт",
+			"Минск, пр-т Независимости, 154, ТЦ Корона",
+			"Слуцк, ул. Парижской Коммуны, д. 2-1, ТЦ Маяк",
+			"Могилев, Минское шоссе, 31, ТЦ Парк Сити",
+			"Полоцк, Вильнюсское шоссе, 1, ТЦ Манеж ",
+			"Слоним, ул. Первомайская, 4а , ТЦ Арена",
+			"Минск, ул. Налибокская, 36-21, ТЦ Квадро ",
+			"Минск, ул. Бобруйская 6-10, ТЦ Галилео ",
+			"Минск, Притыцкого, 156, ТРЦ Green",
+			"Буда-Кошелево, ул. Ленина, 58, ТЦ Евроопт",
+			"Барановичи, ул. Ленина, 1/14",
+			"Волковыск, ул. Жолудева, 50",
+			"Островец, ул. К. Маркса, 14, Гостиница \"Сан Отель\" ",
+			"Кобрин, Николаева, 50, ТЦ Полесье",
+			"Минск, Победителей, 9, ТЦ Галирея ",
+			"Быхов, Красовского, 6, Дом быта ",
+			"Быхов, Ленина, 29",
+			"Глубокое, Красноармейская,23, ТЦ Санта ",
+			"Минск, Корженевского, 26, ТЦ Корона ",
+			"Мозырь, ул. Рыжкова, 94, ТЦ Бобровский",
+			"Могилев,  ул. Островского, 5 , ТЦ Green",
+			"Минск, ул. Уборевича 176, , ТЦ GREEN-Чижовка",
+			"Новогрудок, ул. Мицкевича, 104, к. 1, , ТЦ Пони",
+			"Мозырь, ул. Малинина 1А/1",
+			"Слуцк, ул. 14 Партизан, 15/1 , Европарк",
+			"Дрогичин, ул. Весёлая, 2, ТЦ Олимп",
+			"Брест, ул. Карбышева, 25",
+			"Лепель, ул. Чуйкова, 68, Домашний ",
+			"Брест, пр. Машерова, 17, ЦУМ",
+			"Береза, ул. Ленина, 65",
+			"Ивацевичи, ул. Ленина, 43-3",
+			"Пинск, ул. Ленина,13",
+			"Наровля, ул. Корзуна, 64, ТЦ Евроопт",
+			"Свислочь, ул. Цагельник, 12, ТЦ Евроопт",
+			"Жодино, ул. 50 лет Октября, ТРЦ Green",
+			"Минск, ул. Гашкевича, 3, ТЦ Евроопт",
+			"Клецк, ул. Советская, 21А",
+			"Минск, ул. Денисовская 8-2, ТЦ Корона",
+			"Лида, ул. Гагарина, 27, ТЦ Евроопт",
+			"Скидель, ул. Ленина, 82А, ТЦ Евроопт",
+			"Ляховичи, ул. Ленина, 28",
+			"Ганцевичи, ул. Заслонова, 2а",
+			"Шклов, ул. Гончарная, 47 , ТЦ Корона",
+			"Гомель, пр-т Речицкий, 5в, ТЦ Мандарин",
+			"Ветка, ул. Заслонова, 1д, ТЦ Евроопт ",
+			"Житковичи, ул. Социалистическая, 15, ТЦ Голд",
+			"Мосты, пр-т Мира, 2а, ТЦ Евроопт ",
+			"Петриков, ул. Бумажкова, 3в, ТЦ Евроопт",
+			"Лунинец,,  ул. Блока,  2 , Евроопт",
+			"Зельва, ул. Железнодорожная, 10, ТЦ Евроопт ",
+			"Поставы, пл. Ленина, 24",
+			"Горки, ул.  Якубовского, 25А",
+			"Ивье, ул. Молодежная, 6, Санта",
+			"Столбцы, ул. Мира, 15, Доброном",
+			"Кричев, м-н Сож, 11",
+			"Чериков, ул. Болдина, 32",
+			"Высокое, ул. Социалистическая, 40, Санта",
+			"Чаусы, ул. Ленинская, 8",
+			"Белоозерск, ул. Ленина, 38",
+			"Новолукомль,  ул.Заводская, 2а-1, Евроопт",
+			"Заславль, 6-ой район, ТЦ Гиппо",
+			"Минск, Минский р-н, пересечение Логойского тракта  и МКАД, ТРЦ Экспобел",
+			"Рогачев,  Ленина, 80 , магазин \"Родны Кут\"",
+			"Минск, ул. Петра Глебки 5, ТЦ Скала",
+			"Щучин, ул. 17 сентября, 5",
+			"Чашники, ул. Космонавтов, 4, ТЦ Евроопт",
+			"Глуск, ул. Гагарина, 25, ТЦ Евроопт",
+			"Лиозно, ул. Строителей, 3, Санта",
+			"Брест, пр-т Партизанский, 13, Санта",
+			"Гомель, ул. Советская, 200, ТЦ Корона",
+			"Гомель, ул. Гагарина, 65, ТЦ Секрет",
+			"Витебск, пр-т Московский, 130-1, ТЦ Евроопт",
+			"Воложин,,  ул. Советская, 95 , Евроопт",
+			"Островец, Ул. Володарского, 59А, ТЦ Zami",
+			"Калинковичи, Ул., Советская. 13 , Евроопт",
+			"Гродно, пр-т Янки Купалы, 87 пом 142, ТЦ Тринити",
+			"Молодечно, ул. Великий Гостинец 65 Г, ТЦ Спутник",
+			"Минск, пер. Козлова, 25"
+		];
+
+		document.querySelector(".form-group.card").insertAdjacentHTML('afterend',
+`<div class="form-group">
+	<!--label class="control-label">Адрес самовывоза</label class="form-control col"  -->
+	<select name="equipment[pickup_address]"><option value=""></option></select>
+</div>
+`);
+		let address_select = $(`[name="equipment[pickup_address]"]`);
+		addresses.forEach(it => {
+			address_select.append(`<option value="${it}">${it}</option>`);
+		});
+		address_select.select2({
+			placeholder: 'Адрес магазина "На связи" для самовывоза кассы',
+			theme: "bootstrap",
+			tags: true,
+			formatNoMatches: function () {
+				return '';
+			}
+		});
+
+	}
+
+	if($(`[name="equipment[utm_source]"]`).val() === "A1") {
+		$("#orgNameHint").text("Индивидуальный предприниматель ФИО полностью");
+	}
+
+	let periods = [].slice.call(document.querySelectorAll(`[name="equipment[period]"]`));
+	periods[periods.length-1].checked = true;
+
+</script>
+</form>

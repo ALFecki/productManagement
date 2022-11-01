@@ -10,7 +10,10 @@ import management.data.products.ProductTotal
 import management.data.products.Solution
 import management.data.repositories.DocumentRepository
 import management.data.repositories.SolutionRepository
+import management.data.utils.Util
+import management.data.utils.UtilsRepository
 import management.forms.DocumentDto
+import management.forms.FancyMailBodyFragmentDto
 import management.forms.OrganizationInfoDto
 import management.utils.FilePath.PATH_TO_FM
 import management.utils.FilePath.PATH_TO_PAYMENT_LICENSE
@@ -31,8 +34,10 @@ import java.util.zip.ZipOutputStream
 @Singleton
 class FillDocumentService (
     private val documentRepository: DocumentRepository,
+    private val utilRepository : UtilsRepository,
     private val productService: ProductService,
-    private val solutionService: SolutionService
+    private val solutionService: SolutionService,
+    private val templateService: TemplateService
     ) {
 
     private val EMPTY_FIELD = "______________________________________"
@@ -548,32 +553,62 @@ class FillDocumentService (
 
     fun fillInstruction(contract : Boolean? = null, solution : Solution) : String {
         val contractText = if (contract == null) {
-            """
-Два экземпляра заполненного и подписанного со своей стороны Заявления о присоединении к Публичному договору СККО либо дополнительного соглашения с РУП "Информационно-издательский центр по налогам и сборам"
-<ul>
-    <li>Если у Вас договор на СКНО НЕ заключен, то «01-1 Заявление о присоединении к Публичному договору СККО»;</li>
-    <li>Если у Вас договор на СКНО заключен, то «01-2 Дополнительное соглашение»;</li>
-</ul>
-"""
+            utilRepository.findByName("contract_null")?.data
+                ?: throw IllegalStateException("cannot find default contract text")
         } else if(contract) {
-            """
-Два экземпляра заполненного и подписанного со своей стороны дополнительного соглашения
-с РУП “Информационно-издательский центр по налогам и сборам“:
-«01-2 Дополнительное соглашение»;
-"""
+            utilRepository.findByName("contract")?.data
+                ?: throw IllegalStateException("cannot find default contract text")
         } else {
-            """
-Два экземпляра заполненного и подписанного со своей стороны Заявления о присоединении к Публичному договору СККО:
-«01-1 Заявление о присоединении к Публичному договору СККО»
-"""
+            utilRepository.findByName("not_contract")?.data
+                ?: throw IllegalStateException("cannot find default contract text")
         }
         val equipment = solution.equipment.map { it.name }
         val contentsName = solution.contents.map { it.name }
 
+        val licenseContent = if ((
+                    contentsName.containsAll(listOf("ikassa_register", "ikassa_license")) ||
+                    contentsName.containsAll(listOf("ikassa_register", "ikassa_license_12_season"))
+                    ) || solution.contents.isEmpty()) {
+            utilRepository.findByName("empty_content")?.data
+                ?: throw IllegalStateException("cannot find default content for ikassa_register and ikassa_license")
+        } else if (
+            contentsName.contains("ikassa_license")
+            || contentsName.contains("ikassa_license_12_season")
+        ) {
+            utilRepository.findByName("ikassa_license")?.data
+                ?: throw IllegalStateException("cannot find default content for ikassa_license")
 
+        } else if (contentsName.contains("ikassa_register")) {
+            utilRepository.findByName("ikassa_register")?.data
+                ?: throw IllegalStateException("cannot find default content for ikassa_register")
+        } else {
+            " "
+        }
 
+        val message = FancyMailBodyFragmentDto(
+            vars = hashMapOf(
+                "{body}" to FancyMailBodyFragmentDto(
+                    vars=hashMapOf(
+                        "{contract}" to contractText,
+                        "{ikassa_license_text}" to licenseContent,
+                        "{equipment}" to if(equipment.isEmpty()) " " else equipment.joinToString(prefix="<li>", separator="</li><li>", postfix = "</li>")
+                    ),
+                    templateFile = "pages/instruction"
+                )
+            ),
+            templateFile = "email/email-text-block"
+        )
 
-        throw NotImplementedError()
+        val fullMessage = FancyMailBodyFragmentDto(
+            vars = hashMapOf(
+                "{header_logo}" to "https://ikassa.by/logo_email_big.jpg",
+                "{header}" to utilRepository.findByName("thanks_header")!!.data,
+                "{message}" to message,
+                "{footer}" to utilRepository.findByName("footer")!!.data
+            ),
+            templateFile = "email/email"
+        )
+        return templateService.renderFancyMessageFragment(fullMessage)
     }
 
     fun powerPaperText(org: OrganizationInfoDto): String {
@@ -752,7 +787,7 @@ class FillDocumentService (
 
 
 
-    public fun exportDefaultDocs() : List<Document> {
+    fun exportDefaultDocs() : List<Document> {
         return documentRepository.saveAll(
             listOf(
                 Document(
@@ -809,6 +844,70 @@ class FillDocumentService (
                     name = "09 Заявление о доступе в Личный Кабинет по паролю",
                     path = "declaration_lk_unsafe.docx",
                     alias = "declaration_lk_unsafe"
+                )
+            )
+        )
+    }
+
+    fun exportDefaultUtils() : List<Util> {
+        return utilRepository.saveAll(
+            listOf(
+                Util(
+                name = "contract_null",
+                data =
+                """
+Два экземпляра заполненного и подписанного со своей стороны Заявления о присоединении к Публичному договору СККО либо дополнительного соглашения с РУП "Информационно-издательский центр по налогам и сборам"
+<ul>
+    <li>Если у Вас договор на СКНО НЕ заключен, то «01-1 Заявление о присоединении к Публичному договору СККО»;</li>
+    <li>Если у Вас договор на СКНО заключен, то «01-2 Дополнительное соглашение»;</li>
+</ul>
+"""
+                ),
+                Util(
+                    name = "contract",
+                    data =
+                    """
+Два экземпляра заполненного и подписанного со своей стороны дополнительного соглашения
+с РУП “Информационно-издательский центр по налогам и сборам“:
+«01-2 Дополнительное соглашение»;
+"""
+
+                ),
+                Util(
+                    name = "not_contract",
+                    data =
+                    """
+Два экземпляра заполненного и подписанного со своей стороны Заявления о присоединении к Публичному договору СККО:
+«01-1 Заявление о присоединении к Публичному договору СККО»
+"""
+                ),
+                Util(
+                    name = "empty_content",
+                    data =  "<li>Регистрация программной кассы в АИС ПКС IKASSA и абонентское обслуживание программной кассы;</li>"
+                ),
+                Util(
+                    name = "ikassa_register",
+                    data = "<li>Регистрация программной кассы в АИС ПКС IKASSA;</li>"
+                ),
+                Util(
+                    name = "ikassa_license",
+                    data = "<li>Абонентское обслуживание программной кассы IKASSA;</li>"
+                ),
+                Util(
+                    name = "thanks_header",
+                    data ="""
+Благодарим вас за выбор программной кассы iKassa
+"""
+                ),
+                Util(
+                    name = "footer",
+                    data = """
+Подписанный пакет документов с копиями платежек и заверенной печатью организации, не нотариально, 
+копию свидетельства о государственной регистрации субъекта хозяйствования 
+(при условии, указанном ранее) необходимо подать либо направить почтовым отправлением по адресу: 
+<br/>
+ООО «АЙЭМЛЭБ», 220002, г. Минск, ул. Сторожевская, д.8, пом. 205/2.
+"""
                 )
             )
         )

@@ -36,6 +36,8 @@ dependencies {
     implementation("org.apache.poi:poi-ooxml:5.2.2")
     implementation("fr.opensagres.xdocreport:fr.opensagres.poi.xwpf.converter.core:2.0.4")
     implementation("fr.opensagres.xdocreport:fr.opensagres.poi.xwpf.converter.pdf:2.0.4")
+    implementation("com.itextpdf:itext7-core:7.2.3")
+    implementation("com.itextpdf:html2pdf:4.0.3")
 
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
 
