@@ -11,7 +11,10 @@ import management.data.repositories.SolutionRepository
 
 @Singleton
 class SolutionService (private val solutionRepository: SolutionRepository,
-                       private val productService: ProductService) {
+                       private val productService: ProductService,
+//                       private val fillDocumentService: FillDocumentService,
+//                       private val partnerService: PartnerService
+    ) {
 
     private var defaultProducts : MutableList<Product> = mutableListOf()
 
@@ -133,6 +136,8 @@ class SolutionService (private val solutionRepository: SolutionRepository,
 
     fun exportDefaultSolutions() : List<Solution> {
         productService.exportDefault()
+//        fillDocumentService.exportDefaultDocs()
+//        partnerService.exportDefault()
         defaultProducts.add(productService.getProductByAlias(alias = "ikassa_register")!!)
         defaultProducts.add(productService.getProductByAlias(alias ="ikassa_license")!!)
         defaultProducts.add(productService.getProductByAlias(alias ="skko_register")!!)

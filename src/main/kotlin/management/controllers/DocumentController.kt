@@ -204,7 +204,7 @@ class DocumentController (
         val archive = fillDocumentService.createZipArchive(renderedDocument)
         val archiveName = "Заполненные документы для ${solution.name} от ${LocalDate.now().format(documentsDateFormat)}.zip"
         return serveFile(archive, archiveName)
-        
+
     }
 
 

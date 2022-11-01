@@ -4,6 +4,7 @@ import management.utils.ConstVariables.SCHEMA
 import javax.persistence.*
 
 
+@Entity
 @Table(name = "util", schema = SCHEMA)
 data class Util(
 

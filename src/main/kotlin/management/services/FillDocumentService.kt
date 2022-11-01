@@ -1,6 +1,5 @@
 package management.services
 
-import com.microsoft.schemas.office.office.STHow
 import jakarta.inject.Singleton
 import management.data.docs.Document
 import management.data.docs.RenderedDocument
@@ -9,7 +8,6 @@ import management.data.products.Product
 import management.data.products.ProductTotal
 import management.data.products.Solution
 import management.data.repositories.DocumentRepository
-import management.data.repositories.SolutionRepository
 import management.data.utils.Util
 import management.data.utils.UtilsRepository
 import management.forms.DocumentDto
