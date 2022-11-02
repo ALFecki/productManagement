@@ -10,7 +10,6 @@ fun XWPFParagraph.replaceMultiple(replacingData : Map<String, String?>, isUnderl
         val fullText = this.text
         if (fullText.contains(replaceKey)) {
             this.runs.forEachIndexed { index, xwpfRun ->
-
                 val runText = xwpfRun.text()
                 var hasModified = false
                 if (runText.contains(replaceKey)) {
@@ -30,7 +29,7 @@ fun XWPFParagraph.replaceMultiple(replacingData : Map<String, String?>, isUnderl
 
 //                        val newRunText = this.runs[index - 1].text() + this.runs[index] + this.runs[index + 1]
                         val two = this.runs.subList(index - 1, index + 1).toList()
-                        val newRunText = two[0].text() + two[1].text()
+                        val newRunText = "${two[0].text()}${two[1].text()}"
                         if (newRunText.contains(replaceKey)) {
                             this.runs[index - 1].setText("", 0)
 //                            this.runs[index + 1].setText("", 0)
@@ -42,7 +41,7 @@ fun XWPFParagraph.replaceMultiple(replacingData : Map<String, String?>, isUnderl
 
                 }
                 if (hasModified) {
-                    xwpfRun.setTextHighlightColor("none")
+//                    xwpfRun.setTextHighlightColor("none")
                     if (isUnderline) {
                         xwpfRun.underline = UnderlinePatterns.SINGLE
                     }

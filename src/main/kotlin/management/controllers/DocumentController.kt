@@ -199,7 +199,7 @@ class DocumentController (
                 RenderedDocument(
                     "00-Инструкция",
                     instruction
-                        .replace("width=\"600\"", "width=\"800\"").toPDF(),
+                        /*.replace("width=\"600\"", "width=\"800\"")*/.toPDF(),
                     "pdf"
                 )
             )
