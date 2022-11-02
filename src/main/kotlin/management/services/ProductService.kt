@@ -260,12 +260,12 @@ class ProductService (private val productRepository: ProductRepository,
                         dualDocs=true,
                         accompanyingDocs = listOf(AccompanyingDoc(PATH_TO_PRINTER_RPP02N, "05 Реквизиты для оплаты мобильного принтера"))),
 
-                Product(name = "Мобильный принтер RPP02A", comment = "С рыжими кнопками",
+                Product(alias = "rpp02a", name = "Мобильный принтер RPP02A", comment = "С рыжими кнопками",
                         price = BigDecimal(100), tax = BigDecimal(20),
                         dualDocs=true,
                         accompanyingDocs = listOf(AccompanyingDoc(PATH_TO_PRINTER_RPP02A, "05 Реквизиты для оплаты мобильного принтера"))),
 
-                Product(name = "Сумка-чехол с ремешком", comment = "Для PAX 930 (smart&card)",
+                Product(alias = "bag", name = "Сумка-чехол с ремешком", comment = "Для PAX 930 (smart&card)",
                         price = BigDecimal(55),
                         accompanyingDocs = listOf(AccompanyingDoc(PATH_TO_PAX930_BAG, "Сумка-чехол"))),
 

@@ -19,10 +19,21 @@ fun XWPFParagraph.replaceMultiple(replacingData : Map<String, String?>, isUnderl
                 }
                 else if(runText.isNotEmpty()) { // [{,quantity,}] //example
                     if (index > 0) {
-                        val newRunText = this.runs[index - 1].text() + this.runs[index] + this.runs[index + 1]
-                        if (newRunText.contains(replaceKey)) {
+                        if (index + 1 < this.runs.count()) {
+                            val three = this.runs.subList(index - 1, index + 2).toList()
+                            val newRunText = "${three[0].text()}${three[1].text()}${three[2].text()}"
                             this.runs[index - 1].setText("", 0)
                             this.runs[index + 1].setText("", 0)
+                            xwpfRun.setText(newRunText.replace(replaceKey, replaceValue), 0)
+                            hasModified = true
+                        }
+
+//                        val newRunText = this.runs[index - 1].text() + this.runs[index] + this.runs[index + 1]
+                        val two = this.runs.subList(index - 1, index + 1).toList()
+                        val newRunText = two[0].text() + two[1].text()
+                        if (newRunText.contains(replaceKey)) {
+                            this.runs[index - 1].setText("", 0)
+//                            this.runs[index + 1].setText("", 0)
                             xwpfRun.setText(newRunText.replace(replaceKey, replaceValue), 0)
                             hasModified = true
                         }

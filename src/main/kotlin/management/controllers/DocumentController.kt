@@ -3,6 +3,8 @@ package management.controllers
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.MediaType
 import io.micronaut.http.annotation.*
+import io.micronaut.scheduling.TaskExecutors
+import io.micronaut.scheduling.annotation.ExecuteOn
 import management.data.docs.Document
 import management.data.docs.RenderedDocument
 import management.data.products.PartnerForm
@@ -153,7 +155,9 @@ class DocumentController (
 
     @Post("/step3")
     @Produces("application/zip")
+    @ExecuteOn(TaskExecutors.IO)
     fun step3Post(@Body documentInfo : DocumentDto) : HttpResponse<*> {
+        println("STEP3")
 //        val form  = partnerService.getFormByUNP(documentInfo.equipment["partner_unp"]!!.toInt())
 //            ?: partnerService.
 

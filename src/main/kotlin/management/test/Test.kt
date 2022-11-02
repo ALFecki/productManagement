@@ -14,7 +14,7 @@ class Test(
     @Get("/step3test")
     fun push() {
         println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-        return
+//        return
         //val data = """{"contractData":{"organizationInfo":{"unpN":"191832203","orgF":"IP","organization":"Моров Андрей Михайлович","urAddress":{"index":"123","address":"Минск"},"postAddress":{"index":"123","address":"Минск"},"mail":"test@gmail.com","phone":"+123","positionClient":"","fioClient":"","docType":"","skkoNumber":"1111 1111 1111 1111"},"bankInfo":{"payment":"BY20OLDD00001212000012122321","BICBank":"sdfds","nameBank":"sdf"},"tradeInfo":[{"torgName":"Магазин","torgAddress":"Минск","timeWork":[{"time":{"startTime":"10:00","closeTime":"00:00"},"days":[1]}],"strTimeWork":["Пн.: 10:00-00:00"],"torgType":"Киоск","unitsCashbox":"1"}, [{"torgName":"Мастерплюс ООО","torgAddress":"г. Минск, Северный переулок 13, Западная улица 7","timeWork":[{"time":"Full_Time","days":[1,2,3,4,5,6,7]},{"time":{"startTime":"10:00","closeTime":"12:00"},"days":[1,2,3,4,5,6,7]}],"strTimeWork":["Пн., Вт., Ср., Чт., Пт., Сб., Вс.: Круглосуточно","Пн., Вт., Ср., Чт., Пт., Сб., Вс.: 10:00-12:00"],"torgType":"Магазин","unitsCashbox":"5"}]]},"equipment":{"app":"iKassa Smart","printerCount":5,"printerModel":null,"units":10}}"""
         val data2 = """
 {
@@ -34,7 +34,8 @@ class Test(
       "mail": "test@musicaltheatre.by",
       "phone": "+375172008126",
       "positionClient": "",
-      "fioClient": "",
+      "positionClient2":"",
+      "fioClient": "",  
       "fioClient2": "Морова Андрея Михайловича",
       "docType": "",
       "skkoNumber": ""
