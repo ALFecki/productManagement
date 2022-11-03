@@ -135,7 +135,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
     }
 
     fun exportDefaultSolutions() : List<Solution> {
-        productService.exportDefault()
+//        productService.exportDefault()
 //        fillDocumentService.exportDefaultDocs()
 //        partnerService.exportDefault()
         defaultProducts.add(productService.getProductByAlias(alias = "ikassa_register")!!)

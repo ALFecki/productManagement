@@ -213,9 +213,17 @@ class DocumentController (
 
 
     @Get("/export/default")
-    fun exportDefaultDocs() : List<Document> {
+    fun exportDefaultDocs() : HttpResponse<*> {
+        val products = productService.exportDefault()
+        val solutions = solutionService.exportDefaultSolutions()
+        val docs = fillDocumentService.exportDefaultDocs()
+        val forms = partnerService.exportDefault()
         val utils = fillDocumentService.exportDefaultUtils()
-        return fillDocumentService.exportDefaultDocs()
+        if (products.isNotEmpty() && solutions.isNotEmpty() && docs.isNotEmpty()
+            && forms.isNotEmpty() && utils.isNotEmpty()) {
+            return HttpResponse.ok<Document>()
+        }
+        return notFound()
     }
 
     enum class IkassaBillingMode {

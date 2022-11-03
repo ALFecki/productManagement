@@ -105,5 +105,4 @@ data class Solution(
     @Column(name = "solution_id")
     val solutionId : Long = 0
 
-
 }

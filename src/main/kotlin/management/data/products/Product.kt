@@ -16,7 +16,7 @@ import org.hibernate.annotations.LazyCollectionOption
 data class Product(
 
         @Column(name = "alias")
-        var alias: String? = null,
+        var alias: String,
 
         @Column(name = "name")
         var name: String,
@@ -64,7 +64,6 @@ data class Product(
 
     fun toTotal(quantity : Short = 1) : ProductTotal {
         val taxSum = (tax.divide(BigDecimal(100)) * price).toFixed(2)
-        println(taxSum)
         val taxTotal = (taxSum * BigDecimal(quantity.toInt())).toFixed(2)
         val cost = (price + taxSum).toFixed(2)
         val subTotal = (price * BigDecimal(quantity.toInt())).toFixed(2)
@@ -75,16 +74,16 @@ data class Product(
         }
         return ProductTotal(
                 price = this.price,
-                priceFormatted = "${price} ${currency}",
+                priceFormatted = "$price $currency",
                 quantity = quantity,
-                quantityFormatted = "${quantity} ${this.currency}",
+                quantityFormatted = "$quantity ${this.currency}",
                 cost = cost,
-                costFormatted = "${cost} ${currency}",
+                costFormatted = "$cost $currency",
                 tax = tax,
                 taxFormatted = if(tax == BigDecimal.ZERO) {
                         "без НДС *"
                 } else {
-                        "${tax}"
+                        "$tax"
                 },
                 taxSum = taxSum,
                 taxSumFormatted = "$taxSum $currency",

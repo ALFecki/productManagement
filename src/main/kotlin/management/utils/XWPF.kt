@@ -41,7 +41,7 @@ fun XWPFParagraph.replaceMultiple(replacingData : Map<String, String?>, isUnderl
 
                 }
                 if (hasModified) {
-//                    xwpfRun.setTextHighlightColor("none")
+//  FIXME                  xwpfRun.setTextHighlightColor("none")
                     if (isUnderline) {
                         xwpfRun.underline = UnderlinePatterns.SINGLE
                     }

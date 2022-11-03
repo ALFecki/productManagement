@@ -10,7 +10,7 @@ data class DocumentInfoDto(
     var bankInfo: HashMap<String, String>,
 
     @JsonProperty("tradeInfo")
-    val tradeInfo: List<TradepointInfoDto>
+    val tradeInfo: List<TradePointInfoDto>
 ) {
 
 }

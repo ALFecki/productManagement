@@ -22,7 +22,7 @@ ALTER TABLE IF EXISTS ikassa.accompanying_doc
 
 CREATE TABLE ikassa."product" (
     "product_id" bigserial NOT NULL,
-    "alias" character varying,
+    "alias" character varying NOT NULL UNIQUE,
     "name" character varying NOT NULL,
     "comment" character varying,
     "price" double precision,
@@ -37,7 +37,6 @@ ALTER TABLE IF EXISTS ikassa.product
             OWNER TO root;
 
 
---TODO("сделать, чтобы каждый продукт мог иметь только уникальные документы")
 CREATE TABLE ikassa."products_accompanying_docs" (
     "pr_acc_link_id" bigserial ,
     "product_id" bigint,
@@ -51,7 +50,7 @@ ALTER TABLE IF EXISTS ikassa."products_accompanying_docs"
 
 CREATE TABLE ikassa."solution" (
     "solution_id" bigserial NOT NULL,
-    "alias" character varying NOT NULL,
+    "alias" character varying NOT NULL UNIQUE,
     "name" character varying NOT NULL,
     "price" double precision,
     "extra_vars" jsonb,
@@ -160,7 +159,7 @@ ALTER TABLE IF EXISTS ikassa."document"
 
 CREATE TABLE ikassa."util" (
     "util_id" bigserial NOT NULL,
-    "name" character varying,
+    "name" character varying NOT NULL UNIQUE,
     "data" text,
     PRIMARY KEY (util_id)
 );

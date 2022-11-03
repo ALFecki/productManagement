@@ -14,7 +14,6 @@ import management.services.ProductService
 @Controller("/products")
 class ProductController(private val productService: ProductService) {
 
-
     @Get
     fun getAllProducts(): MutableList<Product> {
         return productService.getAllProducts()

@@ -2,7 +2,7 @@ package management.forms
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class TradepointInfoDto(
+data class TradePointInfoDto(
     @JsonProperty("torgName")
     val torgName: String,
 
