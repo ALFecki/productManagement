@@ -40,22 +40,16 @@ class DocumentController (
 //        partnerUNP: Int? = null
     ) : MutableList<RenderedDocument> {
 
-// FIXME: из маркетинга, но я ниче не понял, что здесь происходит
+
         val equipment = productService.getAllProducts().mapNotNull {
-            val p = solution.equipment.contains(productService.getProductByAlias(it.alias!!))
+            val isProduct = solution.equipment.contains(productService.getProductByAlias(it.alias!!))
             if(
-                p &&
+                isProduct &&
                 period >= 6.toShort() &&
-                //partner?.partnerUnp != null &&
-                //listOf(190374449,193141246).contains(partner.partnerUnp) &&
                 listOf("pax930", "pax930_lancard", "pax930_promo").contains(it.alias)
             ) {
-                // Преопределяем цену если решение -- пакс
-                // и если партнёр в списке партнёров
-                // OPKI-4223
-//                 TODO: выпилить это
                 it.copy(price=productService.getProductByAlias("pax930_promo")!!.price)
-            } else if(p) {
+            } else if(isProduct) {
                 it
             } else {
                 null
@@ -199,7 +193,7 @@ class DocumentController (
                 RenderedDocument(
                     "00-Инструкция",
                     instruction
-                        /*.replace("width=\"600\"", "width=\"800\"")*/.toPDF(),
+                        .replace("width=\"600\"", "width=\"800\"").toPDF(),
                     "pdf"
                 )
             )

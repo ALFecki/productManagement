@@ -13,12 +13,6 @@ import management.data.utils.UtilsRepository
 import management.forms.DocumentDto
 import management.forms.FancyMailBodyFragmentDto
 import management.forms.OrganizationInfoDto
-import management.utils.FilePath.PATH_TO_FM
-import management.utils.FilePath.PATH_TO_PAYMENT_LICENSE
-import management.utils.FilePath.PATH_TO_PAYMENT_REGISTRATION
-import management.utils.FilePath.PATH_TO_PAYMENT_SERVICE
-import management.utils.FilePath.PATH_TO_PAYMENT_SKKO
-import management.utils.FilePath.PATH_TO_SMART
 import management.utils.asWords
 import management.utils.makeBorder
 import management.utils.replaceMultiple
@@ -40,14 +34,6 @@ class FillDocumentService (
 
     private val EMPTY_FIELD = "______________________________________"
 
-    val payments = mapOf(
-        PATH_TO_SMART to listOf("100", "0.2"),
-        PATH_TO_PAYMENT_REGISTRATION to listOf("35", "0"),
-        PATH_TO_PAYMENT_LICENSE to listOf("15", "0"),
-        PATH_TO_PAYMENT_SKKO to listOf("2.5", "0.2"),
-        PATH_TO_PAYMENT_SERVICE to listOf("25", "0.2"),
-        PATH_TO_FM to listOf("290", "0.2")
-    )
 
     fun fillProductDocument(path : String, product: Product, productTotal: ProductTotal, full : DocumentDto? = null, solution: Solution? = null) : ByteArray {
         val defaultInfo = mutableMapOf<String, String?>(
@@ -78,7 +64,8 @@ class FillDocumentService (
             defaultInfo.putAll(it)
         }
 
-        val pew = full?.equipment?.getOrDefault("bank", null) ?: solution?.extraVars?.getOrDefault("PROCESSINGPROVIDER", null)
+        val pew = full?.equipment?.getOrDefault("bank", null)
+            ?: solution?.extraVars?.getOrDefault("PROCESSINGPROVIDER", null)
         pew?.let {
             if(it.trim() != "") {
                 defaultInfo["PROCESSINGPROVIDER"] = it.trim()
@@ -148,17 +135,18 @@ class FillDocumentService (
             "ikassa_license_$period"
         }) + extraPrefix
 
-        val license = productService.getProductByAlias(productKey) ?: productService.getProductByAlias(oneMonthLicense)
+        val license = productService.getProductByAlias(productKey)
+            ?: productService.getProductByAlias(oneMonthLicense)
             ?: throw IllegalStateException("Cannot find license product")
+
         val licenseTotal = license.toTotal()
 
         val connection = productService.getProductByAlias("ikassa_register")
             ?: throw IllegalStateException("Cannot find registration product")
-        val connectionTotal = connection.toTotal(quantity)
 
+        val connectionTotal = connection.toTotal(quantity)
         val total = connectionTotal.total + licenseTotal.total
         val totalFormatted = "$total ${connection.currency}"
-
         val cost = connectionTotal.cost + licenseTotal.cost
         val costFormatted = "$cost ${connection.currency}"
 
@@ -309,7 +297,7 @@ class FillDocumentService (
         val document = documentRepository.findByAlias("skko_contract")!!
         return RenderedDocument(document.name, fillNewContract(full, "docs/fill_auto/${document.path}"))
     }
-    fun fillNewContract(full : DocumentDto, path : String) : ByteArray {
+    private fun fillNewContract(full : DocumentDto, path : String) : ByteArray {
         val org = full.contractData.organizationInfo
 
         return renderDocument(path) { contractDocument ->
@@ -367,7 +355,7 @@ class FillDocumentService (
         return RenderedDocument(document.name, fillExistingContract(full, "docs/fill_auto/${document.path}"))
     }
 
-    fun fillExistingContract(full: DocumentDto, path: String): ByteArray {
+    private fun fillExistingContract(full: DocumentDto, path: String): ByteArray {
         val org = full.contractData.organizationInfo
 
         return renderDocument(path) { contractDocument ->
@@ -389,24 +377,6 @@ class FillDocumentService (
                 "BANK_NAME" to full.contractData.bankInfo["nameBank"],
                 "BANK_ADDRESS" to full.contractData.bankInfo.getOrDefault("bankAddress", EMPTY_FIELD),
             ))
-            /*full.contractData.tradeInfo.forEachIndexed { index, tradepoint ->
-                val tabRow = XWPFTableRow(
-                    contractDocument.tables[contractDocument.tables.lastIndex].ctTbl.addNewTr(),
-                    contractDocument.tables[contractDocument.tables.lastIndex]
-                )
-                val numCell = tabRow.createCell()
-                numCell.text = (index + 1).toString()
-                val addressCell = tabRow.createCell()
-                addressCell.text = tradepoint.torgAddress
-                val koCountCell = tabRow.createCell()
-                koCountCell.text = "-"//tradepoint.unitsCashbox.toString()
-                val ikassaCountCell = tabRow.createCell()
-                ikassaCountCell.text = tradepoint.unitsCashbox.toString()
-                val modelTextCell = tabRow.createCell()
-                modelTextCell.text = "ПК ${getSolutionName(full.equipment.getValue("solution"))}"
-                val usCell = tabRow.createCell()
-                usCell.text = "ООО «АЙЭМЛЭБ»"
-            }*/
         }
     }
 
@@ -765,25 +735,14 @@ class FillDocumentService (
                 " в лице ${org.positionClient2.toLowerCase()} ${org.fioClient2}, действующего на основании ${powerPaperText2(org)}"
     }
 
-    private fun hardwareContractHeader(organiztion: OrganizationInfoDto): String {
-        return contractHeader(organiztion).replace("Пользователь", "Покупатель")
+    private fun hardwareContractHeader(organization: OrganizationInfoDto): String {
+        return contractHeader(organization).replace("Пользователь", "Покупатель")
     }
 
     private fun notificationHeader(org: OrganizationInfoDto): String {
         return "${getOrganizationName(org)} в лице ${org.positionClient2.toLowerCase()} ${org.fioClient2}," +
                 " действующего на основании ${powerPaperText2(org)}"
     }
-
-
-
-
-
-
-
-
-
-
-
 
     fun exportDefaultDocs() : List<Document> {
         return documentRepository.saveAll(

@@ -36,10 +36,7 @@ class TemplateService (
         }
 
         return tpl.replaceMultiple(renderedVars).replaceMultiple(hashMapOf(
-            "{year}" to Year.now().toString()/*,
-            "{api_url}" to apiURL,
-            "{lk_url}" to lkURL,
-            "{main_page_url}" to mainPageURL*/
+            "{year}" to Year.now().toString()
         ))
     }
 
