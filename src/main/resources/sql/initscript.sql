@@ -22,13 +22,13 @@ ALTER TABLE IF EXISTS ikassa.accompanying_doc
 
 CREATE TABLE ikassa."product" (
     "product_id" bigserial NOT NULL,
-    "alias" character varying,
+    "alias" character varying NOT NULL UNIQUE,
     "name" character varying NOT NULL,
     "comment" character varying,
     "price" double precision,
     "tax" double precision,
     "currency" character varying,
-    "units" int,
+    "units" character varying,
     "round_total" boolean,
     "dual_docs" boolean,
     PRIMARY KEY("product_id")
@@ -37,7 +37,6 @@ ALTER TABLE IF EXISTS ikassa.product
             OWNER TO root;
 
 
---TODO("сделать, чтобы каждый продукт мог иметь только уникальные документы")
 CREATE TABLE ikassa."products_accompanying_docs" (
     "pr_acc_link_id" bigserial ,
     "product_id" bigint,
@@ -51,7 +50,7 @@ ALTER TABLE IF EXISTS ikassa."products_accompanying_docs"
 
 CREATE TABLE ikassa."solution" (
     "solution_id" bigserial NOT NULL,
-    "alias" character varying NOT NULL,
+    "alias" character varying NOT NULL UNIQUE,
     "name" character varying NOT NULL,
     "price" double precision,
     "extra_vars" jsonb,
@@ -144,4 +143,25 @@ CREATE TABLE ikassa."form_solution" (
     FOREIGN KEY ("solution_id") REFERENCES ikassa."solution"("solution_id")
 );
 ALTER TABLE IF EXISTS ikassa."form_solution"
+    OWNER TO root;
+
+
+CREATE TABLE ikassa."document" (
+    "document_id" bigserial NOT NULL,
+    "alias" character varying,
+    "name" character varying,
+    "path" character varying,
+    PRIMARY KEY ("document_id")
+);
+ALTER TABLE IF EXISTS ikassa."document"
+    OWNER TO root;
+
+
+CREATE TABLE ikassa."util" (
+    "util_id" bigserial NOT NULL,
+    "name" character varying NOT NULL UNIQUE,
+    "data" text,
+    PRIMARY KEY (util_id)
+);
+ALTER TABLE IF EXISTS ikassa."util"
     OWNER TO root;

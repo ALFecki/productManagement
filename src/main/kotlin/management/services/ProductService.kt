@@ -3,9 +3,9 @@ package management.services
 import io.micronaut.json.tree.JsonArray
 import io.micronaut.json.tree.JsonNode
 import jakarta.inject.Singleton
-import management.data.entities.AccompanyingDoc
-import management.data.entities.Product
-import management.data.entities.Solution
+import management.data.products.AccompanyingDoc
+import management.data.products.Product
+import management.data.products.Solution
 import management.data.repositories.AccompanyingDocRepository
 import management.data.repositories.ProductRepository
 import management.utils.FilePath.PATH_TO_ADAPTER_MICROUSB
@@ -43,11 +43,11 @@ class ProductService (private val productRepository: ProductRepository,
                 ?: Product(
                 alias = product.get("alias")!!.stringValue,
                 name = product.get("name")!!.stringValue,
-                comment = product.get("comment")?.stringValue,
+                comment = product.get("comment")?.stringValue ?: "",
                 price = product.get("price")!!.bigDecimalValue, // "price":123.4
                 tax = product.get("tax")?.bigDecimalValue ?: BigDecimal.ZERO,
-                currency = product.get("currency")?.stringValue,
-                units = product.get("units")?.intValue ?: 1,
+                currency = product.get("currency")?.stringValue ?: "",
+                units = product.get("units")?.stringValue ?: "",
                 roundTotal = product.get("round_total")?.booleanValue ?: false, // "round_total":true
                 dualDocs = product.get("dual_docs")?.booleanValue ?: false, // "dual_docs":true
                 accompanyingDocs = docs
@@ -60,11 +60,11 @@ class ProductService (private val productRepository: ProductRepository,
         return Product(
                 alias = product.get("alias")!!.stringValue,
                 name = product.get("name")!!.stringValue,
-                comment = product.get("comment")?.stringValue,
+                comment = product.get("comment")?.stringValue ?: "",
                 price = product.get("price")!!.bigDecimalValue, // "price":123.4
                 tax = product.get("tax")?.bigDecimalValue ?: BigDecimal.ZERO,
-                currency = product.get("currency")?.stringValue,
-                units = product.get("units")?.intValue ?: 1,
+                currency = product.get("currency")?.stringValue ?: "",
+                units = product.get("units")?.stringValue ?: "",
                 roundTotal = product.get("round_total")?.booleanValue ?: false, // "round_total":true
                 dualDocs = product.get("dual_docs")?.booleanValue ?: false, // "dual_docs":true
                 accompanyingDocs = docs
@@ -82,54 +82,16 @@ class ProductService (private val productRepository: ProductRepository,
     fun makeAccompanyingDocs(docs : JsonArray) : List<AccompanyingDoc> {
         val accompanyingDocList : MutableList<AccompanyingDoc> = mutableListOf()
         (0 until docs.size()).forEach {
-            val doc : JsonNode = docs.get(it)!!
-            val existedDoc = accompanyingDocRepository.findByPath(doc.get("path").stringValue)
-            if(existedDoc != null) {
-                accompanyingDocList += existedDoc
-            } else {
-                accompanyingDocList += AccompanyingDoc(
+            val doc: JsonNode = docs.get(it)!!
+            accompanyingDocList += accompanyingDocRepository.findByPath(doc.get("path").stringValue)
+                ?: AccompanyingDoc(
                     path = doc.get("path")!!.stringValue,
                     name = doc.get("name")!!.stringValue,
                     raw = doc.get("raw")?.booleanValue ?: false
                 )
-            }
         }
         return accompanyingDocList
     }
-
-//    fun checkAccompanyingDocs(products : JsonArray) : MutableList<Product> {
-//        val savedProducts : MutableList<Product> = mutableListOf()
-//        println(products)
-//        (0 until products.size()).forEach {
-//            val product = products.get(it)!!
-//            if (product["accompanying_docs"] == null) {
-//                savedProducts.add(productRepository.save(makeProduct(product, mutableListOf<AccompanyingDoc>())))
-//                return@forEach
-//            }
-//            val accompanyingDocList = makeAccompanyingDocs(product["accompanying_docs"] as JsonArray)
-//            val accompanyingDocListCopy = accompanyingDocList
-//            val savedAccompanyingDocList : MutableList<AccompanyingDoc> = mutableListOf()
-//            (0 until accompanyingDocList.size).forEach {
-////                val doc = accompanyingDocList[it]
-//                println(1)
-//                if (accompanyingDocRepository.findByPath(doc.path) != null) {
-////                    accompanyingDocListCopy.remove(doc)
-//                    savedAccompanyingDocList.add(accompanyingDocRepository.findByPath(doc.path)!!)
-//                }
-//            }
-//
-//            val savedProduct = productRepository.save(makeProduct(product, accompanyingDocListCopy))
-//            for (doc in savedAccompanyingDocList) {
-//                val link = productAccDocLinkRepository.save(
-//                    ProductAccDoc(
-//                        productId = savedProduct.productId,
-//                        accDocId = doc.accompanyingDocId))
-////                productAccDocLinkRepository.insertLink(savedProduct.alias!!, doc.path)
-//            }
-//            savedProducts.add(savedProduct)
-//        }
-//        return savedProducts;
-//    }
 
     fun getAllProducts() : MutableList<Product> {
         return productRepository.findAll()
@@ -298,12 +260,12 @@ class ProductService (private val productRepository: ProductRepository,
                         dualDocs=true,
                         accompanyingDocs = listOf(AccompanyingDoc(PATH_TO_PRINTER_RPP02N, "05 Реквизиты для оплаты мобильного принтера"))),
 
-                Product(name = "Мобильный принтер RPP02A", comment = "С рыжими кнопками",
+                Product(alias = "rpp02a", name = "Мобильный принтер RPP02A", comment = "С рыжими кнопками",
                         price = BigDecimal(100), tax = BigDecimal(20),
                         dualDocs=true,
                         accompanyingDocs = listOf(AccompanyingDoc(PATH_TO_PRINTER_RPP02A, "05 Реквизиты для оплаты мобильного принтера"))),
 
-                Product(name = "Сумка-чехол с ремешком", comment = "Для PAX 930 (smart&card)",
+                Product(alias = "bag", name = "Сумка-чехол с ремешком", comment = "Для PAX 930 (smart&card)",
                         price = BigDecimal(55),
                         accompanyingDocs = listOf(AccompanyingDoc(PATH_TO_PAX930_BAG, "Сумка-чехол"))),
 

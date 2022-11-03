@@ -1,4 +1,4 @@
-package management.data.entities
+package management.data.products
 
 import java.math.BigDecimal
 

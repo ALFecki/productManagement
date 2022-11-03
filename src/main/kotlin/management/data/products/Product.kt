@@ -1,4 +1,4 @@
-package management.data.entities
+package management.data.products
 
 import io.micronaut.data.annotation.TypeDef
 import io.micronaut.data.model.DataType
@@ -16,13 +16,13 @@ import org.hibernate.annotations.LazyCollectionOption
 data class Product(
 
         @Column(name = "alias")
-        var alias: String? = null,
+        var alias: String,
 
         @Column(name = "name")
         var name: String,
 
         @Column(name = "comment")
-        val comment: String? = null,
+        val comment: String = "",
 
         @TypeDef(type = DataType.BIGDECIMAL)
         @Column(name = "price")
@@ -33,10 +33,10 @@ data class Product(
         val tax: BigDecimal = BigDecimal.ZERO,
 
         @Column(name = "currency")
-        val currency: String? = null,
+        val currency: String = "",
 
         @Column(name = "units")
-        val units: Int = 1,
+        val units: String = "",
 
         @Column(name = "round_total")
         val roundTotal: Boolean = false,
@@ -74,16 +74,16 @@ data class Product(
         }
         return ProductTotal(
                 price = this.price,
-                priceFormatted = "${price} ${currency}",
+                priceFormatted = "$price $currency",
                 quantity = quantity,
-                quantityFormatted = "${quantity} ${this.currency}",
+                quantityFormatted = "$quantity ${this.currency}",
                 cost = cost,
-                costFormatted = "${cost} ${currency}",
+                costFormatted = "$cost $currency",
                 tax = tax,
                 taxFormatted = if(tax == BigDecimal.ZERO) {
                         "без НДС *"
                 } else {
-                        "${tax}"
+                        "$tax"
                 },
                 taxSum = taxSum,
                 taxSumFormatted = "$taxSum $currency",

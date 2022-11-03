@@ -2,7 +2,7 @@ package management.data.repositories
 
 import io.micronaut.data.annotation.Repository
 import io.micronaut.data.jpa.repository.JpaRepository
-import management.data.entities.AccompanyingDoc
+import management.data.products.AccompanyingDoc
 
 @Repository
 interface AccompanyingDocRepository : JpaRepository<AccompanyingDoc, Long> {

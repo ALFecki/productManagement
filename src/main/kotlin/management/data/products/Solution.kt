@@ -1,4 +1,4 @@
-package management.data.entities
+package management.data.products
 
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
@@ -104,6 +104,5 @@ data class Solution(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "solution_id")
     val solutionId : Long = 0
-
 
 }

@@ -2,7 +2,7 @@ package management.data.repositories
 
 import io.micronaut.data.annotation.Repository
 import io.micronaut.data.jpa.repository.JpaRepository
-import management.data.entities.Product
+import management.data.products.Product
 import java.math.BigDecimal
 
 

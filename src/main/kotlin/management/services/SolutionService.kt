@@ -3,15 +3,18 @@ package management.services
 import io.micronaut.json.tree.JsonArray
 import io.micronaut.json.tree.JsonNode
 import jakarta.inject.Singleton
-import management.data.entities.AccompanyingDoc
-import management.data.entities.Product
-import management.data.entities.Solution
+import management.data.products.AccompanyingDoc
+import management.data.products.Product
+import management.data.products.Solution
 import management.data.repositories.SolutionRepository
 
 
 @Singleton
 class SolutionService (private val solutionRepository: SolutionRepository,
-                       private val productService: ProductService) {
+                       private val productService: ProductService,
+//                       private val fillDocumentService: FillDocumentService,
+//                       private val partnerService: PartnerService
+    ) {
 
     private var defaultProducts : MutableList<Product> = mutableListOf()
 
@@ -19,7 +22,7 @@ class SolutionService (private val solutionRepository: SolutionRepository,
         return solutionRepository.findAll()
     }
 
-    fun getSolutionByAlias(alias : String) : Solution {
+    fun getSolutionByAlias(alias : String) : Solution? {
         return solutionRepository.findByAlias(alias)
     }
 
@@ -132,7 +135,9 @@ class SolutionService (private val solutionRepository: SolutionRepository,
     }
 
     fun exportDefaultSolutions() : List<Solution> {
-        productService.exportDefault()
+//        productService.exportDefault()
+//        fillDocumentService.exportDefaultDocs()
+//        partnerService.exportDefault()
         defaultProducts.add(productService.getProductByAlias(alias = "ikassa_register")!!)
         defaultProducts.add(productService.getProductByAlias(alias ="ikassa_license")!!)
         defaultProducts.add(productService.getProductByAlias(alias ="skko_register")!!)

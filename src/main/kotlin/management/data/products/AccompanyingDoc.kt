@@ -1,10 +1,13 @@
-package management.data.entities
+package management.data.products
 
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import javax.persistence.*
 import management.utils.ConstVariables.SCHEMA
+import org.hibernate.annotations.Type
+import org.hibernate.annotations.TypeDef
 
-
+@TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)
 @Entity
 @Table(name = "accompanying_doc", schema = SCHEMA)
 data class AccompanyingDoc (
@@ -14,10 +17,10 @@ data class AccompanyingDoc (
 
         @Column(name = "name")
         val name: String,
-//
-//        @TypeDef(type = DataType.JSON)
-//        @Column(name = "field")
-//        val fields: Map<String, String>? = null,
+
+        @Column(name = "field")
+        @Type(type = "jsonb")
+        val fields: Map<String, String>? = mapOf(),
 
         @Column(name = "raw")
         val raw: Boolean = false
