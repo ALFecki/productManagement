@@ -8,8 +8,13 @@ import java.math.BigDecimal
 
 @Repository
 interface ProductRepository : JpaRepository<Product, Long> {
+
     fun findByAlias(alias : String) : Product?
+
     fun deleteByAlias(alias: String)
-    fun updateByAlias(alias: String, name : String)
-    fun updateByAlias(alias: String, price : BigDecimal)
+
+//    fun updateByAlias(alias: String, name : String)
+//    fun updateByAlias(alias: String, price : BigDecimal)
+//
+
 }

@@ -9,6 +9,7 @@ import io.micronaut.json.tree.JsonArray
 import io.micronaut.json.tree.JsonNode
 import management.data.products.Product
 import management.services.ProductService
+import java.math.BigDecimal
 
 
 @Controller("/products")
@@ -40,18 +41,29 @@ class ProductController(private val productService: ProductService) {
     }
 
     @Post("/update/name/{alias}")
-    fun updateProductName(@PathVariable alias: String, @Body name : Map<String, String>) {
+    fun updateProductName(@PathVariable alias: String, @Body name : Map<String, String>) : Product {
         return productService.updateProductName(alias, name)
     }
 
+    @Post("/update/comment/{alias}")
+    fun updateProductComment(@PathVariable alias: String, @Body comment : Map<String, String>) : Product {
+        return productService.updateProductComment(alias, comment)
+    }
+
+
     @Post("/update/price/{alias}")
-    fun updateProductPrice(@PathVariable alias: String, @Body price : Map<String, String>) {
+    fun updateProductPrice(@PathVariable alias: String, @Body price : Map<String, BigDecimal>) : Product {
         return productService.updateProductPrice(alias, price)
     }
 
     @Post("/update/tax/{alias}")
-    fun updateProductTax(@PathVariable alias: String, @Body tax : Map<String, String>){
+    fun updateProductTax(@PathVariable alias: String, @Body tax : Map<String, BigDecimal>) : Product{
         return productService.updateProductTax(alias, tax)
+    }
+
+    @Post("/update/dual_docs/{alias}")
+    fun updateProductDualDocs(@PathVariable alias: String, @Body dualDocs : Map<String, Boolean>) : Product {
+        return productService.updateProductDualDocs(alias, dualDocs)
     }
 
     @Post("/update/docs/{alias}")

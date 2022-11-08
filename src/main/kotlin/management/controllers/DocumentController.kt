@@ -31,7 +31,7 @@ class DocumentController (
     private val documentsDateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MM-yyyy")
 
 
-    fun step3Common(
+    private fun step3Common(
         period : Short,
         count: Short,
         fullData : DocumentDto? = null,
@@ -106,7 +106,7 @@ class DocumentController (
                 renderedDocuments.add(ikassaInvoice)
             }
                 "dusik_r" -> {
-
+                    // FIXME
                 }
 
                 "skko_register" -> {

@@ -22,15 +22,15 @@ data class Product(
         var name: String,
 
         @Column(name = "comment")
-        val comment: String = "",
+        var comment: String = "",
 
         @TypeDef(type = DataType.BIGDECIMAL)
         @Column(name = "price")
-        val price: BigDecimal,
+        var price: BigDecimal,
 
         @TypeDef(type = DataType.BIGDECIMAL)
         @Column(name = "tax")
-        val tax: BigDecimal = BigDecimal.ZERO,
+        var tax: BigDecimal = BigDecimal.ZERO,
 
         @Column(name = "currency")
         val currency: String = "",
@@ -42,7 +42,7 @@ data class Product(
         val roundTotal: Boolean = false,
 
         @Column(name = "dual_docs")
-        val dualDocs: Boolean = false,
+        var dualDocs: Boolean = false,
 
         @LazyCollection(LazyCollectionOption.FALSE)
         @ManyToMany(
