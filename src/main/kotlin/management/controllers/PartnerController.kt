@@ -3,7 +3,6 @@ package management.controllers
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.PathVariable
-import jakarta.inject.Singleton
 import management.data.products.PartnerForm
 import management.services.PartnerService
 

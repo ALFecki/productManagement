@@ -147,6 +147,85 @@ class DocumentController (
         }
     }
 
+    @Get("/step3")
+    @Produces("application/zip")
+    @ExecuteOn(TaskExecutors.IO)
+    fun step3Get(
+        @QueryValue(defaultValue = "1") count: Short,
+        @QueryValue(defaultValue = "1") period: Short,
+        @QueryValue(defaultValue = "smart") solutionName: String,
+        @QueryValue(defaultValue = "") partnerUnp: Int? = null
+    ) : HttpResponse<*> {
+
+
+        val solution = solutionService.getSolutionByAlias(solutionName) ?: solutionService.getSolutionByAlias("smart")!!
+        val partnerForm = partnerService.getFormByUNP(partnerUnp ?: 193141246)!!
+
+        val renderedDocuments = this.step3Common(
+            period = period,
+            count = count,
+            fullData = null,
+            solution = solution,
+            partnerForm = partnerForm)
+
+        renderedDocuments.add(fillDocumentService.renderDocumentFromMap(
+            "docs/fill_manual",
+            fillDocumentService.getDocumentByAlias("skko_contract")!!,
+            mapOf("SOLUTION" to solution.legalName)
+        ))
+
+        renderedDocuments.add(fillDocumentService.renderDocumentFromMap(
+            "docs/fill_manual",
+            fillDocumentService.getDocumentByAlias("skko_contract_application")!!,
+            mapOf("SOLUTION" to solution.legalName)
+        ))
+
+        renderedDocuments.add(fillDocumentService.renderDocumentFromMap(
+            "docs/fill_manual",
+            fillDocumentService.getDocumentByAlias("sko_act")!!,
+            mapOf("SOLUTION" to solution.legalName)
+        ))
+
+        renderedDocuments.add(fillDocumentService.renderDocumentFromMap(
+            "docs/fill_manual",
+            fillDocumentService.getDocumentByAlias("skko_connection_application")!!,
+            mapOf("SOLUTION" to solution.legalName, "VERSION" to solution.version)
+        ))
+
+        renderedDocuments.add(fillDocumentService.renderDocument(
+            "docs/fill_manual",
+            fillDocumentService.getDocumentByAlias("connection_notification")!!
+        ))
+
+        renderedDocuments.add(fillDocumentService.renderDocument(
+            "docs/fill_manual",
+            fillDocumentService.getDocumentByAlias("declaration_lk_unsafe")!!
+        ))
+
+        if(solution.forcedInstructionPdf != null) {
+            renderedDocuments.add(fillDocumentService.renderDocument(
+                "docs/",
+                solution.forcedInstructionPdf!!
+            ).copy(extension = "pdf"))
+        } else {
+            val instruction = fillDocumentService.fillInstruction(null, solution)
+            renderedDocuments.add(
+                RenderedDocument(
+                    "00-Инструкция",
+                    instruction.replace("width=\"600\"", "width=\"800\"").toPDF(),
+                    "pdf"
+                )
+            )
+        }
+
+
+        return serveFile(
+            fillDocumentService.createZipArchive(renderedDocuments),
+            "Документы к заполнению для ${solution.name} от ${LocalDate.now().format(documentsDateFormat)}.zip"
+        )
+
+    }
+
     @Post("/step3")
     @Produces("application/zip")
     @ExecuteOn(TaskExecutors.IO)
