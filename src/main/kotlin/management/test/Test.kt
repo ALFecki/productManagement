@@ -6,9 +6,8 @@ import io.micronaut.http.annotation.Get
 
 @Controller("/test")
 class Test(
-    private val selfClient : SelfClient
+    private val selfClient: SelfClient
 ) {
-
 
 
     @Get("/step3test")

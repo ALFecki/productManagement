@@ -7,6 +7,6 @@ import management.data.products.PartnerForm
 
 @Repository
 interface PartnerFormRepository : JpaRepository<PartnerForm, Long> {
-    fun findByUNP(UNP : Int) : PartnerForm
-    fun findBySlug(slug : String) : PartnerForm
+    fun findByUNP(UNP: Int): PartnerForm
+    fun findBySlug(slug: String): PartnerForm
 }

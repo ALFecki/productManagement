@@ -3,40 +3,40 @@ package management.forms
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.math.BigDecimal
 
-data class SolutionDto (
+data class SolutionDto(
 
     @JsonProperty("alias")
-    val alias : String,
+    val alias: String,
 
     @JsonProperty("name")
-    val name : String,
+    val name: String,
 
     @JsonProperty("contents")
-    val contents : List<ProductDto>,
+    val contents: List<ProductDto>,
 
     @JsonProperty("related")
-    val related : List<ProductDto>,
+    val related: List<ProductDto>,
 
     @JsonProperty("price")
-    val price : BigDecimal,
+    val price: BigDecimal,
 
     @JsonProperty("accompanying_docs")
     val accompanyingDoc: List<AccompanyingDocDto>,
 
     @JsonProperty("equipment")
-    val equipment : List<ProductDto>,
+    val equipment: List<ProductDto>,
 
     @JsonProperty("extra_vars")
-    val extraVars : Map<String, String>,
+    val extraVars: Map<String, String>,
 
     @JsonProperty("legal_name")
-    val legalName : String,
+    val legalName: String,
 
     @JsonProperty("version")
-    val version : String,
+    val version: String,
 
     @JsonProperty("instruction")
-    val instruction : AccompanyingDocDto
+    val instruction: AccompanyingDocDto
 
-    ) {
+) {
 }

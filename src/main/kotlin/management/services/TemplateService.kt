@@ -11,12 +11,12 @@ import java.time.Year
 
 
 @Singleton
-class TemplateService (
+class TemplateService(
 
     @Inject
-    private val objectMapper : ObjectMapper
+    private val objectMapper: ObjectMapper
 
-    ) {
+) {
     fun renderFancyMessageFragment(fragment: FancyMailBodyFragmentDto): String {
         val tpl = (when {
             fragment.templateFile != null -> loadTemplate(fragment.templateFile!!)
@@ -35,9 +35,11 @@ class TemplateService (
             renderedVars[it.key] = v
         }
 
-        return tpl.replaceMultiple(renderedVars).replaceMultiple(hashMapOf(
-            "{year}" to Year.now().toString()
-        ))
+        return tpl.replaceMultiple(renderedVars).replaceMultiple(
+            hashMapOf(
+                "{year}" to Year.now().toString()
+            )
+        )
     }
 
 

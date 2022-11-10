@@ -8,16 +8,16 @@ import javax.persistence.*
 @Table(name = "document", schema = SCHEMA)
 data class Document(
     @Column(name = "alias")
-    val alias : String,
+    val alias: String,
 
     @Column(name = "name")
-    val name : String,
+    val name: String,
 
-    @Column (name = "path")
-    val path : String
+    @Column(name = "path")
+    val path: String
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "document_id")
-    var documentId : Long = 0
+    var documentId: Long = 0
 }

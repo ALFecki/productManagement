@@ -17,14 +17,14 @@ import javax.persistence.Table
     TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)
 )
 @Entity
-@Table(name = "partner_form", schema = SCHEMA, )
+@Table(name = "partner_form", schema = SCHEMA)
 data class PartnerForm(
 
     @Column(name = "unp")
-    val UNP : Int,
+    val UNP: Int,
 
     @Column(name = "name")
-    val name : String,
+    val name: String,
 
     @Column(name = "logo")
     val logo: String,
@@ -67,20 +67,20 @@ data class PartnerForm(
     val availablePeriods: Array<Int> = arrayOf(6, 12),
 
     @Column(name = "slug")
-    val slug: String ?= null
+    val slug: String? = null
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "partner_form_id")
-    val partnerFormId : Long = 0
+    val partnerFormId: Long = 0
 
     @Transient
-    val emailMode : PartnerFormEmailMode = PartnerFormEmailMode.valueOf(emailModeName)
+    val emailMode: PartnerFormEmailMode = PartnerFormEmailMode.valueOf(emailModeName)
 }
 
 enum class PartnerFormEmailMode(
-    val sendToClient: Boolean=true,
-    val sendToPartner: Boolean=false
+    val sendToClient: Boolean = true,
+    val sendToPartner: Boolean = false
 ) {
     NONE(sendToClient = false, sendToPartner = false),
     BOTH(sendToClient = true, sendToPartner = true),

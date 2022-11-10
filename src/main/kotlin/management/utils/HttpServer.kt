@@ -15,8 +15,6 @@ fun serveFile(file: ByteArray, filename: String = "attachment"): HttpResponse<*>
 }
 
 
-
-
-fun notFound() : HttpResponse<*> {
+fun notFound(): HttpResponse<*> {
     return HttpResponse.notFound<Any>()
 }

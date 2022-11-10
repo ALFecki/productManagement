@@ -9,13 +9,13 @@ import javax.persistence.*
 data class Util(
 
     @Column(name = "name")
-    val name : String,
+    val name: String,
 
     @Column(name = "data")
-    val data : String
+    val data: String
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val utilId : Long = 0
+    val utilId: Long = 0
 }
 
