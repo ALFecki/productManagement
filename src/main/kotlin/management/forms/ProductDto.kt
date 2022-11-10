@@ -2,7 +2,6 @@ package management.forms
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.math.BigDecimal
-import java.util.Currency
 
 data class ProductDto(
     @JsonProperty("alias")
@@ -24,13 +23,13 @@ data class ProductDto(
     val currency: String? = "",
 
     @JsonProperty("units")
-    val units : Short?,
+    val units : String?,
 
     @JsonProperty("round_total")
     val roundTotal : Boolean,
 
     @JsonProperty("accompanying_docs")
-    val accompanyingDocs : List<AccDocumentDto>,
+    val accompanyingDocs : List<AccompanyingDocDto>,
 
     @JsonProperty("dual_docs")
     val dualDocs : Boolean

@@ -21,7 +21,7 @@ data class SolutionDto (
     val price : BigDecimal,
 
     @JsonProperty("accompanying_docs")
-    val accompanyingDoc: List<AccDocumentDto>,
+    val accompanyingDoc: List<AccompanyingDocDto>,
 
     @JsonProperty("equipment")
     val equipment : List<ProductDto>,
@@ -36,7 +36,7 @@ data class SolutionDto (
     val version : String,
 
     @JsonProperty("instruction")
-    val instruction : AccDocumentDto
+    val instruction : AccompanyingDocDto
 
     ) {
 }

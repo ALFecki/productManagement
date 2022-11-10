@@ -2,7 +2,7 @@ package management.forms
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class AccDocumentDto(
+data class AccompanyingDocDto(
     @JsonProperty("path")
     val path : String,
 

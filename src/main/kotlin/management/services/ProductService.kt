@@ -5,9 +5,9 @@ import io.micronaut.json.tree.JsonNode
 import jakarta.inject.Singleton
 import management.data.products.AccompanyingDoc
 import management.data.products.Product
-import management.data.products.Solution
 import management.data.repositories.AccompanyingDocRepository
 import management.data.repositories.ProductRepository
+import management.forms.AccompanyingDocDto
 import management.forms.ProductDto
 import management.utils.FilePath.PATH_TO_ADAPTER_MICROUSB
 import management.utils.FilePath.PATH_TO_ADAPTER_MICROUSB_WHIPPY
@@ -24,7 +24,6 @@ import management.utils.FilePath.PATH_TO_PAX930
 import management.utils.FilePath.PATH_TO_PAX930_BAG
 import management.utils.FilePath.PATH_TO_PRINTER_RPP02A
 import management.utils.FilePath.PATH_TO_PRINTER_RPP02N
-import management.utils.notFound
 import management.utils.toFixed
 
 
@@ -33,26 +32,16 @@ class ProductService (private val productRepository: ProductRepository,
                       private val accompanyingDocRepository: AccompanyingDocRepository
 ) {
 
-    fun makeProducts(productData: JsonArray) : MutableList<Product>? {
+    fun makeProducts(products: List<ProductDto>) : MutableList<Product> {
         val productList : MutableList<Product> = mutableListOf()
-        (0 until productData.size()).forEach {
-            val product : JsonNode = productData.get(it) ?: return null
-            var docs : List<AccompanyingDoc> = listOf()
-            if (product["accompanying_docs"] != null) {
-                 docs = makeAccompanyingDocs(product.get("accompanying_docs") as JsonArray)
-            }
-            productList += productRepository.findByAlias(product.get("alias")!!.stringValue)
-                ?: Product(
-                alias = product.get("alias")!!.stringValue,
-                name = product.get("name")!!.stringValue,
-                comment = product.get("comment")?.stringValue ?: "",
-                price = product.get("price")!!.bigDecimalValue, // "price":123.4
-                tax = product.get("tax")?.bigDecimalValue ?: BigDecimal.ZERO,
-                currency = product.get("currency")?.stringValue ?: "",
-                units = product.get("units")?.stringValue ?: "",
-                roundTotal = product.get("round_total")?.booleanValue ?: false, // "round_total":true
-                dualDocs = product.get("dual_docs")?.booleanValue ?: false, // "dual_docs":true
-                accompanyingDocs = docs
+
+        if (products.isEmpty())
+            throw IllegalStateException("Not enough data in request")
+
+        products.forEach { product ->
+            productList.add(
+                productRepository.findByAlias(product.alias)
+                    ?: makeProduct(product)
             )
         }
         return productList
@@ -66,31 +55,29 @@ class ProductService (private val productRepository: ProductRepository,
                 price = product.price, // "price":123.4
                 tax = product.tax ?: BigDecimal.ZERO,
                 currency = product.currency ?: "",
-                units = product.get("units")?.stringValue ?: "",
-                roundTotal = product.get("round_total")?.booleanValue ?: false, // "round_total":true
-                dualDocs = product.get("dual_docs")?.booleanValue ?: false, // "dual_docs":true
-                accompanyingDocs = docs
+                units = product.units ?: "", // FIXME
+                roundTotal = product.roundTotal, // "round_total":true
+                dualDocs = product.dualDocs, // "dual_docs":true
+                accompanyingDocs = makeAccompanyingDocs(product.accompanyingDocs)
             )
     }
-    fun makeAccompanyingDoc(doc : JsonNode) : AccompanyingDoc {
-        return accompanyingDocRepository.findByPath(doc.get("path")?.stringValue ?: throw Exception())
+    fun makeAccompanyingDoc(doc : AccompanyingDocDto) : AccompanyingDoc {
+        return accompanyingDocRepository.findByPath(doc.path)
             ?: AccompanyingDoc(
-                path = doc.get("path")!!.stringValue,
-                name = doc.get("name")!!.stringValue,
-                raw = doc.get("raw")?.booleanValue ?: false
+                path = doc.path,
+                name = doc.name,
+                raw = doc.raw
             )
     }
 
-    fun makeAccompanyingDocs(docs : JsonArray) : List<AccompanyingDoc> {
+    fun makeAccompanyingDocs(docs : List<AccompanyingDocDto>) : List<AccompanyingDoc> {
         val accompanyingDocList : MutableList<AccompanyingDoc> = mutableListOf()
-        (0 until docs.size()).forEach {
-            val doc: JsonNode = docs.get(it)!!
-            accompanyingDocList += accompanyingDocRepository.findByPath(doc.get("path").stringValue)
-                ?: AccompanyingDoc(
-                    path = doc.get("path")!!.stringValue,
-                    name = doc.get("name")!!.stringValue,
-                    raw = doc.get("raw")?.booleanValue ?: false
-                )
+        if (docs.isEmpty()) return accompanyingDocList
+        docs.forEach {doc ->
+            accompanyingDocList.add(
+                accompanyingDocRepository.findByPath(doc.path)
+                    ?: this.makeAccompanyingDoc(doc)
+            )
         }
         return accompanyingDocList
     }
@@ -103,8 +90,12 @@ class ProductService (private val productRepository: ProductRepository,
         return productRepository.findByAlias(alias)
     }
 
-    fun createProduct(productData : ProductDto) : MutableList<Product> {
-        return productRepository.saveAll(makeProduct(productData)!!)
+    fun createProduct(productData : ProductDto) : Product {
+        return productRepository.save(makeProduct(productData))
+    }
+
+    fun createProducts(products: List<ProductDto>) : MutableList<Product> {
+        return productRepository.saveAll(makeProducts(products))
     }
 
     fun updateProductName(alias: String, name : Map<String, String>) : Product {
@@ -149,15 +140,15 @@ class ProductService (private val productRepository: ProductRepository,
         return productRepository.update(product)
     }
 
-    fun updateProductDocs(alias: String, docs : JsonNode) : Product? {
+    fun updateProductDocs(alias: String, docs : List<AccompanyingDocDto>) : Product? {
         val product = productRepository.findByAlias(alias) ?: throw(Exception("No such product in database"))
-        product.accompanyingDocs = makeAccompanyingDocs(docs["accompanying_docs"] as JsonArray)
+        product.accompanyingDocs = makeAccompanyingDocs(docs)
         return productRepository.update(product)
     }
 
-    fun addProductDocs(alias: String, docs : JsonNode) : Product? {
+    fun addProductDocs(alias: String, docs : List<AccompanyingDocDto>) : Product? {
         val product = productRepository.findByAlias(alias) ?: throw(Exception("No such product in database"))
-        product.accompanyingDocs += makeAccompanyingDocs(docs["accompanying_docs"] as JsonArray)
+        product.accompanyingDocs += makeAccompanyingDocs(docs)
         return productRepository.update(product)
     }
 
