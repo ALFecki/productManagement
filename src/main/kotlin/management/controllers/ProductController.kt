@@ -8,6 +8,7 @@ import io.micronaut.http.annotation.Post
 import io.micronaut.json.tree.JsonArray
 import io.micronaut.json.tree.JsonNode
 import management.data.products.Product
+import management.forms.ProductDto
 import management.services.ProductService
 import java.math.BigDecimal
 
@@ -36,7 +37,7 @@ class ProductController(private val productService: ProductService) {
     }
 
     @Post("/create")
-    fun createProduct(@Body requestData : JsonArray) : MutableList<Product>? {
+    fun createProduct(@Body requestData : ProductDto) : MutableList<Product>? {
         return productService.createProduct(requestData)
     }
 

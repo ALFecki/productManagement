@@ -1,6 +1,7 @@
 package management.services
 
 import jakarta.inject.Singleton
+import management.controllers.DocumentController
 import management.data.docs.Document
 import management.data.docs.RenderedDocument
 import management.data.products.AccompanyingDoc
@@ -13,10 +14,7 @@ import management.data.utils.UtilsRepository
 import management.forms.DocumentDto
 import management.forms.FancyMailBodyFragmentDto
 import management.forms.OrganizationInfoDto
-import management.utils.asWords
-import management.utils.makeBorder
-import management.utils.replaceMultiple
-import management.utils.toByteArray
+import management.utils.*
 import org.apache.poi.xwpf.usermodel.*
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -579,9 +577,103 @@ class FillDocumentService (
         return templateService.renderFancyMessageFragment(fullMessage)
     }
 
-    fun powerPaperText(org: OrganizationInfoDto): String {
-        val DOC_NUMBER_FIELD = org.docValue?.get("DOC_NUMBER_FIELD")
-        val DATE_FIELD = org.docValue?.get("DATE_FIELD")
+    fun step3Common(
+        period : Short,
+        count: Short,
+        fullData : DocumentDto? = null,
+        solution : Solution = solutionService.getSolutionByAlias("smart")!!
+    ) : MutableList<RenderedDocument> {
+
+
+        val equipment = productService.getAllProducts().mapNotNull {
+            val isProduct = solution.equipment.contains(productService.getProductByAlias(it.alias))
+            if(
+                isProduct &&
+                period >= 6.toShort() &&
+                listOf("pax930", "pax930_lancard", "pax930_promo").contains(it.alias)
+            ) {
+                it.copy(price=productService.getProductByAlias("pax930_promo")!!.price)
+            } else if(isProduct) {
+                it
+            } else {
+                null
+            }
+        }
+
+        val solutionContent = solution.contents.map { it.alias }
+        val renderedDocuments = mutableListOf<RenderedDocument>()
+
+        val billingMode = if (solutionContent.isEmpty() || solutionContent.containsAll(listOf("ikassa_register", "ikassa_license"))) {
+            DocumentController.IkassaBillingMode.FULL
+        } else if (solutionContent.contains("ikassa_register")) {
+            DocumentController.IkassaBillingMode.REGISTER
+        } else {
+            DocumentController.IkassaBillingMode.LICENSE
+        }
+
+        solution.contents.forEach {
+            when(it.alias) { "ikassa_register" -> {
+                when(billingMode) { DocumentController.IkassaBillingMode.FULL -> {
+                    val ikassaInvoice = this.fillIkassaInvoice(
+                        count,
+                        period,
+                        if (solutionContent.contains("dusik_r")) {
+                            "_dusik"
+                        }
+                        else {
+                            ""
+                        }
+                    )
+                    ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
+                    renderedDocuments.add(ikassaInvoice)
+                }
+
+                    DocumentController.IkassaBillingMode.LICENSE -> {
+                        val ikassaInvoice = this.fillIkassaRegistration(count)
+                        renderedDocuments.add(ikassaInvoice)
+                    }
+
+                    DocumentController.IkassaBillingMode.REGISTER -> {
+                        val ikassaInvoice = this.fillIkassaTariff(count, period)
+                        ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
+                        renderedDocuments.add(ikassaInvoice)
+                    }
+
+                }
+
+
+            }
+                "ikassa_license_12_season" -> {
+                    val licenseProduct = productService.getProductByAlias(it.alias!!)!!
+                    val ikassaInvoice = this.fillIkassaTariff(licenseProduct, count)
+                    ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
+                    renderedDocuments.add(ikassaInvoice)
+                }
+                "dusik_r" -> {
+                    // FIXME
+                }
+
+                "skko_register" -> {
+                    renderedDocuments.add(this.fillSkkoInvoice(count))
+                }
+
+            }
+        }
+
+
+        renderedDocuments.add(this.renderDocument("docs",
+            this.getDocumentByAlias("attorney")!!
+        ))
+        renderedDocuments.addAll(
+            this.fillProductsDocuments(equipment, count, fullData, solution)
+        )
+        return renderedDocuments
+    }
+
+
+    fun dateNumFields(organization: OrganizationInfoDto) : Map<String, String> {
+        val DOC_NUMBER_FIELD = organization.docValue?.get("DOC_NUMBER_FIELD")
+        val DATE_FIELD = organization.docValue?.get("DATE_FIELD")
         val numField = if(DOC_NUMBER_FIELD != null && DOC_NUMBER_FIELD != "") {
             "№$DOC_NUMBER_FIELD"
         } else {
@@ -592,7 +684,14 @@ class FillDocumentService (
         } else {
             ""
         }
-        return "${Doc.getById(org.docType).value} $numField $dateField"
+        return mapOf(
+            "numField" to numField,
+            "dateField" to dateField
+        )
+    }
+    fun powerPaperText(org: OrganizationInfoDto): String {
+        val fields = dateNumFields(org)
+        return "${Doc.getById(org.docType).value} ${fields["numField"]} ${fields["dateField"]}"
     }
 
     fun getDocumentByAlias(alias : String) : Document? {
@@ -684,16 +783,11 @@ class FillDocumentService (
 
 
     fun renderDocumentFromMap(_basePath: String, document: Document, map: Map<String, String?>): RenderedDocument {
-        val basePath = if (_basePath.endsWith("/")) {
-            _basePath
-        } else {
-            "$_basePath/"
-        }
+        val basePath = _basePath.trimEnd('/')
+        val path = "$basePath${document.path}"
         return RenderedDocument(
             document.name,
-            renderDocument(
-                "$basePath${document.path}"
-            ) {
+            renderDocument(path) {
                 it.replaceMultiple(map)
             }
         )
@@ -710,22 +804,11 @@ class FillDocumentService (
     }
 
     fun powerPaperText2(organization : OrganizationInfoDto): String {
-        val DOC_NUMBER_FIELD = organization.docValue?.get("DOC_NUMBER_FIELD")
-        val DATE_FIELD = organization.docValue?.get("DATE_FIELD")
-        val numField = if(DOC_NUMBER_FIELD != null && DOC_NUMBER_FIELD != "") {
-            "№$DOC_NUMBER_FIELD"
-        } else {
-            ""
-        }
-        val dateField = if(DATE_FIELD != null && DATE_FIELD != "") {
-            "от $DATE_FIELD"
-        } else {
-            ""
-        }
-        return "${DocWithEnding.getById(organization.docType).value} $numField $dateField"
+        val fields = dateNumFields(organization)
+        return "${DocWithEnding.getById(organization.docType).value} ${fields["numField"]} ${fields["dateField"]}"
     }
 
-    private fun contractHeader(org: OrganizationInfoDto): String {
+    private fun contractHeader(org: OrganizationInfoDto): String  {
         val oe = if (org.orgF == "IP") {
             "ый"
         } else {

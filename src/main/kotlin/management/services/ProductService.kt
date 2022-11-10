@@ -8,6 +8,7 @@ import management.data.products.Product
 import management.data.products.Solution
 import management.data.repositories.AccompanyingDocRepository
 import management.data.repositories.ProductRepository
+import management.forms.ProductDto
 import management.utils.FilePath.PATH_TO_ADAPTER_MICROUSB
 import management.utils.FilePath.PATH_TO_ADAPTER_MICROUSB_WHIPPY
 import management.utils.FilePath.PATH_TO_ADAPTER_TYPEC
@@ -57,14 +58,14 @@ class ProductService (private val productRepository: ProductRepository,
         return productList
     }
 
-    private fun makeProduct(product : JsonNode, docs : MutableList<AccompanyingDoc>) : Product {
+    private fun makeProduct(product : ProductDto) : Product {
         return Product(
-                alias = product.get("alias")!!.stringValue,
-                name = product.get("name")!!.stringValue,
-                comment = product.get("comment")?.stringValue ?: "",
-                price = product.get("price")!!.bigDecimalValue, // "price":123.4
-                tax = product.get("tax")?.bigDecimalValue ?: BigDecimal.ZERO,
-                currency = product.get("currency")?.stringValue ?: "",
+                alias = product.alias,
+                name = product.name,
+                comment = product.comment ?: "",
+                price = product.price, // "price":123.4
+                tax = product.tax ?: BigDecimal.ZERO,
+                currency = product.currency ?: "",
                 units = product.get("units")?.stringValue ?: "",
                 roundTotal = product.get("round_total")?.booleanValue ?: false, // "round_total":true
                 dualDocs = product.get("dual_docs")?.booleanValue ?: false, // "dual_docs":true
@@ -102,8 +103,8 @@ class ProductService (private val productRepository: ProductRepository,
         return productRepository.findByAlias(alias)
     }
 
-    fun createProduct(productData : JsonArray) : MutableList<Product> {
-        return productRepository.saveAll(makeProducts(productData)!!)
+    fun createProduct(productData : ProductDto) : MutableList<Product> {
+        return productRepository.saveAll(makeProduct(productData)!!)
     }
 
     fun updateProductName(alias: String, name : Map<String, String>) : Product {

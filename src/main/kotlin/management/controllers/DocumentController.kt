@@ -31,100 +31,98 @@ class DocumentController (
     private val documentsDateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MM-yyyy")
 
 
-    private fun step3Common(
-        period : Short,
-        count: Short,
-        fullData : DocumentDto? = null,
-        solution : Solution = solutionService.getSolutionByAlias("smart")!!,
-        partnerForm: PartnerForm = partnerService.getFormByUNP(193141246)!!
-//        partnerUNP: Int? = null
-    ) : MutableList<RenderedDocument> {
-
-
-        val equipment = productService.getAllProducts().mapNotNull {
-            val isProduct = solution.equipment.contains(productService.getProductByAlias(it.alias!!))
-            if(
-                isProduct &&
-                period >= 6.toShort() &&
-                listOf("pax930", "pax930_lancard", "pax930_promo").contains(it.alias)
-            ) {
-                it.copy(price=productService.getProductByAlias("pax930_promo")!!.price)
-            } else if(isProduct) {
-                it
-            } else {
-                null
-            }
-        }
-
-        val solutionContent = solution.contents.map { it.alias }
-        val renderedDocuments = mutableListOf<RenderedDocument>()
-
-        val billingMode = if (solutionContent.isEmpty() || solutionContent.containsAll(listOf("ikassa_register", "ikassa_license"))) {
-            IkassaBillingMode.FULL
-        } else if (solutionContent.contains("ikassa_register")) {
-            IkassaBillingMode.REGISTER
-        } else {
-            IkassaBillingMode.LICENSE
-        }
-
-        solution.contents.forEach {
-            when(it.alias) { "ikassa_register" -> {
-                when(billingMode) { IkassaBillingMode.FULL -> {
-                        val ikassaInvoice = fillDocumentService.fillIkassaInvoice(
-                            count,
-                            period,
-                            if (solutionContent.contains("dusik_r")) {
-                                "_dusik"
-                            }
-                            else {
-                                ""
-                            }
-                        )
-                        ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
-                        renderedDocuments.add(ikassaInvoice)
-                    }
-
-                    IkassaBillingMode.LICENSE -> {
-                        val ikassaInvoice = fillDocumentService.fillIkassaRegistration(count)
-                        renderedDocuments.add(ikassaInvoice)
-                    }
-
-                    IkassaBillingMode.REGISTER -> {
-                        val ikassaInvoice = fillDocumentService.fillIkassaTariff(count, period)
-                        ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
-                        renderedDocuments.add(ikassaInvoice)
-                    }
-
-                }
-
-
-            }
-                "ikassa_license_12_season" -> {
-                val licenseProduct = productService.getProductByAlias(it.alias!!)!!
-                val ikassaInvoice = fillDocumentService.fillIkassaTariff(licenseProduct, count)
-                ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
-                renderedDocuments.add(ikassaInvoice)
-            }
-                "dusik_r" -> {
-                    // FIXME
-                }
-
-                "skko_register" -> {
-                    renderedDocuments.add(fillDocumentService.fillSkkoInvoice(count))
-                }
-
-            }
-        }
-
-
-        renderedDocuments.add(fillDocumentService.renderDocument("docs",
-            fillDocumentService.getDocumentByAlias("attorney")!!
-        ))
-        renderedDocuments.addAll(
-            fillDocumentService.fillProductsDocuments(equipment, count, fullData, solution)
-        )
-        return renderedDocuments
-    }
+//    fun step3Common(
+//        period : Short,
+//        count: Short,
+//        fullData : DocumentDto? = null,
+//        solution : Solution = solutionService.getSolutionByAlias("smart")!!
+//    ) : MutableList<RenderedDocument> {
+//
+//
+//        val equipment = productService.getAllProducts().mapNotNull {
+//            val isProduct = solution.equipment.contains(productService.getProductByAlias(it.alias))
+//            if(
+//                isProduct &&
+//                period >= 6.toShort() &&
+//                listOf("pax930", "pax930_lancard", "pax930_promo").contains(it.alias)
+//            ) {
+//                it.copy(price=productService.getProductByAlias("pax930_promo")!!.price)
+//            } else if(isProduct) {
+//                it
+//            } else {
+//                null
+//            }
+//        }
+//
+//        val solutionContent = solution.contents.map { it.alias }
+//        val renderedDocuments = mutableListOf<RenderedDocument>()
+//
+//        val billingMode = if (solutionContent.isEmpty() || solutionContent.containsAll(listOf("ikassa_register", "ikassa_license"))) {
+//            IkassaBillingMode.FULL
+//        } else if (solutionContent.contains("ikassa_register")) {
+//            IkassaBillingMode.REGISTER
+//        } else {
+//            IkassaBillingMode.LICENSE
+//        }
+//
+//        solution.contents.forEach {
+//            when(it.alias) { "ikassa_register" -> {
+//                when(billingMode) { IkassaBillingMode.FULL -> {
+//                        val ikassaInvoice = fillDocumentService.fillIkassaInvoice(
+//                            count,
+//                            period,
+//                            if (solutionContent.contains("dusik_r")) {
+//                                "_dusik"
+//                            }
+//                            else {
+//                                ""
+//                            }
+//                        )
+//                        ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
+//                        renderedDocuments.add(ikassaInvoice)
+//                    }
+//
+//                    IkassaBillingMode.LICENSE -> {
+//                        val ikassaInvoice = fillDocumentService.fillIkassaRegistration(count)
+//                        renderedDocuments.add(ikassaInvoice)
+//                    }
+//
+//                    IkassaBillingMode.REGISTER -> {
+//                        val ikassaInvoice = fillDocumentService.fillIkassaTariff(count, period)
+//                        ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
+//                        renderedDocuments.add(ikassaInvoice)
+//                    }
+//
+//                }
+//
+//
+//            }
+//                "ikassa_license_12_season" -> {
+//                val licenseProduct = productService.getProductByAlias(it.alias!!)!!
+//                val ikassaInvoice = fillDocumentService.fillIkassaTariff(licenseProduct, count)
+//                ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
+//                renderedDocuments.add(ikassaInvoice)
+//            }
+//                "dusik_r" -> {
+//                    // FIXME
+//                }
+//
+//                "skko_register" -> {
+//                    renderedDocuments.add(fillDocumentService.fillSkkoInvoice(count))
+//                }
+//
+//            }
+//        }
+//
+//
+//        renderedDocuments.add(fillDocumentService.renderDocument("docs",
+//            fillDocumentService.getDocumentByAlias("attorney")!!
+//        ))
+//        renderedDocuments.addAll(
+//            fillDocumentService.fillProductsDocuments(equipment, count, fullData, solution)
+//        )
+//        return renderedDocuments
+//    }
 
     @Get("product/{alias}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -159,14 +157,13 @@ class DocumentController (
 
 
         val solution = solutionService.getSolutionByAlias(solutionName) ?: solutionService.getSolutionByAlias("smart")!!
-        val partnerForm = partnerService.getFormByUNP(partnerUnp ?: 193141246)!!
+//        val partnerForm = partnerService.getFormByUNP(partnerUnp ?: 193141246)!!
 
-        val renderedDocuments = this.step3Common(
+        val renderedDocuments = fillDocumentService.step3Common(
             period = period,
             count = count,
             fullData = null,
-            solution = solution,
-            partnerForm = partnerForm)
+            solution = solution)
 
         renderedDocuments.add(fillDocumentService.renderDocumentFromMap(
             "docs/fill_manual",
@@ -244,7 +241,7 @@ class DocumentController (
             }
         }
 
-        val renderedDocument = this.step3Common(period, count, documentInfo, solution)
+        val renderedDocument = fillDocumentService.step3Common(period, count, documentInfo, solution)
 
         if(documentInfo.contractData.organizationInfo.skkoNumber.isEmpty()) {
             renderedDocument.add(fillDocumentService.fillNewContract(documentInfo))
