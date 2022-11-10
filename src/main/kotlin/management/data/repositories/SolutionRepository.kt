@@ -9,7 +9,7 @@ import java.math.BigDecimal
 
 @Repository
 interface SolutionRepository : JpaRepository<Solution, Long> {
-    fun findByAlias(alias : String) : Solution
+    fun findByAlias(alias : String) : Solution?
     fun deleteByAlias(alias : String)
     fun updateByAlias(alias : String, name : String)
     fun updateByAlias(alias : String, price : BigDecimal)

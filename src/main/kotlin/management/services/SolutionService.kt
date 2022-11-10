@@ -7,6 +7,9 @@ import management.data.products.AccompanyingDoc
 import management.data.products.Product
 import management.data.products.Solution
 import management.data.repositories.SolutionRepository
+import management.forms.AccompanyingDocDto
+import management.forms.ProductDto
+import management.forms.SolutionDto
 
 
 @Singleton
@@ -18,6 +21,35 @@ class SolutionService (private val solutionRepository: SolutionRepository,
 
     private var defaultProducts : MutableList<Product> = mutableListOf()
 
+    fun makeSolution(solution : SolutionDto) : Solution {
+        return Solution(
+            alias = solution.alias,
+            name = solution.name,
+            contents = productService.makeProducts(solution.contents),
+            related = productService.makeProducts(solution.related),
+            price = solution.price,
+            accompanyingDoc = productService.makeAccompanyingDocs(solution.accompanyingDoc),
+            equipment = productService.makeProducts(solution.equipment),
+            extraVars = solution.extraVars,
+            legalName = solution.legalName,
+            version = solution.version,
+            forcedInstructionPdf = productService.makeAccompanyingDoc(solution.instruction)
+        )
+    }
+
+    fun makeSolutions(solutions : List<SolutionDto>) : MutableList<Solution> {
+        val newSolutions : MutableList<Solution> = mutableListOf()
+        if (solutions.isEmpty())
+            throw IllegalStateException("Not enough data in request")
+        solutions.forEach { solution ->
+            newSolutions.add(
+                solutionRepository.findByAlias(solution.alias)
+                    ?: this.makeSolution(solution)
+            )
+        }
+        return newSolutions
+    }
+
     fun getAllSolutions() : MutableList<Solution> {
         return solutionRepository.findAll()
     }
@@ -26,46 +58,12 @@ class SolutionService (private val solutionRepository: SolutionRepository,
         return solutionRepository.findByAlias(alias)
     }
 
-    fun createSolution(solutions : JsonArray) : List<Solution>? {
-        val newSolutions : MutableList<Solution> = mutableListOf()
-        (0 until solutions.size()).forEach {
-            val solution : JsonNode = solutions.get(it) ?: return null
-            newSolutions.add(
-                Solution(
-                    alias = solution.get("alias")!!.stringValue,
-                    name = solution.get("name")!!.stringValue,
-                    contents =
-                    if (solution.get("contents") != null)
-                        productService.makeProducts(solution.get("contents") as JsonArray) as List<Product>
-                    else
-                        listOf<Product>(),
-                    related =
-                    if (solution.get("related") != null)
-                        productService.makeProducts(solution.get("related") as JsonArray) as List<Product>
-                    else
-                        listOf<Product>(),
-                    price = solution.get("price")?.bigDecimalValue,
-                    accompanyingDoc =
-                    if (solution.get("accompanying_doc") != null)
-                        productService.makeAccompanyingDocs(solution.get("accompanying_doc") as JsonArray)
-                    else listOf(),
-                    equipment =
-                    if (solution.get("equipment") != null)
-                        productService.makeProducts(solution.get("equipment") as JsonArray) as List<Product>
-                    else
-                        listOf<Product>(),
-                    legalName = solution.get("legal_name")!!.stringValue,
-                    version = solution.get("version")?.stringValue ?: "2.4.0",
-                    forcedInstructionPdf =
-                    if (solution.get("solution_instruction") != null)
-                        productService.makeAccompanyingDoc(solution.get("solution_instruction")!!)
-                    else
-                        null
+    fun createSolution(solution: SolutionDto) : Solution {
+        return solutionRepository.save(makeSolution(solution))
+    }
 
-                )
-            )
-        }
-        return solutionRepository.saveAll(newSolutions)
+    fun createSolutions(solutions: List<SolutionDto>) : MutableList<Solution> {
+        return solutionRepository.saveAll(makeSolutions(solutions))
     }
 
     fun updateSolutionName(alias : String, name : Map<String, String>) {
@@ -78,55 +76,64 @@ class SolutionService (private val solutionRepository: SolutionRepository,
 
     fun updateSolutionLegalName(alias : String, legalName : Map<String, String>) : Solution {
         val solution = solutionRepository.findByAlias(alias)
+            ?: throw IllegalStateException("No such solution in database")
         solution.legalName = legalName["legal_name"]!!
         return solutionRepository.update(solution)
     }
 
     fun updateSolutionVersion(alias: String, version : Map<String, String>) : Solution {
         val solution = solutionRepository.findByAlias(alias)
+            ?: throw IllegalStateException("No such solution in database")
         solution.legalName = version["version"]!!
         return solutionRepository.update(solution)
     }
 
-    fun updateSolutionContent(alias : String, content : JsonNode) : Solution {
+    fun updateSolutionContent(alias : String, content : List<ProductDto>) : Solution {
         val solution = solutionRepository.findByAlias(alias)
-        solution.contents = productService.makeProducts(content["contents"] as JsonArray) as List<Product>
+            ?: throw IllegalStateException("No such solution in database")
+        solution.contents = productService.makeProducts(content)
         return solutionRepository.update(solution)
     }
 
-    fun updateSolutionEquipment(alias: String, equipment : JsonNode) : Solution {
+    fun updateSolutionEquipment(alias: String, equipment : List<ProductDto>) : Solution {
         val solution = solutionRepository.findByAlias(alias)
-        solution.equipment = productService.makeProducts(equipment["equipment"] as JsonArray) as List<Product>
+            ?: throw IllegalStateException("No such solution in database")
+        solution.equipment = productService.makeProducts(equipment)
         return solutionRepository.update(solution)
     }
 
-    fun updateSolutionRelated(alias : String, related : JsonNode) : Solution {
+    fun updateSolutionRelated(alias : String, related : List<ProductDto>) : Solution {
         val solution = solutionRepository.findByAlias(alias)
-        solution.related = productService.makeProducts(related["related"] as JsonArray) as List<Product>
+            ?: throw IllegalStateException("No such solution in database")
+        solution.related = productService.makeProducts(related)
         return solutionRepository.update(solution)
     }
 
-    fun updateSolutionInstruction(alias : String, instruction : JsonNode) : Solution {
+    fun updateSolutionInstruction(alias : String, instruction : AccompanyingDocDto) : Solution {
         val solution = solutionRepository.findByAlias(alias)
-        solution.forcedInstructionPdf = productService.makeAccompanyingDoc(instruction["solution_instruction"]!!)
+            ?: throw IllegalStateException("No such solution in database")
+        solution.forcedInstructionPdf = productService.makeAccompanyingDoc(instruction)
         return solutionRepository.update(solution)
     }
 
-    fun addSolutionContent(alias : String, content : JsonNode) : Solution {
+    fun addSolutionContent(alias : String, content : List<ProductDto>) : Solution {
         val solution = solutionRepository.findByAlias(alias)
-        solution.contents += productService.makeProducts(content["contents"] as JsonArray) as List<Product>
+            ?: throw IllegalStateException("No such solution in database")
+        solution.contents += productService.makeProducts(content)
         return solutionRepository.update(solution)
     }
 
-    fun addSolutionEquipment(alias: String, equipment : JsonNode) : Solution {
+    fun addSolutionEquipment(alias: String, equipment : List<ProductDto>) : Solution {
         val solution = solutionRepository.findByAlias(alias)
-        solution.equipment += productService.makeProducts(equipment["equipment"] as JsonArray) as List<Product>
+            ?: throw IllegalStateException("No such solution in database")
+        solution.equipment += productService.makeProducts(equipment)
         return solutionRepository.update(solution)
     }
 
-    fun addSolutionRelated(alias : String, related : JsonNode) : Solution {
+    fun addSolutionRelated(alias : String, related : List<ProductDto>) : Solution {
         val solution = solutionRepository.findByAlias(alias)
-        solution.related += productService.makeProducts(related["related"] as JsonArray) as List<Product>
+            ?: throw IllegalStateException("No such solution in database")
+        solution.related += productService.makeProducts(related)
         return solutionRepository.update(solution)
     }
 

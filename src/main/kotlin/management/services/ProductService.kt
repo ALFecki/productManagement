@@ -1,7 +1,5 @@
 package management.services
 
-import io.micronaut.json.tree.JsonArray
-import io.micronaut.json.tree.JsonNode
 import jakarta.inject.Singleton
 import management.data.products.AccompanyingDoc
 import management.data.products.Product
@@ -16,7 +14,6 @@ import management.utils.FilePath.PATH_TO_AZUR8223
 import management.utils.FilePath.PATH_TO_AZUR8223_BELVTI
 import management.utils.FilePath.PATH_TO_AZUR_FM
 import management.utils.FilePath.PATH_TO_AZUR_FM_BELVTI
-import java.math.BigDecimal
 import management.utils.FilePath.PATH_TO_FM
 import management.utils.FilePath.PATH_TO_NEXGO
 import management.utils.FilePath.PATH_TO_PAX910
@@ -25,6 +22,7 @@ import management.utils.FilePath.PATH_TO_PAX930_BAG
 import management.utils.FilePath.PATH_TO_PRINTER_RPP02A
 import management.utils.FilePath.PATH_TO_PRINTER_RPP02N
 import management.utils.toFixed
+import java.math.BigDecimal
 
 
 @Singleton
@@ -56,9 +54,9 @@ class ProductService (private val productRepository: ProductRepository,
                 tax = product.tax ?: BigDecimal.ZERO,
                 currency = product.currency ?: "",
                 units = product.units ?: "", // FIXME
-                roundTotal = product.roundTotal, // "round_total":true
-                dualDocs = product.dualDocs, // "dual_docs":true
-                accompanyingDocs = makeAccompanyingDocs(product.accompanyingDocs)
+                roundTotal = product.roundTotal ?: false, // "round_total":true
+                dualDocs = product.dualDocs ?: false, // "dual_docs":true
+                accompanyingDocs = makeAccompanyingDocs(product.accompanyingDocs ?: listOf())
             )
     }
     fun makeAccompanyingDoc(doc : AccompanyingDocDto) : AccompanyingDoc {

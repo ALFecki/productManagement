@@ -26,11 +26,11 @@ data class ProductDto(
     val units : String?,
 
     @JsonProperty("round_total")
-    val roundTotal : Boolean,
+    val roundTotal : Boolean? = false,
 
     @JsonProperty("accompanying_docs")
-    val accompanyingDocs : List<AccompanyingDocDto>,
+    val accompanyingDocs : List<AccompanyingDocDto>? = listOf(),
 
     @JsonProperty("dual_docs")
-    val dualDocs : Boolean
+    val dualDocs : Boolean? = false
 )

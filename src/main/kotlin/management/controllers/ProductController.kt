@@ -8,6 +8,7 @@ import io.micronaut.http.annotation.Post
 import io.micronaut.json.tree.JsonArray
 import io.micronaut.json.tree.JsonNode
 import management.data.products.Product
+import management.forms.AccompanyingDocDto
 import management.forms.ProductDto
 import management.services.ProductService
 import java.math.BigDecimal
@@ -37,8 +38,13 @@ class ProductController(private val productService: ProductService) {
     }
 
     @Post("/create")
-    fun createProduct(@Body requestData : ProductDto) : MutableList<Product>? {
+    fun createProduct(@Body requestData : ProductDto) : Product {
         return productService.createProduct(requestData)
+    }
+
+    @Post("/create/list") // FIXME хз, какой запрос сделать
+    fun createProducts(@Body requestData: List<ProductDto>) : MutableList<Product> {
+        return productService.createProducts(requestData)
     }
 
     @Post("/update/name/{alias}")
@@ -68,12 +74,12 @@ class ProductController(private val productService: ProductService) {
     }
 
     @Post("/update/docs/{alias}")
-    fun updateAccompanyingDocs(@PathVariable alias : String, @Body docs : JsonNode) : Product? {
+    fun updateAccompanyingDocs(@PathVariable alias : String, @Body docs : List<AccompanyingDocDto>) : Product? {
         return productService.updateProductDocs(alias, docs)
     }
 
     @Post("/add/docs/{alias}")
-    fun addAccompanyingDocs(@PathVariable alias : String, @Body docs : JsonNode) : Product? {
+    fun addAccompanyingDocs(@PathVariable alias : String, @Body docs : List<AccompanyingDocDto>) : Product? {
         return productService.addProductDocs(alias, docs)
     }
 
