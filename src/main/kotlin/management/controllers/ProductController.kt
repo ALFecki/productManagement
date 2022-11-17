@@ -1,10 +1,13 @@
 package management.controllers
 
+import com.fasterxml.jackson.annotation.JsonValue
 import io.micronaut.http.annotation.*
 import management.data.products.Product
+import management.data.utils.UpdateProduct
 import management.forms.AccompanyingDocDto
 import management.forms.ProductDto
 import management.services.ProductService
+import org.hibernate.sql.Update
 import java.math.BigDecimal
 
 
@@ -36,35 +39,40 @@ class ProductController(private val productService: ProductService) {
         return productService.createProduct(requestData)
     }
 
-    @Post("/create/list") // FIXME хз, какой запрос сделать
+    @Post("/create/list")
     fun createProducts(@Body requestData: List<ProductDto>): MutableList<Product> {
         return productService.createProducts(requestData)
     }
 
     @Post("/update/name/{alias}")
-    fun updateProductName(@PathVariable alias: String, @Body name: Map<String, String>): Product {
-        return productService.updateProductName(alias, name)
+    fun updateProductName(@PathVariable alias: String, @Body requestData: UpdateProduct): Product {
+        return productService.updateProductName(alias, requestData)
     }
 
     @Post("/update/comment/{alias}")
-    fun updateProductComment(@PathVariable alias: String, @Body comment: Map<String, String>): Product {
-        return productService.updateProductComment(alias, comment)
+    fun updateProductComment(@PathVariable alias: String, @Body requestData: UpdateProduct): Product {
+        return productService.updateProductComment(alias, requestData)
     }
 
 
     @Post("/update/price/{alias}")
-    fun updateProductPrice(@PathVariable alias: String, @Body price: Map<String, BigDecimal>): Product {
-        return productService.updateProductPrice(alias, price)
+    fun updateProductPrice(@PathVariable alias: String, @Body requestData: UpdateProduct): Product {
+        return productService.updateProductPrice(alias, requestData)
     }
 
     @Post("/update/tax/{alias}")
-    fun updateProductTax(@PathVariable alias: String, @Body tax: Map<String, BigDecimal>): Product {
-        return productService.updateProductTax(alias, tax)
+    fun updateProductTax(@PathVariable alias: String, @Body requestData: UpdateProduct): Product {
+        return productService.updateProductTax(alias, requestData)
     }
 
     @Post("/update/dual_docs/{alias}")
-    fun updateProductDualDocs(@PathVariable alias: String, @Body dualDocs: Map<String, Boolean>): Product {
-        return productService.updateProductDualDocs(alias, dualDocs)
+    fun updateProductDualDocs(@PathVariable alias: String, @Body requestData: UpdateProduct): Product {
+        return productService.updateProductDualDocs(alias, requestData)
+    }
+
+    @Post("/update/round_total/{alias}")
+    fun updateProductRoundTotal(@PathVariable alias : String, @Body requestData: UpdateProduct) : Product {
+        return productService.updateProductRoundTotal(alias, requestData)
     }
 
     @Post("/update/docs/{alias}")

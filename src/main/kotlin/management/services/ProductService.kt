@@ -5,6 +5,7 @@ import management.data.products.AccompanyingDoc
 import management.data.products.Product
 import management.data.repositories.AccompanyingDocRepository
 import management.data.repositories.ProductRepository
+import management.data.utils.UpdateProduct
 import management.forms.AccompanyingDocDto
 import management.forms.ProductDto
 import management.utils.FilePath.PATH_TO_ADAPTER_MICROUSB
@@ -98,47 +99,54 @@ class ProductService(
         return productRepository.saveAll(makeProducts(products))
     }
 
-    fun updateProductName(alias: String, name: Map<String, String>): Product {
+    fun updateProductName(alias: String, requestData: UpdateProduct): Product {
         val product = productRepository.findByAlias(alias)
             ?: throw IllegalStateException("Cannot find product with alias $alias")
-        product.name = name["name"]
+        product.name = requestData.name
             ?: throw IllegalStateException("No data in request")
         return productRepository.update(product)
     }
 
-    fun updateProductComment(alias: String, comment: Map<String, String>): Product {
+    fun updateProductComment(alias: String, requestData: UpdateProduct): Product {
         val product = productRepository.findByAlias(alias)
             ?: throw IllegalStateException("Cannot find product with alias $alias")
-        product.comment = comment["comment"]
+        product.comment = requestData.comment
             ?: throw IllegalStateException("No data in request")
         return productRepository.update(product)
     }
 
 
-    fun updateProductPrice(alias: String, price: Map<String, BigDecimal>): Product {
+    fun updateProductPrice(alias: String, requestData: UpdateProduct): Product {
         val product = productRepository.findByAlias(alias)
             ?: throw IllegalStateException("Cannot find product with alias $alias")
-        product.price = price["price"]
+        product.price = requestData.price
             ?: throw IllegalStateException("No data in request")
         return productRepository.update(product)
     }
 
-    fun updateProductTax(alias: String, tax: Map<String, BigDecimal>): Product {
+    fun updateProductTax(alias: String, requestData: UpdateProduct): Product {
         val product = productRepository.findByAlias(alias)
             ?: throw IllegalStateException("Cannot find product with alias $alias")
-        product.tax = tax["tax"]
+        product.tax = requestData.tax
             ?: throw IllegalStateException("No data in request")
         return productRepository.update(product)
     }
 
-    fun updateProductDualDocs(alias: String, dualDocs: Map<String, Boolean>): Product {
+    fun updateProductDualDocs(alias: String, requestData: UpdateProduct): Product {
         val product = productRepository.findByAlias(alias)
             ?: throw IllegalStateException("Cannot find product with alias $alias")
-        product.dualDocs = dualDocs["dual_docs"]
+        product.dualDocs = requestData.dualDocs
             ?: throw IllegalStateException("No data in request")
         return productRepository.update(product)
     }
 
+    fun updateProductRoundTotal(alias: String, requestData: UpdateProduct) : Product {
+        val product = productRepository.findByAlias(alias)
+            ?: throw IllegalStateException("Cannot find product with alias $alias")
+        product.dualDocs = requestData.roundTotal
+            ?: throw IllegalStateException("No data in request")
+        return productRepository.update(product)
+    }
     fun updateProductDocs(alias: String, docs: List<AccompanyingDocDto>): Product? {
         val product = productRepository.findByAlias(alias) ?: throw (Exception("No such product in database"))
         product.accompanyingDocs = makeAccompanyingDocs(docs)

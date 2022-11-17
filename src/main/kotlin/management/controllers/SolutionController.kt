@@ -2,6 +2,7 @@ package management.controllers
 
 import io.micronaut.http.annotation.*
 import management.data.products.Solution
+import management.data.utils.UpdateSolution
 import management.forms.AccompanyingDocDto
 import management.forms.ProductDto
 import management.forms.SolutionDto
@@ -32,33 +33,18 @@ class SolutionController(private val solutionService: SolutionService) {
     }
 
     @Post("/update/name/{alias}")
-    fun updateSolutionName(@PathVariable alias: String, @Body name: Map<String, String>) {
-        return solutionService.updateSolutionName(alias, name)
-    }
-
-    @Post("/update/price/{alias}")
-    fun updateSolutionPrice(@PathVariable alias: String, @Body price: Map<String, String>) {
-        return solutionService.updateSolutionPrice(alias, price)
-    }
-
-    @Post("/update/legal_name/{alias}")
-    fun updateSolutionLegalName(@PathVariable alias: String, @Body legal_name: Map<String, String>): Solution {
-        return solutionService.updateSolutionLegalName(alias, legal_name)
-    }
-
-    @Post("/update/version/{alias}")
-    fun updateSolutionVersion(@PathVariable alias: String, @Body version: Map<String, String>): Solution {
-        return solutionService.updateSolutionVersion(alias, version)
+    fun updateSolutionName(@PathVariable alias: String, @Body requestData: UpdateSolution) : Solution {
+        return solutionService.updateSolutionName(alias, requestData)
     }
 
     @Post("/update/content/{alias}")
-    fun updateSolutionVersion(@PathVariable alias: String, @Body content: List<ProductDto>): Solution {
+    fun updateSolutionContent(@PathVariable alias: String, @Body content: List<ProductDto>): Solution {
         return solutionService.updateSolutionContent(alias, content)
     }
 
-    @Post("/update/equipment/{alias}")
-    fun updateSolutionEquipment(@PathVariable alias: String, @Body equipment: List<ProductDto>): Solution {
-        return solutionService.updateSolutionEquipment(alias, equipment)
+    @Post("/add/content/{alias}")
+    fun addSolutionContent(@PathVariable alias: String, @Body content: List<ProductDto>): Solution {
+        return solutionService.addSolutionContent(alias, content)
     }
 
     @Post("/update/related/{alias}")
@@ -66,14 +52,29 @@ class SolutionController(private val solutionService: SolutionService) {
         return solutionService.updateSolutionRelated(alias, related)
     }
 
-    @Post("/update/instruction/{alias}")
-    fun updateSolutionInstruction(@PathVariable alias: String, @Body instruction: AccompanyingDocDto): Solution {
-        return solutionService.updateSolutionInstruction(alias, instruction)
+    @Post("/add/related/{alias}")
+    fun addSolutionRelated(@PathVariable alias: String, @Body related: List<ProductDto>): Solution {
+        return solutionService.addSolutionRelated(alias, related)
     }
 
-    @Post("/add/content/{alias}")
-    fun addSolutionVersion(@PathVariable alias: String, @Body content: List<ProductDto>): Solution {
-        return solutionService.addSolutionContent(alias, content)
+    @Post("/update/price/{alias}")
+    fun updateSolutionPrice(@PathVariable alias: String, @Body requestData: UpdateSolution) : Solution {
+        return solutionService.updateSolutionPrice(alias, requestData)
+    }
+
+    @Post("/update/accompanying_doc/{alias}")
+    fun updateSolutionAccompanyingDoc(@PathVariable alias: String, @Body requestData: List<AccompanyingDocDto>) : Solution {
+        return solutionService.updateSolutionAccompanyingDoc(alias, requestData)
+    }
+
+    @Post("/add/accompanying_doc/{alias}")
+    fun addSolutionAccompanyingDoc(@PathVariable alias: String, @Body requestData: List<AccompanyingDocDto>) : Solution {
+        return solutionService.addSolutionAccompanyingDoc(alias, requestData)
+    }
+
+    @Post("/update/equipment/{alias}")
+    fun updateSolutionEquipment(@PathVariable alias: String, @Body equipment: List<ProductDto>): Solution {
+        return solutionService.updateSolutionEquipment(alias, equipment)
     }
 
     @Post("/add/equipment/{alias}")
@@ -81,9 +82,24 @@ class SolutionController(private val solutionService: SolutionService) {
         return solutionService.addSolutionEquipment(alias, equipment)
     }
 
-    @Post("/add/related/{alias}")
-    fun addSolutionRelated(@PathVariable alias: String, @Body related: List<ProductDto>): Solution {
-        return solutionService.addSolutionRelated(alias, related)
+    @Post("update/extra_vars/{alias}")
+    fun updateSolutionExtraVars(@PathVariable alias: String, @Body requestData: UpdateSolution) : Solution {
+        return solutionService.updateSolutionExtraVars(alias, requestData)
+    }
+
+    @Post("/update/legal_name/{alias}")
+    fun updateSolutionLegalName(@PathVariable alias: String, @Body requestData: UpdateSolution): Solution {
+        return solutionService.updateSolutionLegalName(alias, requestData)
+    }
+
+    @Post("/update/version/{alias}")
+    fun updateSolutionVersion(@PathVariable alias: String, @Body requestData: UpdateSolution): Solution {
+        return solutionService.updateSolutionVersion(alias, requestData)
+    }
+
+    @Post("/update/instruction/{alias}")
+    fun updateSolutionInstruction(@PathVariable alias: String, @Body instruction: AccompanyingDocDto): Solution {
+        return solutionService.updateSolutionInstruction(alias, instruction)
     }
 
     @Get("/delete/{alias}")

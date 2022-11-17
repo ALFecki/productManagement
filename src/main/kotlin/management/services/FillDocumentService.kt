@@ -844,7 +844,7 @@ class FillDocumentService(
 
     fun renderDocumentFromMap(_basePath: String, document: Document, map: Map<String, String?>): RenderedDocument {
         val basePath = _basePath.trimEnd('/')
-        val path = "$basePath${document.path}"
+        val path = "$basePath/${document.path}"
         return RenderedDocument(
             document.name,
             renderDocument(path) {

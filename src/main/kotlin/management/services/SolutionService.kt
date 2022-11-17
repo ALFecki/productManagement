@@ -5,6 +5,7 @@ import management.data.products.AccompanyingDoc
 import management.data.products.Product
 import management.data.products.Solution
 import management.data.repositories.SolutionRepository
+import management.data.utils.UpdateSolution
 import management.forms.AccompanyingDocDto
 import management.forms.ProductDto
 import management.forms.SolutionDto
@@ -13,9 +14,7 @@ import management.forms.SolutionDto
 @Singleton
 class SolutionService(
     private val solutionRepository: SolutionRepository,
-    private val productService: ProductService,
-//                       private val fillDocumentService: FillDocumentService,
-//                       private val partnerService: PartnerService
+    private val productService: ProductService
 ) {
 
     private var defaultProducts: MutableList<Product> = mutableListOf()
@@ -65,25 +64,11 @@ class SolutionService(
         return solutionRepository.saveAll(makeSolutions(solutions))
     }
 
-    fun updateSolutionName(alias: String, name: Map<String, String>) {
-        return solutionRepository.updateByAlias(alias, name["name"]!!)
-    }
-
-    fun updateSolutionPrice(alias: String, price: Map<String, String>) {
-        return solutionRepository.updateByAlias(alias, price["price"]!!.toBigDecimal())
-    }
-
-    fun updateSolutionLegalName(alias: String, legalName: Map<String, String>): Solution {
+    fun updateSolutionName(alias: String, requestData: UpdateSolution) : Solution {
         val solution = solutionRepository.findByAlias(alias)
             ?: throw IllegalStateException("No such solution in database")
-        solution.legalName = legalName["legal_name"]!!
-        return solutionRepository.update(solution)
-    }
-
-    fun updateSolutionVersion(alias: String, version: Map<String, String>): Solution {
-        val solution = solutionRepository.findByAlias(alias)
-            ?: throw IllegalStateException("No such solution in database")
-        solution.legalName = version["version"]!!
+        solution.name = requestData.name
+            ?: throw IllegalStateException("No data in request")
         return solutionRepository.update(solution)
     }
 
@@ -94,10 +79,10 @@ class SolutionService(
         return solutionRepository.update(solution)
     }
 
-    fun updateSolutionEquipment(alias: String, equipment: List<ProductDto>): Solution {
+    fun addSolutionContent(alias: String, content: List<ProductDto>): Solution {
         val solution = solutionRepository.findByAlias(alias)
             ?: throw IllegalStateException("No such solution in database")
-        solution.equipment = productService.makeProducts(equipment)
+        solution.contents += productService.makeProducts(content)
         return solutionRepository.update(solution)
     }
 
@@ -108,17 +93,39 @@ class SolutionService(
         return solutionRepository.update(solution)
     }
 
-    fun updateSolutionInstruction(alias: String, instruction: AccompanyingDocDto): Solution {
+    fun addSolutionRelated(alias: String, related: List<ProductDto>): Solution {
         val solution = solutionRepository.findByAlias(alias)
             ?: throw IllegalStateException("No such solution in database")
-        solution.forcedInstructionPdf = productService.makeAccompanyingDoc(instruction)
+        solution.related += productService.makeProducts(related)
         return solutionRepository.update(solution)
     }
 
-    fun addSolutionContent(alias: String, content: List<ProductDto>): Solution {
+    fun updateSolutionPrice(alias: String, requestData: UpdateSolution) : Solution {
         val solution = solutionRepository.findByAlias(alias)
             ?: throw IllegalStateException("No such solution in database")
-        solution.contents += productService.makeProducts(content)
+        solution.price = requestData.price
+            ?: throw IllegalStateException("No data in request")
+        return solutionRepository.update(solution)
+    }
+
+    fun updateSolutionAccompanyingDoc(alias: String, requestData: List<AccompanyingDocDto>) : Solution {
+        val solution = solutionRepository.findByAlias(alias)
+            ?: throw IllegalStateException("No such solution in database")
+        solution.accompanyingDoc = productService.makeAccompanyingDocs(requestData)
+        return solutionRepository.update(solution)
+    }
+
+    fun addSolutionAccompanyingDoc(alias: String, requestData: List<AccompanyingDocDto>) : Solution {
+        val solution = solutionRepository.findByAlias(alias)
+            ?: throw IllegalStateException("No such solution in database")
+        solution.accompanyingDoc += productService.makeAccompanyingDocs(requestData)
+        return solutionRepository.update(solution)
+    }
+
+    fun updateSolutionEquipment(alias: String, equipment: List<ProductDto>): Solution {
+        val solution = solutionRepository.findByAlias(alias)
+            ?: throw IllegalStateException("No such solution in database")
+        solution.equipment = productService.makeProducts(equipment)
         return solutionRepository.update(solution)
     }
 
@@ -129,10 +136,34 @@ class SolutionService(
         return solutionRepository.update(solution)
     }
 
-    fun addSolutionRelated(alias: String, related: List<ProductDto>): Solution {
+    fun updateSolutionExtraVars(alias: String, requestData: UpdateSolution) : Solution {
         val solution = solutionRepository.findByAlias(alias)
             ?: throw IllegalStateException("No such solution in database")
-        solution.related += productService.makeProducts(related)
+        solution.extraVars = requestData.extraVars
+            ?: throw IllegalStateException("No data in request")
+        return solutionRepository.update(solution)
+    }
+
+    fun updateSolutionLegalName(alias: String, requestData: UpdateSolution): Solution {
+        val solution = solutionRepository.findByAlias(alias)
+            ?: throw IllegalStateException("No such solution in database")
+        solution.legalName = requestData.legalName
+            ?: throw IllegalStateException("No data in request")
+        return solutionRepository.update(solution)
+    }
+
+    fun updateSolutionVersion(alias: String, requestData: UpdateSolution): Solution {
+        val solution = solutionRepository.findByAlias(alias)
+            ?: throw IllegalStateException("No such solution in database")
+        solution.version = requestData.version
+            ?: throw IllegalStateException("No data in request")
+        return solutionRepository.update(solution)
+    }
+
+    fun updateSolutionInstruction(alias: String, instruction: AccompanyingDocDto): Solution {
+        val solution = solutionRepository.findByAlias(alias)
+            ?: throw IllegalStateException("No such solution in database")
+        solution.forcedInstructionPdf = productService.makeAccompanyingDoc(instruction)
         return solutionRepository.update(solution)
     }
 

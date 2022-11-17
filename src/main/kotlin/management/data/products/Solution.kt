@@ -18,7 +18,7 @@ data class Solution(
     val alias: String,
 
     @Column(name = "name")
-    val name: String,
+    var name: String,
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @ManyToMany(
@@ -47,7 +47,7 @@ data class Solution(
     var related: List<Product> = listOf(),
 
     @Column(name = "price")
-    val price: BigDecimal? = null, // WHY?
+    var price: BigDecimal? = null, // WHY?
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @ManyToMany(
@@ -78,13 +78,13 @@ data class Solution(
 
     @Column(name = "extra_vars")
     @Type(type = "jsonb")
-    val extraVars: Map<String, String> = mapOf(),
+    var extraVars: Map<String, String> = mapOf(),
 
     @Column(name = "legal_name")
     var legalName: String,
 
     @Column(name = "version")
-    val version: String = "2.4.0",
+    var version: String = "2.4.0",
 
 
     @LazyCollection(LazyCollectionOption.FALSE)

@@ -3,6 +3,7 @@ package management.controllers
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.MediaType
 import io.micronaut.http.annotation.*
+import io.micronaut.http.server.types.files.SystemFile
 import io.micronaut.scheduling.TaskExecutors
 import io.micronaut.scheduling.annotation.ExecuteOn
 import management.data.docs.Document
@@ -30,10 +31,10 @@ class DocumentController(
 
     @Get("product/{alias}")
     @Produces(MediaType.APPLICATION_JSON)
-    fun getDocForProduct(@PathVariable alias: String, @QueryValue(defaultValue = "1") count: Short): HttpResponse<*> {
-        val product = productService.getProductByAlias(alias) ?: return notFound()
+    fun getDocForProduct(@PathVariable alias: String, @QueryValue(defaultValue = "1") count: Short): SystemFile {
+        val product = productService.getProductByAlias(alias) ?: /*return notFound()*/ throw IllegalStateException()
         val renderedDocuments = fillDocumentService.fillProductsDocuments(listOf(product), count)
-        val productDocument = renderedDocuments.firstOrNull() ?: return notFound()
+        val productDocument = renderedDocuments.firstOrNull() ?: /*return notFound()*/  throw IllegalStateException()
         return if (renderedDocuments.count() > 1) {
             serveFile(
                 fillDocumentService.createZipArchive(renderedDocuments),
@@ -57,7 +58,7 @@ class DocumentController(
         @QueryValue(defaultValue = "1") period: Short,
         @QueryValue(defaultValue = "smart") solutionName: String,
         @QueryValue(defaultValue = "") partnerUnp: Int? = null
-    ): HttpResponse<*> {
+    ): SystemFile {
 
 
         val solution = solutionService.getSolutionByAlias(solutionName) ?: solutionService.getSolutionByAlias("smart")!!
@@ -145,7 +146,7 @@ class DocumentController(
     @Post("/step3")
     @Produces("application/zip")
     @ExecuteOn(TaskExecutors.IO)
-    fun step3Post(@Body documentInfo: DocumentDto): HttpResponse<*> {
+    fun step3Post(@Body documentInfo: DocumentDto): SystemFile {
         println("STEP3")
 //        val form  = partnerService.getFormByUNP(documentInfo.equipment["partner_unp"]!!.toInt())
 //            ?: partnerService.
