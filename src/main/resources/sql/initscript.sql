@@ -1,8 +1,8 @@
 DROP SCHEMA ikassa CASCADE;
-DROP SCHEMA public CASCADE;
+-- DROP SCHEMA public CASCADE;
 
-CREATE SCHEMA public
-    AUTHORIZATION root;
+-- CREATE SCHEMA public
+--     AUTHORIZATION root;
 
 CREATE SCHEMA ikassa
     AUTHORIZATION root; -- need to be refactored (testing example)
@@ -124,7 +124,6 @@ CREATE TABLE ikassa."partner_form" (
     "name" character varying NOT NULL,
     "logo" character varying NOT NULL,
     "name_remap" jsonb,
-    "email_mode" character varying, --NOT NULL,
     "emails" character varying[],
     "allow_manual" boolean,
     "description" character varying,
@@ -143,6 +142,25 @@ CREATE TABLE ikassa."form_solution" (
     FOREIGN KEY ("solution_id") REFERENCES ikassa."solution"("solution_id")
 );
 ALTER TABLE IF EXISTS ikassa."form_solution"
+    OWNER TO root;
+
+CREATE TABLE ikassa."email_mode" (
+    "email_mode_id" bigserial NOT NULL,
+    "name" character varying,
+    "send_to_client" boolean,
+    "send_to_partner" boolean,
+    PRIMARY KEY ("email_mode_id")
+);
+ALTER TABLE IF EXISTS ikassa."email_mode"
+    OWNER TO root;
+
+CREATE TABLE ikassa."partner_form_email_mode" (
+    "partner_form_id" bigint,
+    "email_mode_id" bigint,
+    FOREIGN KEY ("partner_form_id") REFERENCES ikassa."partner_form"("partner_form_id"),
+    FOREIGN KEY ("email_mode_id") REFERENCES ikassa."email_mode"("email_mode_id")
+);
+ALTER TABLE IF EXISTS ikassa."partner_form_email_mode"
     OWNER TO root;
 
 

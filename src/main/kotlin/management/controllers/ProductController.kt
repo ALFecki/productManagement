@@ -1,14 +1,11 @@
 package management.controllers
 
-import com.fasterxml.jackson.annotation.JsonValue
 import io.micronaut.http.annotation.*
 import management.data.products.Product
 import management.data.utils.UpdateProduct
 import management.forms.AccompanyingDocDto
 import management.forms.ProductDto
 import management.services.ProductService
-import org.hibernate.sql.Update
-import java.math.BigDecimal
 
 
 @Controller("/products")
@@ -22,11 +19,6 @@ class ProductController(private val productService: ProductService) {
     @Get("/{alias}")
     fun getProductByAlias(@PathVariable alias: String): Product? {
         return productService.getProductByAlias(alias)
-    }
-
-    @Get("/export/default")
-    fun exportDefaultProducts(): List<Product> {
-        return productService.exportDefault()
     }
 
     @Get("/delete/{alias}")

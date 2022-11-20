@@ -1,9 +1,8 @@
 package management.controllers
 
-import io.micronaut.http.annotation.Controller
-import io.micronaut.http.annotation.Get
-import io.micronaut.http.annotation.PathVariable
+import io.micronaut.http.annotation.*
 import management.data.products.PartnerForm
+import management.forms.PartnerFormDto
 import management.services.PartnerService
 
 
@@ -25,9 +24,9 @@ class PartnerController(private val partnerService: PartnerService) {
         return partnerService.getFormByAlias(slug)
     }
 
-    @Get("/export/default")
-    fun exportDefaultForms(): List<PartnerForm> {
-        return partnerService.exportDefault()
+    @Post("/create")
+    fun createPartnerForm(@Body requestData: PartnerFormDto) : PartnerForm {
+        return partnerService.createPartnerForm(requestData)
     }
 
 }
