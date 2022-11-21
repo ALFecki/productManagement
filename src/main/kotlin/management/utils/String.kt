@@ -3,7 +3,6 @@ package management.utils
 import com.itextpdf.html2pdf.ConverterProperties
 import com.itextpdf.html2pdf.HtmlConverter
 import java.io.ByteArrayOutputStream
-import java.util.*
 
 fun String.ellipsis(length: Short): String {
     return if (this.count() > length) {
@@ -23,7 +22,7 @@ fun String.replaceMultiple(what: HashMap<String, String>): String {
 
 fun String.toPDF(): ByteArray {
     val out = ByteArrayOutputStream()
-    HtmlConverter.convertToPdf(this, out, ConverterProperties());
+    HtmlConverter.convertToPdf(this, out, ConverterProperties())
     val result = out.toByteArray()
     out.close()
     return result

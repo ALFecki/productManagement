@@ -15,12 +15,12 @@ class PartnerController(private val partnerService: PartnerService) {
     }
 
     @Get("/{unp}")
-    fun getPartnerFormByUNP(@PathVariable unp: Int): PartnerForm? {
+    fun getPartnerFormByUNP(@PathVariable unp: Int): PartnerForm {
         return partnerService.getFormByUNP(unp)
     }
 
     @Get("/{slug}")
-    fun getPartnerFormBySlug(@PathVariable slug: String): PartnerForm? {
+    fun getPartnerFormBySlug(@PathVariable slug: String): PartnerForm {
         return partnerService.getFormByAlias(slug)
     }
 

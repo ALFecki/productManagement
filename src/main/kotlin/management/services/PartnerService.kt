@@ -3,7 +3,6 @@ package management.services
 import jakarta.inject.Singleton
 import management.data.products.PartnerForm
 import management.data.repositories.PartnerFormRepository
-import management.data.utils.PartnerFormEmailMode
 import management.forms.PartnerEmailModeDto
 import management.forms.PartnerFormDto
 
@@ -19,7 +18,7 @@ class PartnerService(
             unp = data.unp,
             name = data.name,
             logo = data.logo,
-            solutions = solutionService.makeSolutions(data.solutions),
+            solutions = solutionService.makeSolutions(data.solutions, true),
             nameRemap = data.nameRemap,
             partnerEmail = data.partnerEmail.toTypedArray(),
             allowManual = data.allowManual,
@@ -33,11 +32,11 @@ class PartnerService(
         return partnerFormRepository.findAll()
     }
 
-    fun getFormByUNP(UNP: Int): PartnerForm? {
-        return partnerFormRepository.findByUNP(UNP)
+    fun getFormByUNP(UNP: Int): PartnerForm {
+        return partnerFormRepository.findByUnp(UNP)
     }
 
-    fun getFormByAlias(slug: String): PartnerForm? {
+    fun getFormByAlias(slug: String): PartnerForm {
         return partnerFormRepository.findBySlug(slug)
     }
 

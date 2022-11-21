@@ -12,31 +12,30 @@ data class SolutionDto(
     val name: String,
 
     @JsonProperty("contents")
-    val contents: List<ProductDto>,
+    val contents: List<ProductDto> = listOf(),
 
     @JsonProperty("related")
-    val related: List<ProductDto>,
+    val related: List<ProductDto> = listOf(),
 
     @JsonProperty("price")
-    val price: BigDecimal,
+    val price: BigDecimal? = null,
 
     @JsonProperty("accompanying_docs")
-    val accompanyingDoc: List<AccompanyingDocDto>,
+    val accompanyingDoc: List<AccompanyingDocDto> = listOf(),
 
     @JsonProperty("equipment")
-    val equipment: List<ProductDto>,
+    val equipment: List<ProductDto> = listOf(),
 
     @JsonProperty("extra_vars")
-    val extraVars: Map<String, String>,
+    val extraVars: Map<String, String> = mapOf(),
 
     @JsonProperty("legal_name")
     val legalName: String,
 
     @JsonProperty("version")
-    val version: String,
+    val version: String = "2.4.0",
 
     @JsonProperty("instruction")
-    val instruction: AccompanyingDocDto
+    val instruction: AccompanyingDocDto? = null
 
-) {
-}
+)

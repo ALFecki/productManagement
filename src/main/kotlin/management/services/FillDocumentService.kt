@@ -3,13 +3,11 @@ package management.services
 import jakarta.inject.Singleton
 import management.controllers.DocumentController
 import management.data.docs.Document
-import management.data.docs.RenderedDocument
 import management.data.products.AccompanyingDoc
 import management.data.products.Product
 import management.data.products.ProductTotal
 import management.data.products.Solution
 import management.data.repositories.DocumentRepository
-import management.data.utils.Util
 import management.data.utils.UtilsRepository
 import management.forms.DocumentDto
 import management.forms.FancyMailBodyFragmentDto
@@ -18,6 +16,7 @@ import management.utils.*
 import org.apache.poi.xwpf.usermodel.*
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import java.util.*
 import java.util.zip.ZipOutputStream
 
 
@@ -266,7 +265,7 @@ class FillDocumentService(
     }
 
     fun fillSkkoInvoice(quantity: Short = 1): RenderedDocument {
-        val oneMonthLicense = "skko_license"
+//        val oneMonthLicense = "skko_license"
 
         val license6 = productService.getProductByAlias("skko_license_6")
             ?: throw IllegalStateException("Cannot find skko license product")
@@ -403,9 +402,6 @@ class FillDocumentService(
     }
 
     fun fillSkoAct(org: OrganizationInfoDto, quantity: Short = 1): RenderedDocument {
-        val connection = productService.getProductByAlias("ikassa_register")
-            ?: throw IllegalStateException("Cannot find ikassa registration product")
-        val connectionTotal = connection.toTotal(1)
         val document = documentRepository.findByAlias("sko_act")!!
         return RenderedDocument(document.name, renderDocument("docs/fill_auto/${document.path}") { skoActDocument ->
             skoActDocument.replaceMultiple(
@@ -444,7 +440,7 @@ class FillDocumentService(
             trade.forEachIndexed { tradePointIndex, tradePoint ->
                 val tradePointWorkTime = tradePoint.strTimeWork.joinToString(separator = "; ")
                 val tradePointWorkTimeFontSize = countFontSizeByStringLength(tradePointWorkTime)
-                val legalAddress = "${organization.urAddress["index"]} ${organization.urAddress["address"]}"
+//                val legalAddress = "${organization.urAddress["index"]} ${organization.urAddress["address"]}"
                 val postAddress = "${organization.postAddress["index"]} ${organization.postAddress["address"]}"
                 val postAddressFontSize = countFontSizeByStringLength(postAddress)
 
@@ -555,7 +551,15 @@ class FillDocumentService(
         )
     }
 
-    fun fillInstruction(contract: Boolean? = null, solution: Solution): String {
+    fun fillInstruction(contract: Boolean? = null, solution: Solution): RenderedDocument {
+
+        if (solution.forcedInstructionPdf != null) {
+            return renderDocument(
+                    "docs/",
+                    solution.forcedInstructionPdf!!
+                ).copy(extension = "pdf")
+        }
+
         val contractText = if (contract == null) {
             utilRepository.findByName("contract_null")?.data
                 ?: throw IllegalStateException("cannot find default contract text")
@@ -617,7 +621,12 @@ class FillDocumentService(
             ),
             templateFile = "email/email"
         )
-        return templateService.renderFancyMessageFragment(fullMessage)
+        val instruction = templateService.renderFancyMessageFragment(fullMessage)
+        return RenderedDocument(
+            "00-Инструкция",
+            instruction.replace("width=\"600\"", "width=\"800\"").toPDF(),
+            "pdf"
+        )
     }
 
     fun step3Common(
@@ -665,9 +674,7 @@ class FillDocumentService(
                 "ikassa_register" -> {
                     when (billingMode) {
                         DocumentController.IkassaBillingMode.FULL -> {
-                            val ikassaInvoice = this.fillIkassaInvoice(
-                                count,
-                                period,
+                            val ikassaInvoice = this.fillIkassaInvoice(count, period,
                                 if (solutionContent.contains("dusik_r")) {
                                     "_dusik"
                                 } else {
@@ -695,7 +702,8 @@ class FillDocumentService(
                 }
 
                 "ikassa_license_12_season" -> {
-                    val licenseProduct = productService.getProductByAlias(it.alias!!)!!
+                    val licenseProduct = productService.getProductByAlias(it.alias)
+                        ?: throw IllegalStateException("ikassa_license_12_season is not available")
                     val ikassaInvoice = this.fillIkassaTariff(licenseProduct, count)
                     ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
                     renderedDocuments.add(ikassaInvoice)
@@ -875,7 +883,7 @@ class FillDocumentService(
             "ое"
         }
         return "${getOrganizationName(org)}, именуем${oe} в дальнейшем «Пользователь»," +
-                " в лице ${org.positionClient2.toLowerCase()} ${org.fioClient2}, действующего на основании ${
+                " в лице ${org.positionClient2.lowercase(Locale.getDefault())} ${org.fioClient2}, действующего на основании ${
                     powerPaperText2(
                         org
                     )
@@ -887,7 +895,7 @@ class FillDocumentService(
     }
 
     private fun notificationHeader(org: OrganizationInfoDto): String {
-        return "${getOrganizationName(org)} в лице ${org.positionClient2.toLowerCase()} ${org.fioClient2}," +
+        return "${getOrganizationName(org)} в лице ${org.positionClient2.lowercase(Locale.getDefault())} ${org.fioClient2}," +
                 " действующего на основании ${powerPaperText2(org)}"
     }
 

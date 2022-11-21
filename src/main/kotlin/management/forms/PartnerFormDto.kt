@@ -1,7 +1,6 @@
 package management.forms
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.BeanDescription
 import management.data.utils.PartnerFormEmailMode
 
 data class PartnerFormDto(
@@ -16,25 +15,25 @@ data class PartnerFormDto(
     val logo: String,
 
     @JsonProperty("solutions")
-    val solutions: List<SolutionDto>,
+    val solutions: List<SolutionDto> = listOf(),
 
     @JsonProperty("name_remap")
-    val nameRemap: Map<String, String>,
+    val nameRemap: Map<String, String> = hashMapOf(),
 
     @JsonProperty("emails")
-    val partnerEmail: List<String>,
+    val partnerEmail: List<String> = listOf(),
 
     @JsonProperty("allow_manual")
-    val allowManual: Boolean,
+    val allowManual: Boolean = true,
 
     @JsonProperty("description")
-    val formDescription: String,
+    val formDescription: String = "Эта форма позволяет заполнить данные и скачать готовый пакет документов",
 
     @JsonProperty("available_periods")
-    val availablePeriods: List<Int>,
+    val availablePeriods: List<Int> = listOf(6,12),
 
     @JsonProperty("slug")
-    val slug: String,
+    val slug: String = "",
 
     @JsonProperty("email_mode")
     val emailMode: PartnerEmailModeDto

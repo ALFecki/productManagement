@@ -1,8 +1,6 @@
 package management.services
 
 import jakarta.inject.Singleton
-import management.data.products.AccompanyingDoc
-import management.data.products.Product
 import management.data.products.Solution
 import management.data.repositories.SolutionRepository
 import management.data.utils.UpdateSolution
@@ -32,10 +30,14 @@ class SolutionService(
         )
     }
 
-    fun makeSolutions(solutions: List<SolutionDto>): MutableList<Solution> {
+    fun makeSolutions(solutions: List<SolutionDto>, isEmpty: Boolean = false): MutableList<Solution> {
         val newSolutions: MutableList<Solution> = mutableListOf()
-        if (solutions.isEmpty())
+        if (solutions.isEmpty()) {
+            if (isEmpty) {
+                return mutableListOf()
+            }
             throw IllegalStateException("Not enough data in request")
+        }
         solutions.forEach { solution ->
             newSolutions.add(
                 solutionRepository.findByAlias(solution.alias)

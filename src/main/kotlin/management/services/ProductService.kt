@@ -8,7 +8,6 @@ import management.data.repositories.ProductRepository
 import management.data.utils.UpdateProduct
 import management.forms.AccompanyingDocDto
 import management.forms.ProductDto
-import java.math.BigDecimal
 
 
 @Singleton
@@ -36,18 +35,19 @@ class ProductService(
         return Product(
             alias = product.alias,
             name = product.name,
-            comment = product.comment ?: "",
-            price = product.price, // "price":123.4
-            tax = product.tax ?: BigDecimal.ZERO,
-            currency = product.currency ?: "",
-            units = product.units ?: "", // FIXME
-            roundTotal = product.roundTotal ?: false, // "round_total":true
-            dualDocs = product.dualDocs ?: false, // "dual_docs":true
-            accompanyingDocs = makeAccompanyingDocs(product.accompanyingDocs ?: listOf())
+            comment = product.comment,
+            price = product.price,
+            tax = product.tax,
+            currency = product.currency,
+            units = product.units,
+            roundTotal = product.roundTotal,
+            dualDocs = product.dualDocs,
+            accompanyingDocs = makeAccompanyingDocs(product.accompanyingDocs)
         )
     }
 
-    fun makeAccompanyingDoc(doc: AccompanyingDocDto): AccompanyingDoc {
+    fun makeAccompanyingDoc(doc: AccompanyingDocDto?): AccompanyingDoc? {
+        if (doc == null) return null
         return accompanyingDocRepository.findByPath(doc.path)
             ?: AccompanyingDoc(
                 path = doc.path,
@@ -62,7 +62,7 @@ class ProductService(
         docs.forEach { doc ->
             accompanyingDocList.add(
                 accompanyingDocRepository.findByPath(doc.path)
-                    ?: this.makeAccompanyingDoc(doc)
+                    ?: this.makeAccompanyingDoc(doc)!!
             )
         }
         return accompanyingDocList
