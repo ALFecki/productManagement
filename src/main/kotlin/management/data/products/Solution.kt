@@ -2,6 +2,7 @@ package management.data.products
 
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import management.forms.RequiredDocsDto
 import management.utils.ConstVariables.SCHEMA
 import org.hibernate.annotations.LazyCollection
 import org.hibernate.annotations.LazyCollectionOption
@@ -98,8 +99,11 @@ data class Solution(
         joinColumns = [JoinColumn(name = "solution_id")],
         inverseJoinColumns = [JoinColumn(name = "accompanying_doc_id")]
     )
-    var forcedInstructionPdf: AccompanyingDoc? = null
+    var forcedInstructionPdf: AccompanyingDoc? = null,
 
+    @Column(name = "required docs")
+    @Type(type = "jsonb")
+    var requiredDocs: RequiredDocsDto = RequiredDocsDto()
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

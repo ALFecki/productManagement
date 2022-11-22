@@ -135,25 +135,32 @@ class DocumentController(
 
         val renderedDocuments = fillDocumentService.step3Common(period, count, documentInfo, solution)
 
-        if (documentInfo.contractData.organizationInfo.skkoNumber.isEmpty()) {
-            renderedDocuments.add(fillDocumentService.fillNewContract(documentInfo))
-        } else {
-            renderedDocuments.add(fillDocumentService.fillExistingContract(documentInfo))
+        if (solution.requiredDocs.contract) {
+            if (documentInfo.contractData.organizationInfo.skkoNumber.isEmpty()) {
+                renderedDocuments.add(fillDocumentService.fillNewContract(documentInfo))
+            } else {
+                renderedDocuments.add(fillDocumentService.fillExistingContract(documentInfo))
+            }
         }
-
-        renderedDocuments.add(
-            fillDocumentService.fillSkoAct(
-                documentInfo.contractData.organizationInfo, count
+        if (solution.requiredDocs.skoAct) {
+            renderedDocuments.add(
+                fillDocumentService.fillSkoAct(
+                    documentInfo.contractData.organizationInfo, count
+                )
             )
-        )
-
-        renderedDocuments.add(fillDocumentService.fillApplication(documentInfo))
-
-        renderedDocuments.add(fillDocumentService.fillNotification(documentInfo.contractData.organizationInfo))
-
-        renderedDocuments.add(fillDocumentService.fillLkUnsafe(documentInfo.contractData.organizationInfo))
-
+        }
+        if(solution.requiredDocs.skkoContractApp) {
+            renderedDocuments.add(fillDocumentService.fillApplication(documentInfo))
+        }
+        if (solution.requiredDocs.notification) {
+            renderedDocuments.add(fillDocumentService.fillNotification(documentInfo.contractData.organizationInfo))
+        }
+        if (solution.requiredDocs.declarationLkUnsafe) {
+            renderedDocuments.add(fillDocumentService.fillLkUnsafe(documentInfo.contractData.organizationInfo))
+        }
         renderedDocuments.add(fillDocumentService.fillInstruction(null, solution))
+
+
 
         val archive = fillDocumentService.createZipArchive(renderedDocuments)
         val archiveName =

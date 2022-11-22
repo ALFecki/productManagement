@@ -1,7 +1,6 @@
 package management.services
 
 import jakarta.inject.Singleton
-import management.controllers.DocumentController
 import management.data.docs.Document
 import management.data.products.AccompanyingDoc
 import management.data.products.Product
@@ -660,20 +659,20 @@ class FillDocumentService(
         val solutionContent = solution.contents.map { it.alias }
         val renderedDocuments = mutableListOf<RenderedDocument>()
 
-        val billingMode =
-            if (solutionContent.isEmpty() || solutionContent.containsAll(listOf("ikassa_register", "ikassa_license"))) {
-                DocumentController.IkassaBillingMode.FULL
-            } else if (solutionContent.contains("ikassa_register")) {
-                DocumentController.IkassaBillingMode.REGISTER
-            } else {
-                DocumentController.IkassaBillingMode.LICENSE
-            }
+//        val billingMode =
+//            if (solutionContent.isEmpty() || solutionContent.containsAll(listOf("ikassa_register", "ikassa_license"))) {
+//                DocumentController.IkassaBillingMode.FULL
+//            } else if (solutionContent.contains("ikassa_register")) {
+//                DocumentController.IkassaBillingMode.REGISTER
+//            } else {
+//                DocumentController.IkassaBillingMode.LICENSE
+//            }
 
-        solution.contents.forEach {
-            when (it.alias) {
-                "ikassa_register" -> {
-                    when (billingMode) {
-                        DocumentController.IkassaBillingMode.FULL -> {
+        solution.contents.forEach { product->
+            if (product.properties.uniqueDocs) {
+                if (product.properties.billingMode == "full") {
+                    when (product.properties.billingMode) {
+                        "full" -> {
                             val ikassaInvoice = this.fillIkassaInvoice(count, period,
                                 if (solutionContent.contains("dusik_r")) {
                                     "_dusik"
@@ -685,39 +684,83 @@ class FillDocumentService(
                             renderedDocuments.add(ikassaInvoice)
                         }
 
-                        DocumentController.IkassaBillingMode.LICENSE -> {
+                        "license" -> {
                             val ikassaInvoice = this.fillIkassaRegistration(count)
                             renderedDocuments.add(ikassaInvoice)
                         }
 
-                        DocumentController.IkassaBillingMode.REGISTER -> {
+                        "register" -> {
                             val ikassaInvoice = this.fillIkassaTariff(count, period)
                             ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
                             renderedDocuments.add(ikassaInvoice)
                         }
 
+                        "none" -> {
+                            if (solution.requiredDocs.invoiceLicense) {
+
+                                val licenseProduct = productService.getProductByAlias(product.alias)
+                                    ?: throw IllegalStateException("ikassa_license_12_season is not available")
+
+                                val ikassaInvoice = this.fillIkassaTariff(licenseProduct, count)
+                                ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
+                                renderedDocuments.add(ikassaInvoice)
+                            }
+                            if (solution.requiredDocs.skkoInvoice) {
+                                renderedDocuments.add(this.fillSkkoInvoice(count))
+                            }
+                        }
                     }
-
-
                 }
-
-                "ikassa_license_12_season" -> {
-                    val licenseProduct = productService.getProductByAlias(it.alias)
-                        ?: throw IllegalStateException("ikassa_license_12_season is not available")
-                    val ikassaInvoice = this.fillIkassaTariff(licenseProduct, count)
-                    ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
-                    renderedDocuments.add(ikassaInvoice)
-                }
-
-                "dusik_r" -> {
-                    // FIXME
-                }
-
-                "skko_register" -> {
-                    renderedDocuments.add(this.fillSkkoInvoice(count))
-                }
-
             }
+
+//            when (product.alias) {
+//                "ikassa_register" -> {
+//                    when (billingMode) {
+//                        DocumentController.IkassaBillingMode.FULL -> {
+//                            val ikassaInvoice = this.fillIkassaInvoice(count, period,
+//                                if (solutionContent.contains("dusik_r")) {
+//                                    "_dusik"
+//                                } else {
+//                                    ""
+//                                }
+//                            )
+//                            ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
+//                            renderedDocuments.add(ikassaInvoice)
+//                        }
+//
+//                        DocumentController.IkassaBillingMode.LICENSE -> {
+//                            val ikassaInvoice = this.fillIkassaRegistration(count)
+//                            renderedDocuments.add(ikassaInvoice)
+//                        }
+//
+//                        DocumentController.IkassaBillingMode.REGISTER -> {
+//                            val ikassaInvoice = this.fillIkassaTariff(count, period)
+//                            ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
+//                            renderedDocuments.add(ikassaInvoice)
+//                        }
+//
+//                    }
+//
+//
+//                }
+//
+//                "ikassa_license_12_season" -> {
+//                    val licenseProduct = productService.getProductByAlias(product.alias)
+//                        ?: throw IllegalStateException("ikassa_license_12_season is not available")
+//                    val ikassaInvoice = this.fillIkassaTariff(licenseProduct, count)
+//                    ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
+//                    renderedDocuments.add(ikassaInvoice)
+//                }
+//
+//                "dusik_r" -> {
+//                    // FIXME
+//                }
+//
+//                "skko_register" -> {
+//                    renderedDocuments.add(this.fillSkkoInvoice(count))
+//                }
+//
+//            }
         }
 
 

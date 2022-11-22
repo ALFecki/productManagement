@@ -1,18 +1,22 @@
 package management.data.products
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import io.micronaut.data.annotation.TypeDef
 import io.micronaut.data.model.DataType
+import management.forms.ProductPropertiesDto
 import management.utils.ConstVariables.SCHEMA
 import management.utils.asWords
 import management.utils.toFixed
 import org.hibernate.annotations.LazyCollection
 import org.hibernate.annotations.LazyCollectionOption
+import org.hibernate.annotations.Type
 import java.math.BigDecimal
 import javax.persistence.*
 
 
 @Entity
 @Table(name = "product", schema = SCHEMA)
+@org.hibernate.annotations.TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)
 data class Product(
 
     @Column(name = "alias")
@@ -55,7 +59,12 @@ data class Product(
         joinColumns = [JoinColumn(name = "product_id")],
         inverseJoinColumns = [JoinColumn(name = "accompanying_doc_id")]
     )
-    var accompanyingDocs: List<AccompanyingDoc> = listOf()
+    var accompanyingDocs: List<AccompanyingDoc> = listOf(),
+
+    @Column(name = "properties")
+    @Type(type = "jsonb")
+    val properties: ProductPropertiesDto = ProductPropertiesDto()
+
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
