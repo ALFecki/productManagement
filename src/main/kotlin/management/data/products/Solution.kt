@@ -2,7 +2,7 @@ package management.data.products
 
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
-import management.forms.RequiredDocsDto
+import management.forms.RequiredDocs
 import management.utils.ConstVariables.SCHEMA
 import org.hibernate.annotations.LazyCollection
 import org.hibernate.annotations.LazyCollectionOption
@@ -84,10 +84,6 @@ data class Solution(
     @Column(name = "legal_name")
     var legalName: String,
 
-    @Column(name = "required docs")
-    @Type(type = "jsonb")
-    var requiredDocs: RequiredDocsDto = RequiredDocsDto(),
-
     @Column(name = "version")
     var version: String = "2.4.0",
 
@@ -102,7 +98,20 @@ data class Solution(
         joinColumns = [JoinColumn(name = "solution_id")],
         inverseJoinColumns = [JoinColumn(name = "accompanying_doc_id")]
     )
-    var forcedInstructionPdf: AccompanyingDoc? = null
+    var forcedInstructionPdf: AccompanyingDoc? = null,
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToOne(
+        targetEntity = RequiredDocs::class,
+        cascade = [(CascadeType.ALL)],
+    )
+    @JoinTable(
+        name = "solutions_required_docs",
+        schema = SCHEMA,
+        joinColumns = [JoinColumn(name = "solution_id")],
+        inverseJoinColumns = [JoinColumn(name = "required_docs_id")]
+    )
+    val requiredDocs: RequiredDocs = RequiredDocs()
 
 ) {
     @Id

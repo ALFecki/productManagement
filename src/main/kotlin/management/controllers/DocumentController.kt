@@ -82,15 +82,15 @@ class DocumentController(
             }
         }
 
-        if (solution.requiredDocs.skkoContract) {
-            renderedDocuments.add(
-                fillDocumentService.renderDocumentFromMap(
-                    manualPath,
-                    fillDocumentService.getDocumentByAlias("skko_contract")!!,
-                    mapOf("SOLUTION" to solution.legalName)
-                )
-            )
-        }
+//        if (solution.requiredDocs.skkoContract) {
+//            renderedDocuments.add(
+//                fillDocumentService.renderDocumentFromMap(
+//                    manualPath,
+//                    fillDocumentService.getDocumentByAlias("skko_contract")!!,
+//                    defaultInfo
+//                )
+//            )
+//        }
 //
 //        renderedDocuments.add(
 //            fillDocumentService.renderDocumentFromMap(
@@ -131,6 +131,7 @@ class DocumentController(
 
         renderedDocuments.add(fillDocumentService.fillInstruction(null, solution))
 
+
         return serveFile(
             fillDocumentService.createZipArchive(renderedDocuments),
             "Документы к заполнению для ${solution.name} от ${LocalDate.now().format(documentsDateFormat)}.zip"
@@ -156,7 +157,7 @@ class DocumentController(
 
         val renderedDocuments = fillDocumentService.step3Common(period, count, documentInfo, solution)
 
-        if (solution.requiredDocs.contract) {
+        if (solution.requiredDocs.skkoContract) {
             if (documentInfo.contractData.organizationInfo.skkoNumber.isEmpty()) {
                 renderedDocuments.add(fillDocumentService.fillNewContract(documentInfo))
             } else {

@@ -3,7 +3,7 @@ package management.data.products
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import io.micronaut.data.annotation.TypeDef
 import io.micronaut.data.model.DataType
-import management.forms.ProductPropertiesDto
+import management.forms.ProductProperties
 import management.utils.ConstVariables.SCHEMA
 import management.utils.asWords
 import management.utils.toFixed
@@ -61,9 +61,18 @@ data class Product(
     )
     var accompanyingDocs: List<AccompanyingDoc> = listOf(),
 
-    @Column(name = "properties")
-    @Type(type = "jsonb")
-    val properties: ProductPropertiesDto = ProductPropertiesDto()
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToOne(
+        targetEntity = ProductProperties::class,
+        cascade = [(CascadeType.ALL)],
+    )
+    @JoinTable(
+        name = "products_properies_link",
+        schema = SCHEMA,
+        joinColumns = [JoinColumn(name = "product_id")],
+        inverseJoinColumns = [JoinColumn(name = "properties_id")]
+    )
+    val properties: ProductProperties = ProductProperties()
 
 ) {
     @Id
