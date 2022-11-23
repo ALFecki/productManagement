@@ -61,53 +61,73 @@ class DocumentController(
             fullData = null,
             solution = solution
         )
+
         val manualPath = "docs/fill_manual"
-
-        renderedDocuments.add(
-            fillDocumentService.renderDocumentFromMap(
-                manualPath,
-                fillDocumentService.getDocumentByAlias("skko_contract")!!,
-                mapOf("SOLUTION" to solution.legalName)
-            )
+        val defaultInfo = mapOf(
+            "SOLUTION" to solution.legalName,
+            "VERSION" to solution.version
         )
+        val requiredDocs = solution.requiredDocs.toMap()
 
-        renderedDocuments.add(
-            fillDocumentService.renderDocumentFromMap(
-                manualPath,
-                fillDocumentService.getDocumentByAlias("skko_contract_application")!!,
-                mapOf("SOLUTION" to solution.legalName)
-            )
-        )
+        requiredDocs.forEach { key, value ->
+            if (value) {
+                renderedDocuments.add(
+                    fillDocumentService.renderDocumentFromMap(
+                        manualPath,
+                        fillDocumentService.getDocumentByAlias(key)
+                            ?: throw IllegalStateException("Preload is needed"),
+                        defaultInfo
+                    )
+                )
+            }
+        }
 
-        renderedDocuments.add(
-            fillDocumentService.renderDocumentFromMap(
-                manualPath,
-                fillDocumentService.getDocumentByAlias("sko_act")!!,
-                mapOf("SOLUTION" to solution.legalName)
+        if (solution.requiredDocs.skkoContract) {
+            renderedDocuments.add(
+                fillDocumentService.renderDocumentFromMap(
+                    manualPath,
+                    fillDocumentService.getDocumentByAlias("skko_contract")!!,
+                    mapOf("SOLUTION" to solution.legalName)
+                )
             )
-        )
-
-        renderedDocuments.add(
-            fillDocumentService.renderDocumentFromMap(
-                manualPath,
-                fillDocumentService.getDocumentByAlias("skko_connection_application")!!,
-                mapOf("SOLUTION" to solution.legalName, "VERSION" to solution.version)
-            )
-        )
-
-        renderedDocuments.add(
-            fillDocumentService.renderDocument(
-                manualPath,
-                fillDocumentService.getDocumentByAlias("connection_notification")!!
-            )
-        )
-
-        renderedDocuments.add(
-            fillDocumentService.renderDocument(
-                manualPath,
-                fillDocumentService.getDocumentByAlias("declaration_lk_unsafe")!!
-            )
-        )
+        }
+//
+//        renderedDocuments.add(
+//            fillDocumentService.renderDocumentFromMap(
+//                manualPath,
+//                fillDocumentService.getDocumentByAlias("skko_contract_application")!!,
+//                mapOf("SOLUTION" to solution.legalName)
+//            )
+//        )
+//        renderedDocuments.add(
+//            fillDocumentService.renderDocumentFromMap(
+//                manualPath,
+//                fillDocumentService.getDocumentByAlias("sko_act")!!,
+//                mapOf("SOLUTION" to solution.legalName)
+//            )
+//        )
+//
+//        renderedDocuments.add(
+//            fillDocumentService.renderDocumentFromMap(
+//                manualPath,
+//                fillDocumentService.getDocumentByAlias("skko_connection_application")!!,
+//                mapOf("SOLUTION" to solution.legalName, "VERSION" to solution.version)
+//            )
+//        )
+//
+//        renderedDocuments.add(
+//            fillDocumentService.renderDocument(
+//                manualPath,
+//                fillDocumentService.getDocumentByAlias("connection_notification")!!
+//            )
+//        )
+//
+//        renderedDocuments.add(
+//            fillDocumentService.renderDocument(
+//                manualPath,
+//                fillDocumentService.getDocumentByAlias("declaration_lk_unsafe")!!
+//            )
+//        )
 
         renderedDocuments.add(fillDocumentService.fillInstruction(null, solution))
 
@@ -124,7 +144,8 @@ class DocumentController(
     fun step3Post(@Body documentInfo: DocumentDto): SystemFile {
 
         val solution = solutionService.getSolutionByAlias(documentInfo.equipment["solution"].toString())
-            ?: solutionService.getSolutionByAlias("smart")!!
+            ?: solutionService.getSolutionByAlias("smart")
+            ?: throw IllegalStateException("Preload is needed")
         val count = documentInfo.equipment.getOrDefault("units", "1").toShort()
         val period = documentInfo.equipment.getOrDefault("period", "1").toShort()
         for ((key, value) in documentInfo.contractData.bankInfo) {
@@ -144,15 +165,13 @@ class DocumentController(
         }
         if (solution.requiredDocs.skoAct) {
             renderedDocuments.add(
-                fillDocumentService.fillSkoAct(
-                    documentInfo.contractData.organizationInfo, count
-                )
+                fillDocumentService.fillSkoAct(documentInfo.contractData.organizationInfo, count)
             )
         }
-        if(solution.requiredDocs.skkoContractApp) {
+        if(solution.requiredDocs.skkoContractApplication) {
             renderedDocuments.add(fillDocumentService.fillApplication(documentInfo))
         }
-        if (solution.requiredDocs.notification) {
+        if (solution.requiredDocs.connectionNotification) {
             renderedDocuments.add(fillDocumentService.fillNotification(documentInfo.contractData.organizationInfo))
         }
         if (solution.requiredDocs.declarationLkUnsafe) {
@@ -167,12 +186,6 @@ class DocumentController(
             "Заполненные документы для ${solution.name} от ${LocalDate.now().format(documentsDateFormat)}.zip"
         return serveFile(archive, archiveName)
 
-    }
-
-    enum class IkassaBillingMode {
-        FULL,
-        LICENSE,
-        REGISTER
     }
 
 }

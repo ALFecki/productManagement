@@ -670,10 +670,11 @@ class FillDocumentService(
 
         solution.contents.forEach { product->
             if (product.properties.uniqueDocs) {
-                if (product.properties.billingMode == "full") {
-                    when (product.properties.billingMode) {
+                if (product.properties.billingModeUse) {
+                    when (solution.requiredDocs.billingMode) {
                         "full" -> {
-                            val ikassaInvoice = this.fillIkassaInvoice(count, period,
+                            val ikassaInvoice = this.fillIkassaInvoice(
+                                count, period,
                                 if (solutionContent.contains("dusik_r")) {
                                     "_dusik"
                                 } else {
@@ -694,24 +695,23 @@ class FillDocumentService(
                             ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
                             renderedDocuments.add(ikassaInvoice)
                         }
+                    }
+                } else {
+                    if (product.properties.invoiceLicense) {
 
-                        "none" -> {
-                            if (solution.requiredDocs.invoiceLicense) {
+                        val licenseProduct = productService.getProductByAlias(product.alias)
+                            ?: throw IllegalStateException("ikassa_license_12_season is not available")
 
-                                val licenseProduct = productService.getProductByAlias(product.alias)
-                                    ?: throw IllegalStateException("ikassa_license_12_season is not available")
-
-                                val ikassaInvoice = this.fillIkassaTariff(licenseProduct, count)
-                                ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
-                                renderedDocuments.add(ikassaInvoice)
-                            }
-                            if (solution.requiredDocs.skkoInvoice) {
-                                renderedDocuments.add(this.fillSkkoInvoice(count))
-                            }
-                        }
+                        val ikassaInvoice = this.fillIkassaTariff(licenseProduct, count)
+                        ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
+                        renderedDocuments.add(ikassaInvoice)
+                    }
+                    if (product.properties.skkoInvoice) {
+                        renderedDocuments.add(this.fillSkkoInvoice(count))
                     }
                 }
             }
+        }
 
 //            when (product.alias) {
 //                "ikassa_register" -> {
@@ -761,7 +761,7 @@ class FillDocumentService(
 //                }
 //
 //            }
-        }
+
 
 
         renderedDocuments.add(
@@ -894,6 +894,12 @@ class FillDocumentService(
 
 
     fun renderDocumentFromMap(_basePath: String, document: Document, map: Map<String, String?>): RenderedDocument {
+        if (
+            document.name == "connection_notification" ||
+            document.name == "declaration_lk_unsafe"
+        ) {
+            return this.renderDocument(_basePath, document)
+        }
         val basePath = _basePath.trimEnd('/')
         val path = "$basePath/${document.path}"
         return RenderedDocument(

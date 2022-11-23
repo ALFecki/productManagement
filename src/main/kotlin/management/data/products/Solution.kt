@@ -11,9 +11,10 @@ import org.hibernate.annotations.TypeDef
 import java.math.BigDecimal
 import javax.persistence.*
 
-@TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)
+
 @Entity
 @Table(name = "solution", schema = SCHEMA)
+@TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)
 data class Solution(
     @Column(name = "alias")
     val alias: String,
@@ -48,7 +49,7 @@ data class Solution(
     var related: List<Product> = listOf(),
 
     @Column(name = "price")
-    var price: BigDecimal? = null, // WHY?
+    var price: BigDecimal? = null,
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @ManyToMany(
@@ -76,7 +77,6 @@ data class Solution(
     )
     var equipment: List<Product> = listOf(),
 
-
     @Column(name = "extra_vars")
     @Type(type = "jsonb")
     var extraVars: Map<String, String> = mapOf(),
@@ -84,9 +84,12 @@ data class Solution(
     @Column(name = "legal_name")
     var legalName: String,
 
+    @Column(name = "required docs")
+    @Type(type = "jsonb")
+    var requiredDocs: RequiredDocsDto = RequiredDocsDto(),
+
     @Column(name = "version")
     var version: String = "2.4.0",
-
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToOne(
@@ -99,11 +102,8 @@ data class Solution(
         joinColumns = [JoinColumn(name = "solution_id")],
         inverseJoinColumns = [JoinColumn(name = "accompanying_doc_id")]
     )
-    var forcedInstructionPdf: AccompanyingDoc? = null,
+    var forcedInstructionPdf: AccompanyingDoc? = null
 
-    @Column(name = "required docs")
-    @Type(type = "jsonb")
-    var requiredDocs: RequiredDocsDto = RequiredDocsDto()
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

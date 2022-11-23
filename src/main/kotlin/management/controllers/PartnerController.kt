@@ -14,8 +14,8 @@ class PartnerController(private val partnerService: PartnerService) {
         return partnerService.getAllPartnerForms()
     }
 
-    @Get("/{unp}")
-    fun getPartnerFormByUNP(@PathVariable unp: Int): PartnerForm {
+    @Get("/get")
+    fun getPartnerFormByUNP(@QueryValue(defaultValue = "193141246") unp: Int): PartnerForm {
         return partnerService.getFormByUNP(unp)
     }
 

@@ -31,7 +31,7 @@ CREATE TABLE ikassa."product" (
     "units" character varying,
     "round_total" boolean,
     "dual_docs" boolean,
-    "properties" jsonb,
+    "properties" jsonb NOT NULL,
     PRIMARY KEY("product_id")
 );
 ALTER TABLE IF EXISTS ikassa.product
@@ -57,7 +57,7 @@ CREATE TABLE ikassa."solution" (
     "extra_vars" jsonb,
     "legal_name" character varying NOT NULL,
     "version" character varying NOT NULL,
-    "required_docs" jsonb,
+    "required_docs" jsonb NOT NULL,
     PRIMARY KEY (solution_id)
 );
 
