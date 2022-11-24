@@ -1,6 +1,5 @@
-package management.forms
+package management.data.docs
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import management.utils.ConstVariables.SCHEMA
 import javax.persistence.*
 
@@ -41,10 +40,7 @@ data class RequiredDocs(
             "sko_act" to skoAct,
             "skko_connection_application" to skkoConnectionApplication,
             "connection_notification" to connectionNotification,
-            "declaration_lk_unsafe" to declarationLkUnsafe,
-//            "contract" to contract,
-//            "invoice_license" to invoiceLicense,
-//            "skko_invoice" to skkoInvoice
+            "declaration_lk_unsafe" to declarationLkUnsafe
         )
     }
 }

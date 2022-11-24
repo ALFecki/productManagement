@@ -3,13 +3,11 @@ package management.data.products
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import io.micronaut.data.annotation.TypeDef
 import io.micronaut.data.model.DataType
-import management.forms.ProductProperties
 import management.utils.ConstVariables.SCHEMA
 import management.utils.asWords
 import management.utils.toFixed
 import org.hibernate.annotations.LazyCollection
 import org.hibernate.annotations.LazyCollectionOption
-import org.hibernate.annotations.Type
 import java.math.BigDecimal
 import javax.persistence.*
 

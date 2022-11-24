@@ -24,9 +24,20 @@ class PartnerController(private val partnerService: PartnerService) {
         return partnerService.getFormByAlias(slug)
     }
 
+    @Get("/delete/{unp}")
+    fun deletePartnerForm(@PathVariable unp: Int) {
+        return partnerService.deletePartnerForm(unp)
+    }
+
     @Post("/create")
     fun createPartnerForm(@Body requestData: PartnerFormDto) : PartnerForm {
         return partnerService.createPartnerForm(requestData)
     }
+
+    @Post("/update/")
+    fun updatePartnerForm(@Body requestData: PartnerFormDto) : PartnerForm {
+        return partnerService.updatePartnerForm(requestData)
+    }
+
 
 }

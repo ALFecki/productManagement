@@ -5,7 +5,10 @@ import io.micronaut.http.annotation.*
 import io.micronaut.http.server.types.files.SystemFile
 import io.micronaut.scheduling.TaskExecutors
 import io.micronaut.scheduling.annotation.ExecuteOn
+import management.data.docs.Document
 import management.forms.DocumentDto
+import management.forms.FillDocumentDto
+import management.services.DocumentService
 import management.services.FillDocumentService
 import management.services.ProductService
 import management.services.SolutionService
@@ -17,12 +20,33 @@ import java.time.format.DateTimeFormatter
 @Controller("/docs")
 class DocumentController(
     private val fillDocumentService: FillDocumentService,
+    private val documentService: DocumentService,
     private val productService: ProductService,
     private val solutionService: SolutionService
 
 ) {
 
     private val documentsDateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MM-yyyy")
+
+    @Get
+    fun getAllDocuments() : List<Document>? {
+        return documentService.getAllDocuments()
+    }
+
+    @Get("/{alias}")
+    fun getDocumentByAlias(alias: String) : Document? {
+        return documentService.getDocumentByAlias(alias)
+    }
+
+    @Get("/delete")
+    fun deleteDocumentByAlias(alias: String) {
+        return documentService.deleteDocumentByAlias(alias)
+    }
+
+    @Post("/create")
+    fun createDocument(@Body requestData: DocumentDto) : Document {
+        return documentService.createDocument(requestData)
+    }
 
     @Get("product/{alias}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -93,7 +117,7 @@ class DocumentController(
     @Post("/step3")
     @Produces("application/zip")
     @ExecuteOn(TaskExecutors.IO)
-    fun step3Post(@Body documentInfo: DocumentDto): SystemFile {
+    fun step3Post(@Body documentInfo: FillDocumentDto): SystemFile {
 
         val solution = solutionService.getSolutionByAlias(documentInfo.equipment["solution"].toString())
             ?: solutionService.getSolutionByAlias("smart")

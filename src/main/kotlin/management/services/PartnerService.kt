@@ -34,13 +34,28 @@ class PartnerService(
 
     fun getFormByUNP(UNP: Int): PartnerForm {
         return partnerFormRepository.findByUnp(UNP)
+            ?:  throw IllegalStateException("No such form in database")
+
     }
 
     fun getFormByAlias(slug: String): PartnerForm {
         return partnerFormRepository.findBySlug(slug)
+            ?:  throw IllegalStateException("No such form in database")
+
     }
 
     fun createPartnerForm(data: PartnerFormDto) : PartnerForm {
         return partnerFormRepository.save(this.makePartnerForm(data))
+    }
+
+    fun updatePartnerForm(data: PartnerFormDto) : PartnerForm {
+        if (partnerFormRepository.findByUnp(data.unp) == null) {
+            throw IllegalStateException("No such form in database")
+        }
+        return partnerFormRepository.update(makePartnerForm(data))
+    }
+
+    fun deletePartnerForm(unp: Int) {
+        return partnerFormRepository.deleteByUnp(unp)
     }
 }

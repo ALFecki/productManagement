@@ -3,9 +3,12 @@ package management.forms
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class DocumentDto(
-    @JsonProperty("contractData")
-    val contractData: DocumentInfoDto,
+    @JsonProperty("alias")
+    val alias: String,
 
-    @JsonProperty("equipment")
-    val equipment: HashMap<String, String>
+    @JsonProperty("name")
+    val name: String,
+
+    @JsonProperty("path")
+    val path: String
 )

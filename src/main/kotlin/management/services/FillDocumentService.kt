@@ -8,8 +8,8 @@ import management.data.products.ProductTotal
 import management.data.products.Solution
 import management.data.repositories.DocumentRepository
 import management.data.utils.UtilsRepository
-import management.forms.DocumentDto
 import management.forms.FancyMailBodyFragmentDto
+import management.forms.FillDocumentDto
 import management.forms.OrganizationInfoDto
 import management.utils.*
 import org.apache.poi.xwpf.usermodel.*
@@ -35,7 +35,7 @@ class FillDocumentService(
         path: String,
         product: Product,
         productTotal: ProductTotal,
-        full: DocumentDto? = null,
+        full: FillDocumentDto? = null,
         solution: Solution? = null
     ): ByteArray {
         val defaultInfo = mutableMapOf<String, String?>(
@@ -114,7 +114,7 @@ class FillDocumentService(
     fun fillProductsDocuments(
         products: List<Product>,
         eqTotal: Short,
-        fullData: DocumentDto? = null,
+        fullData: FillDocumentDto? = null,
         solution: Solution? = null
     ): List<RenderedDocument> {
         val documents: MutableList<RenderedDocument> = mutableListOf()
@@ -309,14 +309,14 @@ class FillDocumentService(
         )
     }
 
-    fun fillNewContract(full: DocumentDto): RenderedDocument {
+    fun fillNewContract(full: FillDocumentDto): RenderedDocument {
         val document = documentRepository.findByAlias("skko_contract")
             ?: throw IllegalStateException("Preload is needed")
 
         return RenderedDocument(document.name, fillNewContract(full, "docs/fill_auto/${document.path}"))
     }
 
-    private fun fillNewContract(full: DocumentDto, path: String): ByteArray {
+    private fun fillNewContract(full: FillDocumentDto, path: String): ByteArray {
         val org = full.contractData.organizationInfo
 
         return renderDocument(path) { contractDocument ->
@@ -371,12 +371,12 @@ class FillDocumentService(
         }
     }
 
-    fun fillExistingContract(full: DocumentDto): RenderedDocument {
+    fun fillExistingContract(full: FillDocumentDto): RenderedDocument {
         val document = documentRepository.findByAlias("skko_contract_application")!!
         return RenderedDocument(document.name, fillExistingContract(full, "docs/fill_auto/${document.path}"))
     }
 
-    private fun fillExistingContract(full: DocumentDto, path: String): ByteArray {
+    private fun fillExistingContract(full: FillDocumentDto, path: String): ByteArray {
         val org = full.contractData.organizationInfo
 
         return renderDocument(path) { contractDocument ->
@@ -431,7 +431,7 @@ class FillDocumentService(
         })
     }
 
-    fun fillApplication(full: DocumentDto): RenderedDocument {
+    fun fillApplication(full: FillDocumentDto): RenderedDocument {
         val organization = full.contractData.organizationInfo
         val trade = full.contractData.tradeInfo
         val document = documentRepository.findByAlias("skko_connection_application")!!
@@ -634,7 +634,7 @@ class FillDocumentService(
     fun step3Common(
         period: Short,
         count: Short,
-        fullData: DocumentDto? = null,
+        fullData: FillDocumentDto? = null,
         solution: Solution = solutionService.getSolutionByAlias("smart")!!
     ): MutableList<RenderedDocument> {
 
@@ -903,11 +903,6 @@ class FillDocumentService(
                 return values()
                     .find { it.id == id } ?: throw IllegalStateException("Unknown status with id $id")
             }
-
-            fun from(id: Int): Doc {
-                return values()
-                    .find { it.id == id } ?: throw IllegalStateException("Unknown doc with id $id")
-            }
         }
     }
 
@@ -925,11 +920,6 @@ class FillDocumentService(
             fun getById(id: Int): DocWithEnding {
                 return values()
                     .find { it.id == id } ?: throw IllegalStateException("Unknown status with id $id")
-            }
-
-            fun from(id: Int): DocWithEnding {
-                return values()
-                    .find { it.id == id } ?: throw IllegalStateException("Unknown doc with id $id")
             }
         }
     }

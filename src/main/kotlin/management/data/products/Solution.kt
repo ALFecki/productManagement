@@ -2,7 +2,7 @@ package management.data.products
 
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
-import management.forms.RequiredDocs
+import management.data.docs.RequiredDocs
 import management.utils.ConstVariables.SCHEMA
 import org.hibernate.annotations.LazyCollection
 import org.hibernate.annotations.LazyCollectionOption

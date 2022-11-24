@@ -1,6 +1,5 @@
-package management.forms
+package management.data.products
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import management.utils.ConstVariables.SCHEMA
 import javax.persistence.*
 

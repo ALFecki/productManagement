@@ -1,6 +1,7 @@
 package management.forms
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import management.data.docs.RequiredDocs
 import java.math.BigDecimal
 
 data class SolutionDto(

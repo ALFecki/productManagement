@@ -1,6 +1,7 @@
 package management.forms
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import management.data.products.ProductProperties
 import java.math.BigDecimal
 
 data class ProductDto(
