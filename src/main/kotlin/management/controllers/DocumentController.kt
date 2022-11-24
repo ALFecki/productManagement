@@ -27,9 +27,9 @@ class DocumentController(
     @Get("product/{alias}")
     @Produces(MediaType.APPLICATION_JSON)
     fun getDocForProduct(@PathVariable alias: String, @QueryValue(defaultValue = "1") count: Short): SystemFile {
-        val product = productService.getProductByAlias(alias) ?: /*return notFound()*/ throw IllegalStateException()
+        val product = productService.getProductByAlias(alias) ?: throw IllegalStateException("Preload is needed")
         val renderedDocuments = fillDocumentService.fillProductsDocuments(listOf(product), count)
-        val productDocument = renderedDocuments.firstOrNull() ?: /*return notFound()*/  throw IllegalStateException()
+        val productDocument = renderedDocuments.firstOrNull() ?: throw IllegalStateException("Preload is needed")
         return if (renderedDocuments.count() > 1) {
             serveFile(
                 fillDocumentService.createZipArchive(renderedDocuments),
@@ -69,7 +69,7 @@ class DocumentController(
         )
         val requiredDocs = solution.requiredDocs.toMap()
 
-        requiredDocs.forEach { key, value ->
+        requiredDocs.forEach { (key, value) ->
             if (value) {
                 renderedDocuments.add(
                     fillDocumentService.renderDocumentFromMap(
@@ -82,56 +82,7 @@ class DocumentController(
             }
         }
 
-//        if (solution.requiredDocs.skkoContract) {
-//            renderedDocuments.add(
-//                fillDocumentService.renderDocumentFromMap(
-//                    manualPath,
-//                    fillDocumentService.getDocumentByAlias("skko_contract")!!,
-//                    defaultInfo
-//                )
-//            )
-//        }
-//
-//        renderedDocuments.add(
-//            fillDocumentService.renderDocumentFromMap(
-//                manualPath,
-//                fillDocumentService.getDocumentByAlias("skko_contract_application")!!,
-//                mapOf("SOLUTION" to solution.legalName)
-//            )
-//        )
-//        renderedDocuments.add(
-//            fillDocumentService.renderDocumentFromMap(
-//                manualPath,
-//                fillDocumentService.getDocumentByAlias("sko_act")!!,
-//                mapOf("SOLUTION" to solution.legalName)
-//            )
-//        )
-//
-//        renderedDocuments.add(
-//            fillDocumentService.renderDocumentFromMap(
-//                manualPath,
-//                fillDocumentService.getDocumentByAlias("skko_connection_application")!!,
-//                mapOf("SOLUTION" to solution.legalName, "VERSION" to solution.version)
-//            )
-//        )
-//
-//        renderedDocuments.add(
-//            fillDocumentService.renderDocument(
-//                manualPath,
-//                fillDocumentService.getDocumentByAlias("connection_notification")!!
-//            )
-//        )
-//
-//        renderedDocuments.add(
-//            fillDocumentService.renderDocument(
-//                manualPath,
-//                fillDocumentService.getDocumentByAlias("declaration_lk_unsafe")!!
-//            )
-//        )
-
         renderedDocuments.add(fillDocumentService.fillInstruction(null, solution))
-
-
         return serveFile(
             fillDocumentService.createZipArchive(renderedDocuments),
             "Документы к заполнению для ${solution.name} от ${LocalDate.now().format(documentsDateFormat)}.zip"
@@ -179,8 +130,6 @@ class DocumentController(
             renderedDocuments.add(fillDocumentService.fillLkUnsafe(documentInfo.contractData.organizationInfo))
         }
         renderedDocuments.add(fillDocumentService.fillInstruction(null, solution))
-
-
 
         val archive = fillDocumentService.createZipArchive(renderedDocuments)
         val archiveName =

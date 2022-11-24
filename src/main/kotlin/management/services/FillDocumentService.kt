@@ -264,14 +264,15 @@ class FillDocumentService(
     }
 
     fun fillSkkoInvoice(quantity: Short = 1): RenderedDocument {
-//        val oneMonthLicense = "skko_license"
 
         val license6 = productService.getProductByAlias("skko_license_6")
             ?: throw IllegalStateException("Cannot find skko license product")
+        val license6Total = license6.toTotal(quantity)
+
         val license12 = productService.getProductByAlias("skko_license_12")
             ?: throw IllegalStateException("Cannot find skko license product")
-        val license6Total = license6.toTotal(quantity)
         val license12Total = license12.toTotal(quantity)
+
         val connection = productService.getProductByAlias("skko_register")
             ?: throw IllegalStateException("Cannot find skko registration product")
 
@@ -309,7 +310,9 @@ class FillDocumentService(
     }
 
     fun fillNewContract(full: DocumentDto): RenderedDocument {
-        val document = documentRepository.findByAlias("skko_contract")!!
+        val document = documentRepository.findByAlias("skko_contract")
+            ?: throw IllegalStateException("Preload is needed")
+
         return RenderedDocument(document.name, fillNewContract(full, "docs/fill_auto/${document.path}"))
     }
 
@@ -636,37 +639,26 @@ class FillDocumentService(
     ): MutableList<RenderedDocument> {
 
 
-        /* TODO:
-             а нужно ли тут в принципе делать выборку из бд
-             или те продукты, что являются эквипментом солюшена всегда итак находятся в бд о_0
-         */
         val equipment = mutableListOf<Product>()
         solution.equipment.forEach { product ->
-            val productFromDB = productService.getProductByAlias(product.alias)
-                ?: throw IllegalStateException("No such product in database")
+
             if (period >= 6.toShort() && listOf(
                     "pax930",
                     "pax930_lancard",
                     "pax930_promo"
-                ).contains(productFromDB.alias)
+                ).contains(product.alias)
             ) {
-                equipment.add(productFromDB.copy(price = productService.getProductByAlias("pax930_promo")!!.price))
+                equipment.add(
+                    product.copy(price = productService.getProductByAlias("pax930_promo")?.price
+                        ?: throw IllegalStateException("Preload is needed"))
+                )
             } else {
-                equipment.add(productFromDB)
+                equipment.add(product)
             }
         }
 
         val solutionContent = solution.contents.map { it.alias }
         val renderedDocuments = mutableListOf<RenderedDocument>()
-
-//        val billingMode =
-//            if (solutionContent.isEmpty() || solutionContent.containsAll(listOf("ikassa_register", "ikassa_license"))) {
-//                DocumentController.IkassaBillingMode.FULL
-//            } else if (solutionContent.contains("ikassa_register")) {
-//                DocumentController.IkassaBillingMode.REGISTER
-//            } else {
-//                DocumentController.IkassaBillingMode.LICENSE
-//            }
 
         solution.contents.forEach { product->
             if (product.properties.uniqueDocs) {
@@ -712,57 +704,6 @@ class FillDocumentService(
                 }
             }
         }
-
-//            when (product.alias) {
-//                "ikassa_register" -> {
-//                    when (billingMode) {
-//                        DocumentController.IkassaBillingMode.FULL -> {
-//                            val ikassaInvoice = this.fillIkassaInvoice(count, period,
-//                                if (solutionContent.contains("dusik_r")) {
-//                                    "_dusik"
-//                                } else {
-//                                    ""
-//                                }
-//                            )
-//                            ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
-//                            renderedDocuments.add(ikassaInvoice)
-//                        }
-//
-//                        DocumentController.IkassaBillingMode.LICENSE -> {
-//                            val ikassaInvoice = this.fillIkassaRegistration(count)
-//                            renderedDocuments.add(ikassaInvoice)
-//                        }
-//
-//                        DocumentController.IkassaBillingMode.REGISTER -> {
-//                            val ikassaInvoice = this.fillIkassaTariff(count, period)
-//                            ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
-//                            renderedDocuments.add(ikassaInvoice)
-//                        }
-//
-//                    }
-//
-//
-//                }
-//
-//                "ikassa_license_12_season" -> {
-//                    val licenseProduct = productService.getProductByAlias(product.alias)
-//                        ?: throw IllegalStateException("ikassa_license_12_season is not available")
-//                    val ikassaInvoice = this.fillIkassaTariff(licenseProduct, count)
-//                    ikassaInvoice.name = "${ikassaInvoice.name} за $period месяц${period.morph("", "а", "ев")}"
-//                    renderedDocuments.add(ikassaInvoice)
-//                }
-//
-//                "dusik_r" -> {
-//                    // FIXME
-//                }
-//
-//                "skko_register" -> {
-//                    renderedDocuments.add(this.fillSkkoInvoice(count))
-//                }
-//
-//            }
-
-
 
         renderedDocuments.add(
             this.renderDocument(

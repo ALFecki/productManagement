@@ -42,7 +42,8 @@ class ProductService(
             units = product.units,
             roundTotal = product.roundTotal,
             dualDocs = product.dualDocs,
-            accompanyingDocs = makeAccompanyingDocs(product.accompanyingDocs)
+            accompanyingDocs = makeAccompanyingDocs(product.accompanyingDocs),
+            properties = product.productProperties
         )
     }
 

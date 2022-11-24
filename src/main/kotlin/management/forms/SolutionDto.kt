@@ -36,6 +36,9 @@ data class SolutionDto(
     val version: String = "2.4.0",
 
     @JsonProperty("instruction")
-    val instruction: AccompanyingDocDto? = null
+    val instruction: AccompanyingDocDto? = null,
+
+    @JsonProperty("required_docs")
+    val requiredDocs: RequiredDocs = RequiredDocs()
 
 )

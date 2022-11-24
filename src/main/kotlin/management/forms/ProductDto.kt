@@ -32,5 +32,8 @@ data class ProductDto(
     val accompanyingDocs: List<AccompanyingDocDto> = listOf(),
 
     @JsonProperty("dual_docs")
-    val dualDocs: Boolean = false
+    val dualDocs: Boolean = false,
+
+    @JsonProperty("properties")
+    val productProperties: ProductProperties = ProductProperties()
 )

@@ -31,12 +31,33 @@ CREATE TABLE ikassa."product" (
     "units" character varying,
     "round_total" boolean,
     "dual_docs" boolean,
-    "properties" jsonb NOT NULL,
     PRIMARY KEY("product_id")
 );
 ALTER TABLE IF EXISTS ikassa.product
             OWNER TO root;
 
+
+CREATE TABLE ikassa."product_properties" (
+    "properties_id" bigserial NOT NULL,
+    "unique_docs" boolean,
+    "invoice_license" boolean,
+    "skko_invoice" boolean,
+    "billing_mode_use" boolean,
+    PRIMARY KEY (properties_id)
+);
+ALTER TABLE IF EXISTS ikassa.product_properties
+    OWNER TO root;
+
+CREATE TABLE ikassa."products_properies_link" (
+    "product_properties_id" bigserial ,
+    "product_id" bigint,
+    "properties_id" bigint,
+    PRIMARY KEY ("product_properties_id"),
+    FOREIGN KEY ("product_id") REFERENCES ikassa."product"("product_id"),
+    FOREIGN KEY ("properties_id") REFERENCES ikassa."product_properties"("properties_id")
+);
+ALTER TABLE IF EXISTS ikassa."products_properies_link"
+    OWNER TO root;
 
 CREATE TABLE ikassa."products_accompanying_docs" (
     "pr_acc_link_id" bigserial ,
@@ -57,12 +78,37 @@ CREATE TABLE ikassa."solution" (
     "extra_vars" jsonb,
     "legal_name" character varying NOT NULL,
     "version" character varying NOT NULL,
-    "required_docs" jsonb NOT NULL,
     PRIMARY KEY (solution_id)
 );
 
 ALTER TABLE IF EXISTS ikassa."solution"
     OWNER TO root;
+
+CREATE TABLE ikassa."required_docs" (
+    "required_docs_id" bigserial NOT NULL,
+    "skko_contract" boolean,
+    "skko_contract_application" boolean,
+    "sko_act" boolean,
+    "skko_connection_application" boolean,
+    "connection_notification" boolean,
+    "declaration_lk_unsafe" boolean,
+    "billing_mode" character varying,
+    PRIMARY KEY (required_docs_id)
+);
+ALTER TABLE IF EXISTS ikassa.product_properties
+    OWNER TO root;
+
+CREATE TABLE ikassa."solutions_required_docs" (
+    "solution_required_doc_id" bigserial ,
+    "solution_id" bigint,
+    "required_docs_id" bigint,
+    PRIMARY KEY ("solution_required_doc_id"),
+    FOREIGN KEY ("solution_id") REFERENCES ikassa."solution"("solution_id"),
+    FOREIGN KEY ("required_docs_id") REFERENCES ikassa."required_docs"("required_docs_id")
+);
+ALTER TABLE IF EXISTS ikassa."solutions_products"
+    OWNER TO root;
+
 
 CREATE TABLE ikassa."solutions_products" (
     "sol_prod_link_id" bigserial ,

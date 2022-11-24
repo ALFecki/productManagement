@@ -15,6 +15,14 @@ class SolutionService(
     private val productService: ProductService
 ) {
     fun makeSolution(solution: SolutionDto): Solution {
+        val solutionContent = solution.contents.map{ it.alias }
+        if (solutionContent.isEmpty() || solutionContent.containsAll(listOf("ikassa_register", "ikassa_license"))) {
+            solution.requiredDocs.billingMode = "full"
+        } else if (solutionContent.contains("ikassa_register")) {
+            solution.requiredDocs.billingMode = "register"
+        } else {
+            solution.requiredDocs.billingMode = "license"
+        }
         return Solution(
             alias = solution.alias,
             name = solution.name,
@@ -26,7 +34,8 @@ class SolutionService(
             extraVars = solution.extraVars,
             legalName = solution.legalName,
             version = solution.version,
-            forcedInstructionPdf = productService.makeAccompanyingDoc(solution.instruction)
+            forcedInstructionPdf = productService.makeAccompanyingDoc(solution.instruction),
+            requiredDocs = solution.requiredDocs
         )
     }
 
