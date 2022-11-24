@@ -11,6 +11,4 @@ data class DocumentInfoDto(
 
     @JsonProperty("tradeInfo")
     val tradeInfo: List<TradePointInfoDto>
-) {
-
-}
+)

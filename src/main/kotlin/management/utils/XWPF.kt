@@ -4,7 +4,7 @@ import org.apache.poi.xwpf.usermodel.*
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STBorder
 import java.io.ByteArrayOutputStream
 
-fun XWPFParagraph.replaceMultiple(replacingData : Map<String, String?>, isUnderline : Boolean = false) {
+fun XWPFParagraph.replaceMultiple(replacingData: Map<String, String?>, isUnderline: Boolean = false) {
     replacingData.keys.forEach { replaceKey ->
         val replaceValue = replacingData.getValue(replaceKey) ?: return@forEach
         val fullText = this.text
@@ -15,8 +15,7 @@ fun XWPFParagraph.replaceMultiple(replacingData : Map<String, String?>, isUnderl
                 if (runText.contains(replaceKey)) {
                     xwpfRun.setText(runText.replace(replaceKey, replaceValue), 0)
                     hasModified = true
-                }
-                else if(runText.isNotEmpty()) { // [{,quantity,}] //example
+                } else if (runText.isNotEmpty()) { // [{,quantity,}] //example
                     if (index > 0) {
                         if (index + 1 < this.runs.count()) {
                             val three = this.runs.subList(index - 1, index + 2).toList()
@@ -61,7 +60,7 @@ fun XWPFTable.replaceMultiple(replacingData: Map<String, String?>, isUnderline: 
     }
 }
 
-fun XWPFDocument.replaceMultiple(replacingData: Map<String, String?>, isUnderline: Boolean = false) : XWPFDocument {
+fun XWPFDocument.replaceMultiple(replacingData: Map<String, String?>, isUnderline: Boolean = false): XWPFDocument {
     this.tables.forEach { table ->
         table.replaceMultiple(replacingData, isUnderline)
     }
@@ -83,11 +82,11 @@ fun XWPFDocument.toByteArray(closeAfterExport: Boolean = false): ByteArray {
     return out.toByteArray()
 }
 
-fun XWPFTableCell.makeBorder(borderType: STBorder.Enum= STBorder.BASIC_THIN_LINES) {
-    val cell = this.ctTc.tcPr?:this.ctTc.addNewTcPr()
-    val borders = cell.tcBorders?:cell.addNewTcBorders()
-    (borders.left?:borders.addNewLeft()).`val` = borderType
-    (borders.right?:borders.addNewRight()).`val` = borderType
-    (borders.top?:borders.addNewTop()).`val` = borderType
-    (borders.bottom?:borders.addNewBottom()).`val` = borderType
+fun XWPFTableCell.makeBorder(borderType: STBorder.Enum = STBorder.BASIC_THIN_LINES) {
+    val cell = this.ctTc.tcPr ?: this.ctTc.addNewTcPr()
+    val borders = cell.tcBorders ?: cell.addNewTcBorders()
+    (borders.left ?: borders.addNewLeft()).`val` = borderType
+    (borders.right ?: borders.addNewRight()).`val` = borderType
+    (borders.top ?: borders.addNewTop()).`val` = borderType
+    (borders.bottom ?: borders.addNewBottom()).`val` = borderType
 }

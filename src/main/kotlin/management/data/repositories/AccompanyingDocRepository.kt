@@ -6,6 +6,6 @@ import management.data.products.AccompanyingDoc
 
 @Repository
 interface AccompanyingDocRepository : JpaRepository<AccompanyingDoc, Long> {
-    fun findByPath(path : String) : AccompanyingDoc?
+    fun findByPath(path: String): AccompanyingDoc?
 
 }

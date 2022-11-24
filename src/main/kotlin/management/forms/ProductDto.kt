@@ -1,37 +1,40 @@
 package management.forms
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import management.data.products.ProductProperties
 import java.math.BigDecimal
-import java.util.Currency
 
 data class ProductDto(
     @JsonProperty("alias")
-    val alias : String,
+    val alias: String,
 
     @JsonProperty("name")
-    val name : String,
+    val name: String,
 
     @JsonProperty("comment")
-    val comment : String? = null,
+    val comment: String = "",
 
     @JsonProperty("price")
-    val price : BigDecimal,
+    val price: BigDecimal,
 
     @JsonProperty("tax")
-    val tax : BigDecimal? = BigDecimal.ZERO,
+    val tax: BigDecimal = BigDecimal.ZERO,
 
     @JsonProperty("currency")
-    val currency: String? = "",
+    val currency: String = "",
 
     @JsonProperty("units")
-    val units : Short?,
+    val units: String = "",
 
     @JsonProperty("round_total")
-    val roundTotal : Boolean,
+    val roundTotal: Boolean = false,
 
     @JsonProperty("accompanying_docs")
-    val accompanyingDocs : List<AccDocumentDto>,
+    val accompanyingDocs: List<AccompanyingDocDto> = listOf(),
 
     @JsonProperty("dual_docs")
-    val dualDocs : Boolean
+    val dualDocs: Boolean = false,
+
+    @JsonProperty("properties")
+    val productProperties: ProductProperties = ProductProperties()
 )

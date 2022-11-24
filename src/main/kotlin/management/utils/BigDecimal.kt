@@ -8,7 +8,7 @@ fun BigDecimal.asWords(): String {
     val converter = MoneyConverters.RUSSIAN_BANKING_MONEY_VALUE
 
     val rem = ((this.rem(BigDecimal.ONE)) * 100.toBigDecimal()).toInt()
-    val strRem = if(rem == 0) {
+    val strRem = if (rem == 0) {
         "00"
     } else {
         rem.toString()
@@ -16,6 +16,6 @@ fun BigDecimal.asWords(): String {
     return "${converter.asWords(this).substringBefore("руб")} бел. руб. $strRem коп."
 }
 
-fun BigDecimal.toFixed(precision: Int=2): BigDecimal {
+fun BigDecimal.toFixed(precision: Int = 2): BigDecimal {
     return this.setScale(precision, RoundingMode.HALF_UP)
 }
