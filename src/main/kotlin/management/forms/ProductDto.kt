@@ -24,7 +24,7 @@ data class ProductDto(
     val currency: String = "",
 
     @JsonProperty("units")
-    val units: String = "",
+    val units: String = "шт.",
 
     @JsonProperty("round_total")
     val roundTotal: Boolean = false,

@@ -38,7 +38,7 @@ data class Product(
     val currency: String = "",
 
     @Column(name = "units")
-    val units: String = "",
+    val units: String = "шт.",
 
     @Column(name = "round_total")
     val roundTotal: Boolean = false,
