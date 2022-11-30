@@ -6,11 +6,16 @@ import java.io.ByteArrayOutputStream
 
 fun XWPFParagraph.replaceMultiple(replacingData: Map<String, String?>, isUnderline: Boolean = false) {
     replacingData.keys.forEach { replaceKey ->
+//        if(replaceKey == "CONTRACT_HEADER") {
+//            println("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
+//            println(replacingData.getValue(replaceKey))
+//        }
         val replaceValue = replacingData.getValue(replaceKey) ?: return@forEach
         val fullText = this.text
         if (fullText.contains(replaceKey)) {
             this.runs.forEachIndexed { index, xwpfRun ->
                 val runText = xwpfRun.text()
+                println(runText)
                 var hasModified = false
                 if (runText.contains(replaceKey)) {
                     xwpfRun.setText(runText.replace(replaceKey, replaceValue), 0)
@@ -20,10 +25,12 @@ fun XWPFParagraph.replaceMultiple(replacingData: Map<String, String?>, isUnderli
                         if (index + 1 < this.runs.count()) {
                             val three = this.runs.subList(index - 1, index + 2).toList()
                             val newRunText = "${three[0].text()}${three[1].text()}${three[2].text()}"
-                            this.runs[index - 1].setText("", 0)
-                            this.runs[index + 1].setText("", 0)
-                            xwpfRun.setText(newRunText.replace(replaceKey, replaceValue), 0)
-                            hasModified = true
+                            if(newRunText.contains(replaceKey)) {
+                                this.runs[index - 1].setText("", 0)
+                                this.runs[index + 1].setText("", 0)
+                                xwpfRun.setText(newRunText.replace(replaceKey, replaceValue), 0)
+                                hasModified = true
+                            }
                         }
 
 //                        val newRunText = this.runs[index - 1].text() + this.runs[index] + this.runs[index + 1]

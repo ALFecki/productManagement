@@ -73,7 +73,8 @@ class FillDocumentService(
                 defaultInfo["PROCESSINGPROVIDER"] = it.trim()
             }
         }
-
+        val organization1 = full?.contractData?.organizationInfo
+        println(hardwareContractHeader(organization1!!))
         val realPath = if (full != null) {
             val organization = full.contractData.organizationInfo
             mapOf(

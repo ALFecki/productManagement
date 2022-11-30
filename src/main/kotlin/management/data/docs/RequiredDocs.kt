@@ -7,22 +7,22 @@ import javax.persistence.*
 @Table(name = "required_docs", schema = SCHEMA)
 data class RequiredDocs(
     @Column(name = "skko_contract")
-    var skkoContract: Boolean = true,
+    val skkoContract: Boolean = true,
 
     @Column(name = "skko_contract_application")
-    var skkoContractApplication: Boolean = true,
+    val skkoContractApplication: Boolean = true,
 
     @Column(name = "sko_act")
-    var skoAct: Boolean = true,
+    val skoAct: Boolean = true,
 
     @Column(name ="skko_connection_application")
-    var skkoConnectionApplication: Boolean = true,
+    val skkoConnectionApplication: Boolean = true,
 
     @Column(name = "connection_notification")
-    var connectionNotification: Boolean = true,
+    val connectionNotification: Boolean = true,
 
     @Column(name = "declaration_lk_unsafe")
-    var declarationLkUnsafe: Boolean = true,
+    val declarationLkUnsafe: Boolean = true,
 
     @Column(name = "billing_mode")
     var billingMode: String = "full"
