@@ -6,16 +6,11 @@ import java.io.ByteArrayOutputStream
 
 fun XWPFParagraph.replaceMultiple(replacingData: Map<String, String?>, isUnderline: Boolean = false) {
     replacingData.keys.forEach { replaceKey ->
-//        if(replaceKey == "CONTRACT_HEADER") {
-//            println("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
-//            println(replacingData.getValue(replaceKey))
-//        }
         val replaceValue = replacingData.getValue(replaceKey) ?: return@forEach
         val fullText = this.text
         if (fullText.contains(replaceKey)) {
             this.runs.forEachIndexed { index, xwpfRun ->
                 val runText = xwpfRun.text()
-                println(runText)
                 var hasModified = false
                 if (runText.contains(replaceKey)) {
                     xwpfRun.setText(runText.replace(replaceKey, replaceValue), 0)
@@ -32,13 +27,10 @@ fun XWPFParagraph.replaceMultiple(replacingData: Map<String, String?>, isUnderli
                                 hasModified = true
                             }
                         }
-
-//                        val newRunText = this.runs[index - 1].text() + this.runs[index] + this.runs[index + 1]
                         val two = this.runs.subList(index - 1, index + 1).toList()
                         val newRunText = "${two[0].text()}${two[1].text()}"
                         if (newRunText.contains(replaceKey)) {
                             this.runs[index - 1].setText("", 0)
-//                            this.runs[index + 1].setText("", 0)
                             xwpfRun.setText(newRunText.replace(replaceKey, replaceValue), 0)
                             hasModified = true
                         }
